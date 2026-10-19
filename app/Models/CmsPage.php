@@ -143,7 +143,7 @@ class CmsPage extends Model
             if (!empty($this->filter_universe) && $this->filter_universe !== 'all') {
                 $univ = strtolower($this->filter_universe);
                 $query->where(function ($q) use ($univ) {
-                    $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.website_section'))) = ?", [$univ])
+                    $q->where('meta->website_section', $univ)
                       ->orWhereRaw("LOWER(brand) LIKE ?", ["%{$univ}%"]);
                 });
             }
@@ -151,7 +151,7 @@ class CmsPage extends Model
             if (!empty($this->filter_category) && $this->filter_category !== 'all') {
                 $cat = strtolower($this->filter_category);
                 $query->where(function ($q) use ($cat) {
-                    $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.category'))) LIKE ?", ["%{$cat}%"])
+                    $q->where('meta->category', 'like', "%{$cat}%")
                       ->orWhereRaw("LOWER(title) LIKE ?", ["%{$cat}%"]);
                 });
             }

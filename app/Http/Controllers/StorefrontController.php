@@ -2012,13 +2012,22 @@ class StorefrontController extends Controller
             str_contains($name, 'negro') || str_contains($name, 'black') => '#0f172a',
             str_contains($name, 'blanco') || str_contains($name, 'white') => '#ffffff',
             str_contains($name, 'azul') || str_contains($name, 'blue') || str_contains($name, 'marino') => '#1e3a8a',
-            str_contains($name, 'rojo') || str_contains($name, 'red') || str_contains($name, 'vino') => '#b91c1c',
+            str_contains($name, 'naranja') || str_contains($name, 'orange') => '#ea580c',
+            str_contains($name, 'rojo') || str_contains($name, 'red') => '#b91c1c',
+            str_contains($name, 'vino') || str_contains($name, 'burgundy') || str_contains($name, 'granate') => '#881337',
+            str_contains($name, 'cafe') || str_contains($name, 'café') || str_contains($name, 'marron') || str_contains($name, 'marrón') || str_contains($name, 'brown') => '#78350f',
             str_contains($name, 'verde') || str_contains($name, 'green') || str_contains($name, 'olivo') => '#15803d',
-            str_contains($name, 'gris') || str_contains($name, 'gray') || str_contains($name, 'plata') => '#64748b',
+            str_contains($name, 'turquesa') || str_contains($name, 'cyan') || str_contains($name, 'aqua') => '#06b6d4',
+            str_contains($name, 'gris') || str_contains($name, 'gray') || str_contains($name, 'plata') || str_contains($name, 'silver') => '#64748b',
             str_contains($name, 'beige') || str_contains($name, 'nude') || str_contains($name, 'arena') => '#d4b996',
-            str_contains($name, 'rosa') || str_contains($name, 'pink') => '#f43f5e',
-            str_contains($name, 'morado') || str_contains($name, 'purple') => '#7e22ce',
-            str_contains($name, 'amarillo') || str_contains($name, 'yellow') => '#eab308',
+            str_contains($name, 'rosa') || str_contains($name, 'pink') || str_contains($name, 'coral') => '#f43f5e',
+            str_contains($name, 'morado') || str_contains($name, 'purple') || str_contains($name, 'lila') || str_contains($name, 'lavanda') => '#7e22ce',
+            str_contains($name, 'magenta') || str_contains($name, 'fucsia') => '#d946ef',
+            str_contains($name, 'amarillo') || str_contains($name, 'yellow') || str_contains($name, 'dorado') || str_contains($name, 'gold') => '#eab308',
+            str_contains($name, 'caqui') || str_contains($name, 'kaki') => '#a3a375',
+            str_contains($name, 'menta') || str_contains($name, 'mint') => '#6ee7b7',
+            str_contains($name, 'cielo') || str_contains($name, 'celeste') => '#38bdf8',
+            str_contains($name, 'perla') || str_contains($name, 'hueso') || str_contains($name, 'marfil') => '#fefce8',
             default => '#475569',
         };
     }
@@ -2061,19 +2070,19 @@ class StorefrontController extends Controller
             }
 
             // Normalización canónica con CRUD de Colores (apparel_colors)
-            $matchedCrud = $crudColors->first(fn($c) => strcasecmp($c->name, $name) === 0);
+            $matchedCrud = $crudColors->first(fn($c) => strcasecmp(trim($c->name), $name) === 0);
             if (!$matchedCrud) {
                 $metaCol = trim((string) data_get($product->meta, 'color_name', ''));
                 if ($metaCol !== '' && (stripos($name, $metaCol) !== false || stripos($metaCol, $name) !== false)) {
-                    $matchedCrud = $crudColors->first(fn($c) => strcasecmp($c->name, $metaCol) === 0);
+                    $matchedCrud = $crudColors->first(fn($c) => strcasecmp(trim($c->name), $metaCol) === 0);
                     if ($matchedCrud) {
                         $name = $matchedCrud->name;
                     }
                 } else {
                     $fuzzy = $crudColors->first(function($c) use ($name) {
-                        $cLower = strtolower($c->name);
-                        $nLower = strtolower($name);
-                        return preg_match('/\b' . preg_quote($cLower, '/') . '\b/i', $nLower);
+                        $cLower = strtolower(trim($c->name));
+                        $nLower = strtolower(trim($name));
+                        return str_contains($nLower, $cLower) || str_contains($cLower, $nLower);
                     });
                     if ($fuzzy) {
                         $name = $fuzzy->name;
@@ -2157,9 +2166,14 @@ class StorefrontController extends Controller
         }
 
         // 5. Meta 'color_name' / 'color_hex'
-        $metaColorName = data_get($product->meta, 'color_name');
-        if ($metaColorName && is_string($metaColorName)) {
-            $addColor($metaColorName, data_get($product->meta, 'color_hex'), $mainImage);
+        // Solo añadir si no hay colores derivados de galería/variantes, o si coincide con los colores existentes
+        $metaColorName = trim((string) data_get($product->meta, 'color_name', ''));
+        if ($metaColorName !== '') {
+            $hasExplicitColors = !empty($colors);
+            $hasGalleryColors = !empty($product->meta['gallery']) || !empty($product->meta['images_by_color']) || !empty($product->meta['image_color_map']);
+            if (!$hasExplicitColors || !$hasGalleryColors || isset($colors[$metaColorName])) {
+                $addColor($metaColorName, data_get($product->meta, 'color_hex'), $mainImage);
+            }
         }
 
         // Fallback default color

@@ -1243,6 +1243,173 @@ $curatedGoogleFonts = [
                         </label>
                     </div>
 
+                    <!-- Grid 4: Configuración de Columnas del Footer (Categorías Oficiales e Información & Legal) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+                        <!-- Columna 1 de la cuadrícula: Categorías Oficiales (Columna 3 del Footer) -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between shadow-2xs">
+                            <div>
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+                                            <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                            <span>Columna 3: Categorías Oficiales</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Prendas y categorías (creadas en Familias y Categorías). Al hacer clic en la tienda, guían al catálogo filtrado.</p>
+                                    </div>
+                                    <a href="{{ route('portal.inventory') }}?tab=settings" target="_blank" class="px-2.5 py-1 text-[11px] font-bold text-indigo-700 hover:text-indigo-900 bg-white border border-indigo-200 rounded-lg shadow-2xs flex items-center gap-1 shrink-0" title="Editar taxonomías en Familias y Categorías de RevOps">
+                                        <span>Familias &amp; Categorías</span>
+                                        <svg class="w-3 h-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                </div>
+
+                                <div class="overflow-hidden border border-slate-200 rounded-lg bg-white shadow-2xs">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="bg-slate-100/90 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200">
+                                                <th class="py-2 px-2 text-center w-8" title="Arrastra para reordenar">Mover</th>
+                                                <th class="py-2 px-3">Categoría Oficial</th>
+                                                <th class="py-2 px-2 text-center w-20">Acción</th>
+                                                <th class="py-2 px-2 text-center w-16">Visible</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="footerCatsSortableBody" class="divide-y divide-slate-100">
+                                            @php
+                                                $resolvedFooterCats = $footerCategories ?? [];
+                                                if (empty($resolvedFooterCats)) {
+                                                    $resolvedFooterCats = \App\Models\Category::all()->map(fn($c, $i) => [
+                                                        'id' => $c->id,
+                                                        'name' => $c->name,
+                                                        'slug' => $c->slug,
+                                                        'is_active' => true,
+                                                        'sort_order' => $i + 1
+                                                    ])->all();
+                                                }
+                                            @endphp
+                                            @forelse($resolvedFooterCats as $fIdx => $fCat)
+                                                <tr class="footer-cat-row hover:bg-slate-50/80 transition-colors" draggable="true" data-index="{{ $fIdx }}">
+                                                    <td class="py-2 px-2 text-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-teal-600 select-none drag-handle" title="Arrastrar para ordenar">
+                                                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                                                    </td>
+                                                    <td class="py-2 px-3">
+                                                        <div class="font-bold text-slate-800">{{ $fCat['name'] }}</div>
+                                                        <div class="text-[10px] text-slate-400 font-mono">/catalogo?categoria={{ $fCat['slug'] }}</div>
+                                                        <input type="hidden" name="payload[footer_categories][{{ $fIdx }}][id]" value="{{ $fCat['id'] }}" class="fcat-id">
+                                                        <input type="hidden" name="payload[footer_categories][{{ $fIdx }}][name]" value="{{ $fCat['name'] }}" class="fcat-name">
+                                                        <input type="hidden" name="payload[footer_categories][{{ $fIdx }}][slug]" value="{{ $fCat['slug'] }}" class="fcat-slug">
+                                                        <input type="hidden" name="payload[footer_categories][{{ $fIdx }}][sort_order]" value="{{ $fCat['sort_order'] ?? ($fIdx + 1) }}" class="fcat-order">
+                                                    </td>
+                                                    <td class="py-2 px-2 text-center">
+                                                        <a href="{{ route('portal.inventory') }}?tab=settings" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 rounded text-[10px] font-semibold border border-slate-200 transition" title="Redirigir a Familias y Categorías donde fue creada">
+                                                            <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                            <span>Editar</span>
+                                                        </a>
+                                                    </td>
+                                                    <td class="py-2 px-2 text-center">
+                                                        <input type="hidden" name="payload[footer_categories][{{ $fIdx }}][is_active]" value="0" class="fcat-active-hidden">
+                                                        <input type="checkbox" name="payload[footer_categories][{{ $fIdx }}][is_active]" value="1" {{ !empty($fCat['is_active']) ? 'checked' : '' }} class="rounded text-teal-600 focus:ring-teal-500 cursor-pointer fcat-active-checkbox">
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="4" class="py-4 text-center text-slate-400 text-xs">No hay categorías disponibles.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Arrastra las filas para alterar el orden en que se muestran en el pie de página.</span>
+                            </div>
+                        </div>
+
+                        <!-- Columna 2 de la cuadrícula: Información & Legal (Columna 4 del Footer) -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between shadow-2xs">
+                            <div>
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+                                            <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            <span>Columna 4: Información &amp; Legal</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Páginas institucionales, convenios y políticas. Las páginas de filtro de prendas pertenecen a Categorías Oficiales.</p>
+                                    </div>
+                                    <button type="button" onclick="window.openStoreModal('createPageModal')" class="px-2.5 py-1 text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-white border border-teal-200 rounded-lg shadow-2xs flex items-center gap-1 shrink-0 cursor-pointer">
+                                        <span>+ Nueva Página</span>
+                                    </button>
+                                </div>
+
+                                <div class="overflow-hidden border border-slate-200 rounded-lg bg-white shadow-2xs">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="bg-slate-100/90 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200">
+                                                <th class="py-2 px-2 text-center w-8" title="Arrastra para reordenar">Mover</th>
+                                                <th class="py-2 px-3">Página Institucional</th>
+                                                <th class="py-2 px-2 text-center w-20">Acción</th>
+                                                <th class="py-2 px-2 text-center w-16">Visible</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="footerPagesSortableBody" class="divide-y divide-slate-100">
+                                            @php
+                                                $resolvedFooterPages = $footerLegalPages ?? [];
+                                                if (empty($resolvedFooterPages)) {
+                                                    $resolvedFooterPages = ($pages ?? collect())->filter(fn($p) => !$p->hasCatalogFilters())->map(fn($p, $i) => [
+                                                        'id' => $p->id,
+                                                        'title' => $p->title,
+                                                        'slug' => $p->slug,
+                                                        'is_active' => (bool) $p->show_in_footer,
+                                                        'sort_order' => $p->footer_order ?: ($i + 1)
+                                                    ])->all();
+                                                }
+                                            @endphp
+                                            @forelse($resolvedFooterPages as $pIdx => $fPage)
+                                                @php
+                                                    $rawPageModel = ($pages ?? collect())->firstWhere('id', $fPage['id']);
+                                                @endphp
+                                                <tr class="footer-page-row hover:bg-slate-50/80 transition-colors" draggable="true" data-index="{{ $pIdx }}">
+                                                    <td class="py-2 px-2 text-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-teal-600 select-none drag-handle" title="Arrastrar para ordenar">
+                                                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                                                    </td>
+                                                    <td class="py-2 px-3">
+                                                        <div class="font-bold text-slate-800">{{ $fPage['title'] }}</div>
+                                                        <div class="text-[10px] text-slate-400 font-mono">/pagina/{{ $fPage['slug'] }}</div>
+                                                        <input type="hidden" name="payload[footer_legal_pages][{{ $pIdx }}][id]" value="{{ $fPage['id'] }}" class="fpage-id">
+                                                        <input type="hidden" name="payload[footer_legal_pages][{{ $pIdx }}][title]" value="{{ $fPage['title'] }}" class="fpage-title">
+                                                        <input type="hidden" name="payload[footer_legal_pages][{{ $pIdx }}][slug]" value="{{ $fPage['slug'] }}" class="fpage-slug">
+                                                        <input type="hidden" name="payload[footer_legal_pages][{{ $pIdx }}][sort_order]" value="{{ $fPage['sort_order'] ?? ($pIdx + 1) }}" class="fpage-order">
+                                                    </td>
+                                                    <td class="py-2 px-2 text-center">
+                                                        @if($rawPageModel)
+                                                            <button type="button" onclick='window.openEditPageModal(@json($rawPageModel))' class="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded text-[10px] font-semibold border border-amber-200 transition cursor-pointer" title="Editar contenido y configuración de esta página">
+                                                                <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                                <span>Editar</span>
+                                                            </button>
+                                                        @else
+                                                            <span class="text-[10px] text-slate-400">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="py-2 px-2 text-center">
+                                                        <input type="hidden" name="payload[footer_legal_pages][{{ $pIdx }}][is_active]" value="0" class="fpage-active-hidden">
+                                                        <input type="checkbox" name="payload[footer_legal_pages][{{ $pIdx }}][is_active]" value="1" {{ !empty($fPage['is_active']) ? 'checked' : '' }} class="rounded text-teal-600 focus:ring-teal-500 cursor-pointer fpage-active-checkbox">
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="4" class="py-4 text-center text-slate-400 text-xs">No hay páginas institucionales disponibles.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Arrastra las filas para definir el orden en la columna de Información &amp; Legal del footer.</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex items-center justify-between pt-4 border-t border-slate-100">
                         <a href="{{ url('/?universo=marte') }}" target="_blank" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
                             <span>Previsualizar Tienda Online</span>
@@ -7252,6 +7419,146 @@ $curatedGoogleFonts = [
             filtersBody.addEventListener('drop', function(e) {
                 e.preventDefault();
                 reindexFilterInputs();
+            });
+        }
+
+        // Inicializar Drag & Drop para Categorías Oficiales del Footer (Columna 3)
+        const footerCatsBody = document.getElementById('footerCatsSortableBody');
+        function reindexFooterCats() {
+            if (!footerCatsBody) return;
+            const rows = footerCatsBody.querySelectorAll('tr.footer-cat-row');
+            rows.forEach((row, idx) => {
+                row.dataset.index = idx;
+                const idInput = row.querySelector('.fcat-id');
+                const nameInput = row.querySelector('.fcat-name');
+                const slugInput = row.querySelector('.fcat-slug');
+                const orderInput = row.querySelector('.fcat-order');
+                const activeHidden = row.querySelector('.fcat-active-hidden');
+                const activeCheckbox = row.querySelector('.fcat-active-checkbox');
+
+                if (idInput) idInput.name = `payload[footer_categories][${idx}][id]`;
+                if (nameInput) nameInput.name = `payload[footer_categories][${idx}][name]`;
+                if (slugInput) slugInput.name = `payload[footer_categories][${idx}][slug]`;
+                if (orderInput) {
+                    orderInput.name = `payload[footer_categories][${idx}][sort_order]`;
+                    orderInput.value = idx + 1;
+                }
+                if (activeHidden) activeHidden.name = `payload[footer_categories][${idx}][is_active]`;
+                if (activeCheckbox) activeCheckbox.name = `payload[footer_categories][${idx}][is_active]`;
+            });
+        }
+        if (footerCatsBody) {
+            if (typeof Sortable !== 'undefined') {
+                new Sortable(footerCatsBody, {
+                    handle: '.drag-handle',
+                    animation: 200,
+                    ghostClass: 'bg-teal-50/80',
+                    chosenClass: 'bg-teal-100/60',
+                    dragClass: 'shadow-2xl',
+                    onEnd: reindexFooterCats
+                });
+            }
+            let draggedCatRow = null;
+            footerCatsBody.addEventListener('dragstart', function(e) {
+                draggedCatRow = e.target.closest('tr.footer-cat-row');
+                if (draggedCatRow) {
+                    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+                    draggedCatRow.classList.add('opacity-50');
+                }
+            });
+            footerCatsBody.addEventListener('dragend', function() {
+                if (draggedCatRow) {
+                    draggedCatRow.classList.remove('opacity-50');
+                    draggedCatRow = null;
+                }
+            });
+            footerCatsBody.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                const targetRow = e.target.closest('tr.footer-cat-row');
+                if (targetRow && targetRow !== draggedCatRow && draggedCatRow) {
+                    const bounding = targetRow.getBoundingClientRect();
+                    const offset = e.clientY - bounding.top;
+                    if (offset > bounding.height / 2) {
+                        targetRow.parentNode.insertBefore(draggedCatRow, targetRow.nextSibling);
+                    } else {
+                        targetRow.parentNode.insertBefore(draggedCatRow, targetRow);
+                    }
+                }
+            });
+            footerCatsBody.addEventListener('drop', function(e) {
+                e.preventDefault();
+                reindexFooterCats();
+            });
+        }
+
+        // Inicializar Drag & Drop para Información & Legal del Footer (Columna 4)
+        const footerPagesBody = document.getElementById('footerPagesSortableBody');
+        function reindexFooterPages() {
+            if (!footerPagesBody) return;
+            const rows = footerPagesBody.querySelectorAll('tr.footer-page-row');
+            rows.forEach((row, idx) => {
+                row.dataset.index = idx;
+                const idInput = row.querySelector('.fpage-id');
+                const titleInput = row.querySelector('.fpage-title');
+                const slugInput = row.querySelector('.fpage-slug');
+                const orderInput = row.querySelector('.fpage-order');
+                const activeHidden = row.querySelector('.fpage-active-hidden');
+                const activeCheckbox = row.querySelector('.fpage-active-checkbox');
+
+                if (idInput) idInput.name = `payload[footer_legal_pages][${idx}][id]`;
+                if (titleInput) titleInput.name = `payload[footer_legal_pages][${idx}][title]`;
+                if (slugInput) slugInput.name = `payload[footer_legal_pages][${idx}][slug]`;
+                if (orderInput) {
+                    orderInput.name = `payload[footer_legal_pages][${idx}][sort_order]`;
+                    orderInput.value = idx + 1;
+                }
+                if (activeHidden) activeHidden.name = `payload[footer_legal_pages][${idx}][is_active]`;
+                if (activeCheckbox) activeCheckbox.name = `payload[footer_legal_pages][${idx}][is_active]`;
+            });
+        }
+        if (footerPagesBody) {
+            if (typeof Sortable !== 'undefined') {
+                new Sortable(footerPagesBody, {
+                    handle: '.drag-handle',
+                    animation: 200,
+                    ghostClass: 'bg-teal-50/80',
+                    chosenClass: 'bg-teal-100/60',
+                    dragClass: 'shadow-2xl',
+                    onEnd: reindexFooterPages
+                });
+            }
+            let draggedPageRow = null;
+            footerPagesBody.addEventListener('dragstart', function(e) {
+                draggedPageRow = e.target.closest('tr.footer-page-row');
+                if (draggedPageRow) {
+                    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+                    draggedPageRow.classList.add('opacity-50');
+                }
+            });
+            footerPagesBody.addEventListener('dragend', function() {
+                if (draggedPageRow) {
+                    draggedPageRow.classList.remove('opacity-50');
+                    draggedPageRow = null;
+                }
+            });
+            footerPagesBody.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                const targetRow = e.target.closest('tr.footer-page-row');
+                if (targetRow && targetRow !== draggedPageRow && draggedPageRow) {
+                    const bounding = targetRow.getBoundingClientRect();
+                    const offset = e.clientY - bounding.top;
+                    if (offset > bounding.height / 2) {
+                        targetRow.parentNode.insertBefore(draggedPageRow, targetRow.nextSibling);
+                    } else {
+                        targetRow.parentNode.insertBefore(draggedPageRow, targetRow);
+                    }
+                }
+            });
+            footerPagesBody.addEventListener('drop', function(e) {
+                e.preventDefault();
+                reindexFooterPages();
             });
         }
 

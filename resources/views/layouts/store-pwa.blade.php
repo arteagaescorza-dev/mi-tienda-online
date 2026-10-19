@@ -763,26 +763,36 @@
         <div>
           <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Categorías Oficiales</strong>
           <ul class="footer-link-list">
-            <li><a href="#" data-action="switch-dock-tab" data-dock-tab="catalog">Jockstraps ($250 MXN)</a></li>
-            <li><a href="#" data-action="switch-dock-tab" data-dock-tab="catalog">Boxers Modal ($280 MXN)</a></li>
-            <li><a href="#" data-action="switch-dock-tab" data-dock-tab="catalog">Tangas Velvet ($180 MXN)</a></li>
-            <li><a href="#" data-action="switch-dock-tab" data-dock-tab="catalog">Bikinis Athletic ($220 MXN)</a></li>
-            <li><a href="#" data-action="switch-dock-tab" data-dock-tab="catalog">Tank Tops ($320 MXN)</a></li>
+            @forelse($footerCategories as $fCat)
+              <li>
+                <a href="{{ route('store.home', ['categoria' => $fCat['slug'], 'universo' => $activeUniverse ?? 'marte']) }}" 
+                   data-action="explore-filter-catalog" 
+                   data-category="{{ $fCat['slug'] }}" 
+                   data-universe="{{ $activeUniverse ?? 'marte' }}" 
+                   style="color: inherit; text-decoration: none;">
+                  {{ $fCat['name'] }}
+                </a>
+              </li>
+            @empty
+              <li><a href="#" data-action="switch-dock-tab" data-dock-tab="catalog">Catálogo Completo</a></li>
+            @endforelse
           </ul>
         </div>
 
         <div>
           <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Información &amp; Legal</strong>
           <ul class="footer-link-list">
-            @if(!empty($footerPages) && $footerPages->isNotEmpty())
-              @foreach($footerPages as $fp)
-                <li><a href="{{ url('/pagina/' . $fp->slug) }}" style="color: inherit; text-decoration: none;">{{ $fp->title }}</a></li>
-              @endforeach
-            @else
+            @forelse($footerLegalPages as $fPage)
+              <li>
+                <a href="{{ url('/pagina/' . $fPage['slug']) }}" style="color: inherit; text-decoration: none;">
+                  {{ $fPage['title'] }}
+                </a>
+              </li>
+            @empty
               <li><a href="/privacidad" style="color: inherit; text-decoration: none;">Aviso de Privacidad</a></li>
               <li><a href="/cookies" style="color: inherit; text-decoration: none;">Política de Cookies</a></li>
               <li><a href="#" data-action="open-size-guide" style="color: inherit; text-decoration: none;">Guía de Tallas Anatómicas</a></li>
-            @endif
+            @endforelse
           </ul>
 
           <!-- Acceso al Panel RevOps -->

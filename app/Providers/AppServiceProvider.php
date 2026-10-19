@@ -89,7 +89,47 @@ class AppServiceProvider extends ServiceProvider
             } catch (\Throwable $e) {
                 $footerConfig = $defaultFooterConfig;
             }
+
+            // 1. Categorías oficiales activas en footer
+            $footerCategories = collect($footerConfig['footer_categories'] ?? [])
+                ->filter(fn($c) => !empty($c['is_active']))
+                ->sortBy('sort_order')
+                ->values();
+            
+            if ($footerCategories->isEmpty()) {
+                $footerCategories = \App\Models\Category::all()
+                    ->map(fn($c, $idx) => [
+                        'id' => $c->id,
+                        'name' => $c->name,
+                        'slug' => $c->slug,
+                        'is_active' => true,
+                        'sort_order' => $idx + 1,
+                    ])->values();
+            }
+
+            // 2. Páginas de Información & Legal activas en footer (excluyendo páginas asociadas a productos/catálogo)
+            $footerLegalPages = collect($footerConfig['footer_legal_pages'] ?? [])
+                ->filter(fn($p) => !empty($p['is_active']))
+                ->sortBy('sort_order')
+                ->values();
+
+            if ($footerLegalPages->isEmpty()) {
+                $footerLegalPages = \App\Models\CmsPage::active()
+                    ->inFooter()
+                    ->get()
+                    ->filter(fn($p) => !$p->hasCatalogFilters())
+                    ->map(fn($p, $idx) => [
+                        'id' => $p->id,
+                        'title' => $p->title,
+                        'slug' => $p->slug,
+                        'is_active' => true,
+                        'sort_order' => $p->footer_order ?: ($idx + 1),
+                    ])->values();
+            }
+
             $view->with('footerConfig', $footerConfig ?? $defaultFooterConfig);
+            $view->with('footerCategories', $footerCategories);
+            $view->with('footerLegalPages', $footerLegalPages);
 
             $viewData = $view->getData();
             if (!array_key_exists('announcementActive', $viewData)) {

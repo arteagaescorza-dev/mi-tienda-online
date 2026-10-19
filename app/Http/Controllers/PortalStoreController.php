@@ -367,6 +367,34 @@ class PortalStoreController extends Controller
         $blogPosts = CmsBlogPost::orderByDesc('created_at')->get();
         $tracking = CmsTrackingSetting::current();
 
+        // 9.1. Categorías Oficiales y Páginas de Información y Legal para el Footer Editor
+        $dbOfficialCategories = Category::orderBy('name')->get();
+        $savedFooterCats = collect($footerConfig['footer_categories'] ?? []);
+        $footerCategories = $dbOfficialCategories->map(function ($cat) use ($savedFooterCats) {
+            $saved = $savedFooterCats->first(fn($s) => ($s['id'] ?? null) == $cat->id || ($s['slug'] ?? null) === $cat->slug);
+            return [
+                'id' => $cat->id,
+                'name' => $cat->name,
+                'slug' => $cat->slug,
+                'is_active' => $saved ? !empty($saved['is_active']) : true,
+                'sort_order' => (int) ($saved['sort_order'] ?? 99),
+            ];
+        })->sortBy('sort_order')->values()->all();
+
+        $savedFooterPages = collect($footerConfig['footer_legal_pages'] ?? []);
+        $footerLegalPages = $pages->filter(function ($p) {
+            return !$p->hasCatalogFilters();
+        })->map(function ($p) use ($savedFooterPages) {
+            $saved = $savedFooterPages->first(fn($s) => ($s['id'] ?? null) == $p->id || ($s['slug'] ?? null) === $p->slug);
+            return [
+                'id' => $p->id,
+                'title' => $p->title,
+                'slug' => $p->slug,
+                'is_active' => $saved ? !empty($saved['is_active']) : (bool) $p->show_in_footer,
+                'sort_order' => (int) ($saved['sort_order'] ?? ($p->footer_order ?: 99)),
+            ];
+        })->sortBy('sort_order')->values()->all();
+
         // Asegurar que todas las dimensiones del catálogo existan y estén configuradas como checkbox
         $allCatalogDimensions = [
             ['filter_key' => 'universe', 'label' => 'Universo', 'display_type' => 'checkbox', 'sort_order' => 1, 'is_visible' => true],
@@ -429,6 +457,8 @@ class PortalStoreController extends Controller
             'tracking' => $tracking,
             'catalogFilters' => $catalogFilters,
             'footerConfig' => $footerConfig,
+            'footerCategories' => $footerCategories,
+            'footerLegalPages' => $footerLegalPages,
             'cmsMedia' => \App\Models\CmsMedia::latest()->get(),
             'cmsMediaCount' => \App\Models\CmsMedia::count(),
             'approvedAllyCampaigns' => \App\Models\AllyCampaignDirA::with('ally')->where('status', 'active')->get(),

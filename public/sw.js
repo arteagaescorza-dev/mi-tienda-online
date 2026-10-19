@@ -2,7 +2,7 @@
 // Politica estricta de Cero Emojis
 // Soporte Web Push Notifications VAPID (RFC 8292 - TASK-STR-06)
 
-const CACHE_NAME = 'multiverse-store-v2';
+const CACHE_NAME = 'multiverse-store-v3';
 const STATIC_ASSETS = [
   '/',
   '/css/store-pwa.css',
