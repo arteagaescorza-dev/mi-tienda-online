@@ -656,7 +656,7 @@
                     <button type="button" class="btn-wishlist-toggle" data-action="toggle-wishlist" data-product-id="{{ $prod['id'] }}" title="Guardar en mis deseos" aria-label="Guardar en favoritos">
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     </button>
-                    <span class="product-stock-badge {{ ($prod['stockType'] ?? '') === 'ready' ? 'ready' : (($prod['stockType'] ?? '') === 'drop_on_demand' ? 'drop_on_demand' : '') }}">
+                    <span class="product-stock-badge {{ ($prod['stockType'] ?? '') === 'ready' ? 'ready' : 'on_demand' }}">
                       {{ $prod['stockLabel'] ?? 'ENVÍO EXPRESS' }}
                     </span>
                     <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: pointer; text-decoration: none; position: relative;" title="{{ $prod['name'] }}">
@@ -756,7 +756,7 @@
                     <button type="button" class="btn-wishlist-toggle" data-action="toggle-wishlist" data-product-id="{{ $prod['id'] }}" title="Guardar en mis deseos" aria-label="Guardar en favoritos">
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     </button>
-                    <span class="product-stock-badge {{ ($prod['stockType'] ?? '') === 'ready' ? 'ready' : (($prod['stockType'] ?? '') === 'drop_on_demand' ? 'drop_on_demand' : '') }}">
+                    <span class="product-stock-badge {{ ($prod['stockType'] ?? '') === 'ready' ? 'ready' : 'on_demand' }}">
                       {{ $prod['stockLabel'] ?? 'EXPRESS' }}
                     </span>
                     <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: pointer; text-decoration: none; position: relative;" title="{{ $prod['name'] }}">
@@ -1130,7 +1130,7 @@
                 <button type="button" class="btn-wishlist-toggle" data-action="toggle-wishlist" data-product-id="{{ $prod['id'] }}" title="Guardar en mis deseos" aria-label="Guardar en favoritos">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 </button>
-                <span class="product-stock-badge {{ ($prod['stockType'] ?? '') === 'ready' ? 'ready' : (($prod['stockType'] ?? '') === 'drop_on_demand' ? 'drop_on_demand' : '') }}">
+                <span class="product-stock-badge {{ ($prod['stockType'] ?? '') === 'ready' ? 'ready' : 'on_demand' }}">
                   {{ $prod['stockLabel'] }}
                 </span>
                 <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: pointer; text-decoration: none; position: relative;" title="{{ $prod['name'] }}">
@@ -1483,7 +1483,7 @@
             <button type="button" class="btn-wishlist-toggle" data-action="toggle-wishlist" data-product-id="{{ $prod['id'] }}" title="Guardar en mis deseos" aria-label="Guardar en favoritos">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
             </button>
-            <span class="product-stock-badge {{ ($prod['stockType'] ?? '') === 'ready' ? 'ready' : (($prod['stockType'] ?? '') === 'drop_on_demand' ? 'drop_on_demand' : '') }}">
+            <span class="product-stock-badge {{ ($prod['stockType'] ?? '') === 'ready' ? 'ready' : 'on_demand' }}">
               {{ $prod['stockLabel'] }}
             </span>
             <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: pointer; text-decoration: none; position: relative;" title="{{ $prod['name'] }}">

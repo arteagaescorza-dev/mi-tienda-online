@@ -207,7 +207,7 @@ class StorefrontApiController extends Controller
     public function checkout(\App\Http\Requests\Api\Storefront\CheckoutRequest $request): JsonResponse
     {
         $cartSessionId = $this->getCartSessionId($request);
-        $payload = $request->validated();
+        $payload = array_merge($request->all(), $request->validated());
         $payload['cart_id'] = $cartSessionId;
 
         try {

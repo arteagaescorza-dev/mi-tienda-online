@@ -44,7 +44,9 @@ class StorefrontCatalogService
             '3XL' => ['pants' => '42-44', 'waist_cm' => '112-120 cm', 'label' => 'Triple Extra Grande'],
         ];
 
-        $variantList = $variants->map(function ($v) use ($sizeSubMap) {
+        $isScraped = $product->isScraped();
+
+        $variantList = $variants->map(function ($v) use ($sizeSubMap, $isScraped) {
             $qty = (int) $v->inventories->sum('quantity');
             $res = (int) $v->inventories->sum('reserved');
             $avail = max(0, $qty - $res);
@@ -57,11 +59,11 @@ class StorefrontCatalogService
                 'color' => data_get($v->attributes, 'color', 'Unico'),
                 'price' => (float) $v->price,
                 'price_formatted' => 'MXN $' . number_format((float) $v->price, 2),
-                'stock_physical' => $qty,
-                'stock_reserved' => $res,
-                'stock_available' => $avail,
-                'is_available' => $avail > 0,
-                'stock_badge' => $avail > 0 ? 'Stock Físico' : 'Bajo Pedido',
+                'stock_physical' => $isScraped ? 0 : $qty,
+                'stock_reserved' => $isScraped ? 0 : $res,
+                'stock_available' => $isScraped ? 0 : $avail,
+                'is_available' => !$isScraped && ($avail > 0),
+                'stock_badge' => (!$isScraped && $avail > 0) ? 'Stock Físico' : 'Bajo Pedido',
                 'sub_info' => $sizeSubMap[$size] ?? ['pants' => '-', 'waist_cm' => '-', 'label' => 'Talla ' . $size],
             ];
         })->values();
@@ -154,11 +156,12 @@ class StorefrontCatalogService
             'price_formatted' => 'MXN $' . number_format((float) $product->price, 2),
             'fabric' => (string) ($product->fabric ?: data_get($product->meta, 'fabric', '')),
             'fabric_composition' => $fabricComposition,
-            'stock_type' => $totalAvailable > 0 ? 'ready' : 'on_demand',
-            'stock_label' => $totalAvailable > 0 ? 'Stock Físico' : 'Bajo Pedido',
-            'total_physical_stock' => $totalPhysical,
-            'total_reserved_stock' => $totalReserved,
-            'total_available_stock' => $totalAvailable,
+            'stock_type' => (!$isScraped && $totalAvailable > 0) ? 'ready' : 'on_demand',
+            'stock_label' => (!$isScraped && $totalAvailable > 0) ? 'Stock Físico' : 'Bajo Pedido',
+            'total_physical_stock' => $isScraped ? 0 : $totalPhysical,
+            'total_reserved_stock' => $isScraped ? 0 : $totalReserved,
+            'total_available_stock' => $isScraped ? 0 : $totalAvailable,
+            'is_scraped' => $isScraped,
             'image' => $image,
             'images' => $images,
             'description' => $product->description ?: 'Prenda anatómica confeccionada con textiles transpirables y soporte ergonómico.',

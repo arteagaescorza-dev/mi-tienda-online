@@ -105,12 +105,14 @@ class CartService
             $hasActiveLock = $activeLock !== null;
             $lockRemaining = $activeLock ? max(0, (int) $now->diffInSeconds($activeLock->expires_at, false)) : 0;
 
-            // Clasificacion: Linea A (Bodega local, entrega 24-48h) vs Linea B (Taller On-Demand, confeccion 3-5 dias)
-            $isLineA = $hasActiveLock || ($availStock > 0);
+            // Clasificacion: Linea A (Bodega local, entrega 24-48h) vs Linea B (Bajo Pedido / Taller On-Demand / Scraping)
+            // Un producto de scraping o dropshipping jamas es Linea A de bodega local.
+            $isScrapedProduct = $product ? $product->isScraped() : false;
+            $isLineA = !$isScrapedProduct && ($hasActiveLock || ($availStock > 0));
             $lineType = $isLineA ? 'line_a' : 'line_b';
             $lineLabel = $isLineA
                 ? 'Bodega Local (Entrega Express 24-48h)'
-                : 'Taller On-Demand (Confeccion Artesanal 3-5 dias)';
+                : ($isScrapedProduct ? 'Proveedor Externo (Bajo Pedido 3-5 dias)' : 'Taller On-Demand (Confeccion Artesanal 3-5 dias)');
             $stockBadge = $isLineA ? 'Stock Fisico' : 'Bajo Pedido';
 
             $size = strtoupper(trim((string) data_get($variant->attributes, 'size', 'M')));
@@ -138,11 +140,12 @@ class CartService
                 'line_type' => $lineType,
                 'line_label' => $lineLabel,
                 'stock_badge' => $stockBadge,
-                'physical_stock' => $physQty,
-                'available_stock' => $availStock,
-                'has_active_lock' => $hasActiveLock,
-                'lock_expires_at' => $activeLock ? $activeLock->expires_at->toIso8601String() : null,
-                'lock_remaining_seconds' => $lockRemaining,
+                'is_scraped' => $isScrapedProduct,
+                'physical_stock' => $isScrapedProduct ? 0 : $physQty,
+                'available_stock' => $isScrapedProduct ? 0 : $availStock,
+                'has_active_lock' => $isLineA && $hasActiveLock,
+                'lock_expires_at' => ($isLineA && $activeLock) ? $activeLock->expires_at->toIso8601String() : null,
+                'lock_remaining_seconds' => $isLineA ? $lockRemaining : 0,
             ];
 
             if ($isLineA) {
@@ -216,21 +219,24 @@ class CartService
                 ]);
             }
 
-            // Verificar si tiene stock en warehouse-1
-            $inv = $variant->inventories->firstWhere('location', 'warehouse-1');
-            if ($inv) {
-                $avail = $inv->quantity - $inv->reserved;
-                // Si hay stock o ya tenia lock activo, reservamos
-                $existingLock = StockLock::where('cart_id', $cartSessionId)
-                    ->where('product_variant_id', $variant->id)
-                    ->where('status', 'active')
-                    ->first();
+            // Verificar si tiene stock en warehouse-1 (solo aplica a productos propios/locales, nunca a scraping)
+            $isScrapedProduct = $variant->product ? $variant->product->isScraped() : false;
+            if (!$isScrapedProduct) {
+                $inv = $variant->inventories->firstWhere('location', 'warehouse-1');
+                if ($inv) {
+                    $avail = $inv->quantity - $inv->reserved;
+                    // Si hay stock o ya tenia lock activo, reservamos
+                    $existingLock = StockLock::where('cart_id', $cartSessionId)
+                        ->where('product_variant_id', $variant->id)
+                        ->where('status', 'active')
+                        ->first();
 
-                if ($avail > 0 || $existingLock) {
-                    try {
-                        $this->reservationService->reserveStock($cartSessionId, $variant->id, $newQuantity, $userId, 5);
-                    } catch (Exception $e) {
-                        // Si no hay suficiente para la cantidad completa, se intenta reservar lo disponible o se deja como on_demand
+                    if ($avail > 0 || $existingLock) {
+                        try {
+                            $this->reservationService->reserveStock($cartSessionId, $variant->id, $newQuantity, $userId, 5);
+                        } catch (Exception $e) {
+                            // Si no hay suficiente para la cantidad completa, se intenta reservar lo disponible o se deja como on_demand
+                        }
                     }
                 }
             }

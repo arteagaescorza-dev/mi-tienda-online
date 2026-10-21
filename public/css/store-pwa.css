@@ -700,7 +700,8 @@ body.store-body {
 }
 
 .product-stock-badge.drop_on_demand,
-.product-stock-badge.dropship {
+.product-stock-badge.dropship,
+.product-stock-badge.on_demand {
   color: #b45309;
   border-color: rgba(245, 158, 11, 0.45);
   background: rgba(254, 243, 199, 0.96);
@@ -4227,7 +4228,8 @@ html.dark .product-stock-badge.ready {
 }
 
 html.dark .product-stock-badge.drop_on_demand,
-html.dark .product-stock-badge.dropship {
+html.dark .product-stock-badge.dropship,
+html.dark .product-stock-badge.on_demand {
   background: rgba(120, 53, 15, 0.90) !important;
   border-color: #d97706 !important;
   color: #fef3c7 !important;

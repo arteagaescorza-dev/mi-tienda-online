@@ -1155,13 +1155,14 @@
           @foreach($product['sizes'] as $sz)
             @php
               $vData = collect($product['variants'])->firstWhere('size', $sz);
-              $isAvailable = $vData ? ($vData['available'] > 0) : true;
+              $isScraped = !empty($product['is_scraped']);
+              $isAvailable = !$isScraped && ($vData ? ($vData['available'] > 0) : (($product['availableStock'] ?? 0) > 0));
             @endphp
             <button type="button"
                     class="pdp-size-pill {{ $loop->first ? 'selected' : '' }}"
                     data-size="{{ $sz }}"
                     data-sku="{{ $vData['sku'] ?? $product['sku'] }}"
-                    data-available="{{ $vData['available'] ?? $product['availableStock'] }}"
+                    data-available="{{ $isScraped ? 0 : ($vData['available'] ?? $product['availableStock']) }}"
                     data-stock-label="{{ $isAvailable ? 'Stock Físico' : 'Bajo Pedido' }}"
                     data-stock-type="{{ $isAvailable ? 'ready' : 'on_demand' }}"
                     onclick="selectPdpSize(this)">
@@ -1173,10 +1174,10 @@
 
       <!-- Estado en Vivo del Inventario Seleccionado -->
       <div class="pdp-stock-notice-box" id="pdpStockNoticeBox">
-        <span class="pdp-stock-dot {{ $product['stockType'] }}" id="pdpStockDot"></span>
+        <span class="pdp-stock-dot {{ (!empty($product['is_scraped']) || ($product['stockType'] ?? '') === 'drop_on_demand') ? 'on_demand' : ($product['stockType'] ?? 'ready') }}" id="pdpStockDot"></span>
         <div id="pdpStockNoticeText">
-          @if(($product['stockType'] ?? '') === 'drop_on_demand')
-            <strong>Drop Bajo Pedido:</strong> Despacho directo desde proveedor internacional/aliado en 5-8 días hábiles.
+          @if(!empty($product['is_scraped']) || ($product['stockType'] ?? '') === 'drop_on_demand')
+            <strong>Prenda bajo pedido:</strong> Despacho directo desde proveedor asociado en 3-5 días hábiles.
           @elseif(($product['availableStock'] ?? 0) > 0)
             <strong>En existencia física:</strong> {{ $product['availableStock'] }} piezas listas para despacho express inmediato.
           @else
@@ -1523,8 +1524,11 @@
       badge.textContent = stockLabel;
     }
 
-    if (available > 0) {
+    const isScrapedProduct = {{ !empty($product['is_scraped']) ? 'true' : 'false' }};
+    if (!isScrapedProduct && available > 0) {
       noticeText.innerHTML = '<strong>En existencia física:</strong> ' + available + ' piezas listas para despacho express inmediato.';
+    } else if (isScrapedProduct) {
+      noticeText.innerHTML = '<strong>Prenda bajo pedido:</strong> Despacho directo desde proveedor asociado en 3-5 días hábiles.';
     } else {
       noticeText.innerHTML = '<strong>Confección bajo pedido:</strong> Se produce y despacha en 3-5 días hábiles.';
     }

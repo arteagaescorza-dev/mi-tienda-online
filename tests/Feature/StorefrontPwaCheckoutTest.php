@@ -23,7 +23,7 @@ class StorefrontPwaCheckoutTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function createProductWithStock(string $sku, int $quantity = 10, float $price = 450.00, float $cost = 120.00): array
+    protected function createProductWithStock(string $sku, int $quantity = 10, float $price = 450.00, float $cost = 120.00, string $brand = 'Dajo', string $type = 'physical'): array
     {
         $product = Product::create([
             'title' => 'Prenda Anatómica ' . $sku,
@@ -31,8 +31,9 @@ class StorefrontPwaCheckoutTest extends TestCase
             'sku' => $sku,
             'price' => $price,
             'cost' => $cost,
+            'type' => $type,
             'visible' => true,
-            'brand' => 'Torzo',
+            'brand' => $brand,
         ]);
 
         $variant = ProductVariant::create([
@@ -294,6 +295,61 @@ class StorefrontPwaCheckoutTest extends TestCase
 
         $this->assertDatabaseHas('order_items', [
             'variant_id' => $varB->id,
+            'fulfillment_status' => 'backorder',
+        ]);
+    }
+
+    public function test_mixed_cart_with_scraped_product_generates_mix_folio_and_backorders_scraped_item(): void
+    {
+        [$prodA, $varA] = $this->createProductWithStock('MIX-PHYS-02', 10, 400.00, 100.00, 'Dajo', 'physical');
+        // Scraped product has 50 units in warehouse-1, but because it is scraped/dropship, it must be Line B
+        [$prodScraped, $varScraped] = $this->createProductWithStock('MIX-SCRAPED-02', 50, 700.00, 250.00, 'Torzo', 'dropship');
+
+        $this->postJson('/api/v1/store/cart/items', [
+            'cart_id' => 'sess_scraped_checkout',
+            'variant_id' => $varA->id,
+            'quantity' => 1,
+        ]);
+
+        $this->postJson('/api/v1/store/cart/items', [
+            'cart_id' => 'sess_scraped_checkout',
+            'variant_id' => $varScraped->id,
+            'quantity' => 1,
+        ]);
+
+        $checkoutData = [
+            'cart_id' => 'sess_scraped_checkout',
+            'customer' => [
+                'name' => 'Luis Hernandez',
+                'email' => 'luis@ejemplo.com',
+                'phone' => '5511223344',
+            ],
+            'shipping' => [
+                'street' => 'Calle Londres',
+                'exterior_number' => '10',
+                'colony' => 'Juarez',
+                'postal_code' => '06600',
+                'city' => 'Cuauhtemoc',
+                'state' => 'Ciudad de Mexico',
+            ],
+            'payment_method' => 'spei_bbva',
+            'universe' => 'marte',
+        ];
+
+        $response = $this->postJson('/api/v1/store/checkout', $checkoutData);
+
+        $response->assertStatus(201);
+        $orderNumber = $response->json('order.order_number');
+        $this->assertStringStartsWith('#MIX-2026-', $orderNumber);
+
+        // Physical item fulfilled, Scraped item marked as backorder
+        $this->assertDatabaseHas('order_items', [
+            'variant_id' => $varA->id,
+            'fulfillment_status' => 'fulfilled',
+        ]);
+
+        $this->assertDatabaseHas('order_items', [
+            'variant_id' => $varScraped->id,
             'fulfillment_status' => 'backorder',
         ]);
     }

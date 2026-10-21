@@ -124,4 +124,37 @@ class Product extends Model
     {
         return $this->belongsTo(ApparelFabric::class, 'fabric_id');
     }
+
+    /**
+     * Determina si el producto proviene de scraping o dropshipping externo (bajo pedido).
+     */
+    public function isScraped(): bool
+    {
+        if (in_array($this->type, ['dropship', 'scraped'], true)) {
+            return true;
+        }
+
+        if ($this->type === 'physical') {
+            return false;
+        }
+
+        if ((bool) data_get($this->meta, 'is_scraped')) {
+            return true;
+        }
+
+        $provider = strtolower(trim((string) data_get($this->meta, 'provider', data_get($this->meta, 'supplier_name', ''))));
+        if (str_contains($provider, 'torzo') || str_contains($provider, 'adrenaline')) {
+            return true;
+        }
+
+        if ($this->relationLoaded('supplierProducts')) {
+            return $this->supplierProducts->contains(function ($sp) {
+                return $sp->supplier && in_array($sp->supplier->type, ['dropship_scrape', 'dropship_api'], true);
+            });
+        }
+
+        return $this->supplierProducts()->whereHas('supplier', function ($q) {
+            $q->whereIn('type', ['dropship_scrape', 'dropship_api']);
+        })->exists();
+    }
 }

@@ -26,7 +26,7 @@ class CartController extends Controller
 
     public function addItem(CartAddItemRequest $request): JsonResponse
     {
-        $validated = 
+        $validated = $request->validated();
 
         $cart = $this->resolveCart($request);
 
@@ -42,7 +42,7 @@ class CartController extends Controller
 
     public function sync(CartSyncRequest $request): JsonResponse
     {
-        $validated = 
+        $validated = $request->validated();
 
         $cart = DB::transaction(function () use ($request, $validated): Cart {
             $cart = $this->resolveCart($request);
@@ -65,7 +65,7 @@ class CartController extends Controller
 
     public function updateItem(CartUpdateItemRequest $request, CartItem $item): JsonResponse
     {
-        $validated = 
+        $validated = $request->validated();
 
         $item->update($validated);
 

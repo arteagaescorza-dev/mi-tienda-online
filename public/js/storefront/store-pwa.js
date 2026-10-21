@@ -814,6 +814,9 @@
     if (existingIndex > -1) {
       storeState.cart[existingIndex].quantity += 1;
     } else {
+      const isScraped = Boolean(product.is_scraped || product.type === 'dropship' || product.type === 'scraped');
+      const isLineB = isScraped || product.stockType === 'on_demand' || product.stockType === 'drop_on_demand' || (product.availableStock !== undefined && product.availableStock <= 0);
+
       storeState.cart.push({
         productId: product.id,
         sku: product.sku,
@@ -824,9 +827,10 @@
         image: product.image || '/user-avatar.png',
         color: storeState.selectedModalColor || (Array.isArray(product.colors) && product.colors[0]?.name) || 'Único',
         variantId: explicitVariantId || null,
-        stockType: product.stockType || 'ready',
-        stockLabel: product.stockLabel || (product.stockType === 'on_demand' ? 'Bajo Pedido' : 'Stock Fisico'),
-        lineType: (product.stockType === 'on_demand' ? 'line_b' : 'line_a'),
+        stockType: isLineB ? 'on_demand' : 'ready',
+        stockLabel: isLineB ? 'Bajo Pedido' : 'Stock Fisico',
+        lineType: isLineB ? 'line_b' : 'line_a',
+        is_scraped: isScraped,
         quantity: 1
       });
     }
@@ -885,6 +889,7 @@
         itemImg = localProd ? localProd.image : null;
       }
       const itemSlug = bi.product_slug || (localProd ? (localProd.slug || localProd.id) : (bi.product_id || bi.sku));
+      const isLineB = bi.line_type === 'line_b' || Boolean(bi.is_scraped);
 
       return {
         backendId: bi.id,
@@ -898,10 +903,11 @@
         price: bi.price,
         size: bi.size,
         color: bi.color || (localProd && Array.isArray(localProd.colors) ? localProd.colors[0]?.name : 'Único'),
-        stockType: bi.line_type === 'line_b' ? 'on_demand' : 'ready',
-        stockLabel: bi.stock_badge,
-        lineType: bi.line_type,
+        stockType: isLineB ? 'on_demand' : 'ready',
+        stockLabel: bi.stock_badge || (isLineB ? 'Bajo Pedido' : 'Stock Fisico'),
+        lineType: isLineB ? 'line_b' : 'line_a',
         lineLabel: bi.line_label,
+        is_scraped: isLineB,
         quantity: bi.quantity,
         hasActiveLock: bi.has_active_lock
       };
@@ -1419,11 +1425,18 @@
       `;
     }
 
-    // Desglose de carrito mixto: Linea A (Bodega local, entrega 24-48h) vs Linea B (Taller On-Demand, entrega 3-5 dias)
+    // Desglose de carrito mixto: Linea A (Bodega local, entrega 24-48h) vs Linea B (Bajo Pedido / Taller / Scraping)
+    const isLineBItem = item => {
+      if (!item) return false;
+      const lt = item.lineType || item.line_type;
+      const st = item.stockType || item.stock_type;
+      return lt === 'line_b' || st === 'on_demand' || st === 'drop_on_demand' || Boolean(item.is_scraped);
+    };
+
     const lineAEntries = storeState.cart.map((item, idx) => ({ item, idx }))
-      .filter(x => (x.item.lineType || x.item.stockType) !== 'line_b' && (x.item.lineType || x.item.stockType) !== 'on_demand');
+      .filter(x => !isLineBItem(x.item));
     const lineBEntries = storeState.cart.map((item, idx) => ({ item, idx }))
-      .filter(x => (x.item.lineType || x.item.stockType) === 'line_b' || (x.item.lineType || x.item.stockType) === 'on_demand');
+      .filter(x => isLineBItem(x.item));
     const isMixedCart = lineAEntries.length > 0 && lineBEntries.length > 0;
 
     let mixedNoticeHtml = '';
@@ -1431,7 +1444,7 @@
       mixedNoticeHtml = `
         <div style="background: var(--bg-tertiary, #f8fafc); border: 1px solid var(--border-subtle, #e2e8f0); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px; font-size: 0.72rem; color: var(--text-secondary, #475569); display: flex; align-items: center; gap: 6px;">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <div><strong style="color: var(--text-primary, #0f172a);">Pedido Mixto:</strong> Incluye prendas de bodega inmediata y confeccion en taller.</div>
+          <div><strong style="color: var(--text-primary, #0f172a);">Pedido Mixto:</strong> Incluye prendas en bodega inmediata (24-48h) y prendas por pedido (3-5 días).</div>
         </div>
       `;
     }
@@ -1463,7 +1476,7 @@
           </a>
           <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
             <span style="font-size: 0.7rem; color: var(--text-muted);">Talla: <strong style="color: var(--text-primary);">${item.size}</strong></span>
-            <span style="font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; font-weight: 700; ${((item.lineType || item.stockType) === 'line_b' || (item.lineType || item.stockType) === 'on_demand') ? 'background: #fffbeb; color: #b45309;' : 'background: #ecfdf5; color: #047857;'}">${item.stockLabel || (((item.lineType || item.stockType) === 'line_b' || (item.lineType || item.stockType) === 'on_demand') ? 'Bajo Pedido' : 'Stock Fisico')}</span>
+            <span style="font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; font-weight: 700; ${isLineBItem(item) ? 'background: #fffbeb; color: #b45309; border: 1px solid #fef3c7;' : 'background: #ecfdf5; color: #047857; border: 1px solid #d1fae5;'}">${isLineBItem(item) ? 'Bajo Pedido' : (item.stockLabel || 'Stock Fisico')}</span>
           </div>
           ${outOfStock ? `
             <div class="cart-item-out-of-stock-notice" style="color: #ef4444; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
@@ -1503,15 +1516,15 @@
       itemsHtml += `
         <div style="margin-top: 10px;">
           <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Linea A - Bodega Local (Entrega 24-48h)</span>
+            <span>Linea A - Bodega Local (Entrega Express 24-48h)</span>
             <span style="color: #059669; font-size: 0.65rem;">Stock Apartado</span>
           </div>
           ${lineAEntries.map(renderItemHtml).join('')}
         </div>
         <div style="margin-top: 16px;">
           <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Linea B - Taller On-Demand (Entrega 3-5 dias)</span>
-            <span style="color: #d97706; font-size: 0.65rem;">Confeccion Artesanal</span>
+            <span>Linea B - Bajo Pedido / Proveedor (Entrega 3-5 días)</span>
+            <span style="color: #d97706; font-size: 0.65rem;">Bajo Pedido</span>
           </div>
           ${lineBEntries.map(renderItemHtml).join('')}
         </div>
@@ -1530,8 +1543,8 @@
       itemsHtml += `
         <div style="margin-top: 10px;">
           <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Linea B - Taller On-Demand (Entrega 3-5 dias)</span>
-            <span style="color: #d97706; font-size: 0.65rem;">Confeccion Artesanal</span>
+            <span>Linea B - Bajo Pedido / Proveedor (Entrega 3-5 días)</span>
+            <span style="color: #d97706; font-size: 0.65rem;">Bajo Pedido</span>
           </div>
           ${lineBEntries.map(renderItemHtml).join('')}
         </div>
@@ -2206,22 +2219,22 @@
     lastConfirmedOrder: null
   };
 
-  // Clasificación de Tipo de Carrito (Stock Físico vs On-Demand vs Mixto)
+  // Clasificación de Tipo de Carrito (Stock Físico vs On-Demand / Scraping vs Mixto)
   function getCartType(cart) {
     const items = cart || storeState.cart;
     if (!items || items.length === 0) return 'ready';
-    const hasReady = items.some(i => (i.stockType || 'ready') === 'ready');
-    const hasOnDemand = items.some(i => i.stockType === 'on_demand');
+    const hasReady = items.some(i => !isLineBItem(i));
+    const hasOnDemand = items.some(i => isLineBItem(i));
     if (hasReady && hasOnDemand) return 'mixed';
     if (hasOnDemand) return 'on_demand';
     return 'ready';
   }
 
-  // Bifurcación de Líneas de Carrito (Línea A: Bodega vs Línea B: Taller Confección)
+  // Bifurcación de Líneas de Carrito (Línea A: Bodega vs Línea B: Bajo Pedido / Proveedor / Taller)
   function getCartLines(cart) {
     const items = cart || storeState.cart;
-    const readyItems = items.filter(i => (i.stockType || 'ready') === 'ready');
-    const onDemandItems = items.filter(i => i.stockType === 'on_demand');
+    const readyItems = items.filter(i => !isLineBItem(i));
+    const onDemandItems = items.filter(i => isLineBItem(i));
     return { readyItems, onDemandItems };
   }
 
@@ -2793,7 +2806,7 @@
     if (itemsContainer) {
       itemsContainer.innerHTML = order.items.map(it => `
         <div style="display: flex; justify-content: space-between; font-size: 0.76rem; padding: 4px 0; border-bottom: 1px solid var(--border-subtle);">
-          <span>${it.quantity}x ${it.name} (Talla ${it.size}) <small style="color: var(--text-muted);">[${it.stockType === 'on_demand' ? 'Bajo Pedido' : 'Stock Fisico'}]</small></span>
+          <span>${it.quantity}x ${it.name} (Talla ${it.size}) <small style="color: var(--text-muted);">[${isLineBItem(it) ? 'Bajo Pedido' : 'Stock Fisico'}]</small></span>
           <strong>MXN $${(it.price * it.quantity).toFixed(2)}</strong>
         </div>
       `).join('');
@@ -2976,7 +2989,7 @@
             <div class="review-items-list">
               ${storeState.cart.map(it => `
                 <div class="review-item-row">
-                  <span>${it.quantity}x ${it.name} (Talla ${it.size}) <small style="color: var(--text-muted);">[${it.stockType === 'on_demand' ? 'Bajo Pedido' : 'Stock Fisico'}]</small></span>
+                  <span>${it.quantity}x ${it.name} (Talla ${it.size}) <small style="color: var(--text-muted);">[${isLineBItem(it) ? 'Bajo Pedido' : 'Stock Fisico'}]</small></span>
                   <strong>MXN $${(it.price * it.quantity).toFixed(2)}</strong>
                 </div>
               `).join('')}
@@ -4923,14 +4936,12 @@
         const variant = (modalProd.variants || []).find(v => v.size === sz);
         const stockBadge = document.getElementById('pdpStockBadge');
         if (stockBadge) {
-          if (variant && variant.available > 0) {
+          const isScraped = Boolean(modalProd.is_scraped || modalProd.stockType === 'drop_on_demand' || modalProd.type === 'dropship' || modalProd.type === 'scraped');
+          if (!isScraped && variant && variant.available > 0) {
             stockBadge.className = 'product-stock-badge ready';
             stockBadge.textContent = 'Stock Físico';
-          } else if (modalProd.is_scraped || modalProd.stockType === 'drop_on_demand') {
-            stockBadge.className = 'product-stock-badge drop_on_demand';
-            stockBadge.textContent = 'Drop Bajo Pedido';
           } else {
-            stockBadge.className = 'product-stock-badge';
+            stockBadge.className = 'product-stock-badge on_demand';
             stockBadge.textContent = 'Bajo Pedido';
           }
         }

@@ -179,6 +179,7 @@ class OrderProcessingService
                 $itemSub = (float) $item->price * (int) $item->quantity;
                 $rawSubtotal += $itemSub;
 
+                $isScrapedProduct = $variant->product ? $variant->product->isScraped() : false;
                 $inv = $variant->inventories->firstWhere('location', 'warehouse-1');
                 $avail = $inv ? ($inv->quantity - $inv->reserved) : 0;
 
@@ -188,7 +189,7 @@ class OrderProcessingService
                     ->where('status', 'active')
                     ->exists();
 
-                if ($hasLock || $avail > 0) {
+                if (!$isScrapedProduct && ($hasLock || $avail > 0)) {
                     $hasPhysical = true;
                 } else {
                     $hasOnDemand = true;
@@ -306,8 +307,9 @@ class OrderProcessingService
                     ->first();
 
                 $fulfillmentStatus = 'waiting';
+                $isScrapedProduct = $variant->product ? $variant->product->isScraped() : false;
 
-                if ($activeLock) {
+                if (!$isScrapedProduct && $activeLock) {
                     $lockQty = $activeLock->quantity;
                     $activeLock->status = 'purchased';
                     $activeLock->save();
@@ -329,7 +331,7 @@ class OrderProcessingService
                         ]);
                     }
                     $fulfillmentStatus = 'fulfilled';
-                } elseif ($inventory && ($inventory->quantity - $inventory->reserved) >= $itemQty) {
+                } elseif (!$isScrapedProduct && $inventory && ($inventory->quantity - $inventory->reserved) >= $itemQty) {
                     // Si no tenia lock pero habia stock en bodega
                     $prevQty = $inventory->quantity;
                     $inventory->quantity = max(0, $inventory->quantity - $itemQty);
@@ -345,7 +347,7 @@ class OrderProcessingService
                     ]);
                     $fulfillmentStatus = 'fulfilled';
                 } else {
-                    // Prenda bajo pedido en taller (Línea B)
+                    // Prenda bajo pedido en taller o proveedor externo (Línea B)
                     $fulfillmentStatus = 'backorder';
                 }
 

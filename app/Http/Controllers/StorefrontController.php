@@ -705,21 +705,21 @@ class StorefrontController extends Controller
             ?? ''
         );
 
-        $isScrapedProduct = ($dbProduct->type === 'dropship' || $dbProduct->type === 'scraped' || data_get($dbProduct->meta, 'is_scraped') || $dbProduct->supplierProducts->isNotEmpty());
+        $isScrapedProduct = $dbProduct->isScraped();
 
         $variantList = $variants->map(function ($v) use ($isScrapedProduct) {
             $qty = (int) $v->inventories->sum('quantity');
             $res = (int) $v->inventories->sum('reserved');
             $avail = max(0, $qty - $res);
-            $variantStockLabel = $isScrapedProduct ? 'Drop Bajo Pedido' : ($avail > 0 ? 'Stock Físico' : 'Bajo Pedido');
-            $variantStockType = $isScrapedProduct ? 'drop_on_demand' : ($avail > 0 ? 'ready' : 'on_demand');
+            $variantStockLabel = $isScrapedProduct ? 'Bajo Pedido' : ($avail > 0 ? 'Stock Físico' : 'Bajo Pedido');
+            $variantStockType = $isScrapedProduct ? 'on_demand' : ($avail > 0 ? 'ready' : 'on_demand');
             return [
                 'id' => $v->id,
                 'sku' => $v->sku,
                 'size' => strtoupper(trim((string) data_get($v->attributes, 'size', 'M'))),
                 'color' => data_get($v->attributes, 'color', 'Único'),
                 'price' => (float) $v->price,
-                'available' => $avail,
+                'available' => $isScrapedProduct ? 0 : $avail,
                 'stockLabel' => $variantStockLabel,
                 'stockType' => $variantStockType,
             ];
@@ -734,9 +734,9 @@ class StorefrontController extends Controller
             'categoryName' => $dbProduct->brand ?: (data_get($dbProduct->meta, 'category', 'Prenda')),
             'price' => (float) $dbProduct->price,
             'price_formatted' => 'MXN $' . number_format((float) $dbProduct->price, 2),
-            'availableStock' => $availableStock,
-            'stockType' => $isScrapedProduct ? 'drop_on_demand' : ($availableStock > 0 ? 'ready' : 'on_demand'),
-            'stockLabel' => $isScrapedProduct ? 'Drop Bajo Pedido' : ($availableStock > 0 ? 'Stock Físico' : 'Bajo Pedido'),
+            'availableStock' => $isScrapedProduct ? 0 : $availableStock,
+            'stockType' => $isScrapedProduct ? 'on_demand' : ($availableStock > 0 ? 'ready' : 'on_demand'),
+            'stockLabel' => $isScrapedProduct ? 'Bajo Pedido' : ($availableStock > 0 ? 'Stock Físico' : 'Bajo Pedido'),
             'is_scraped' => $isScrapedProduct,
             'image' => $image,
             'images' => $images,
@@ -2353,7 +2353,7 @@ class StorefrontController extends Controller
                     ?? ''
                 );
 
-                $isScrapedProduct = ($product->type === 'dropship' || $product->type === 'scraped' || data_get($product->meta, 'is_scraped') || $product->supplierProducts->isNotEmpty());
+                $isScrapedProduct = $product->isScraped();
 
                 return [
                     'id' => (string) $product->id,
@@ -2365,10 +2365,10 @@ class StorefrontController extends Controller
                     'price' => (float) $product->price,
                     'price_formatted' => 'MXN $' . number_format((float) $product->price, 2),
                     'universes' => $universes,
-                    'stockType' => $isScrapedProduct ? 'drop_on_demand' : ($availableStock > 0 ? 'ready' : 'on_demand'),
-                    'stockLabel' => $isScrapedProduct ? 'Drop Bajo Pedido' : ($availableStock > 0 ? 'Stock Físico' : 'Bajo Pedido'),
+                    'stockType' => $isScrapedProduct ? 'on_demand' : ($availableStock > 0 ? 'ready' : 'on_demand'),
+                    'stockLabel' => $isScrapedProduct ? 'Bajo Pedido' : ($availableStock > 0 ? 'Stock Físico' : 'Bajo Pedido'),
                     'is_scraped' => $isScrapedProduct,
-                    'availableStock' => $availableStock,
+                    'availableStock' => $isScrapedProduct ? 0 : $availableStock,
                     'image' => $image,
                     'images' => $allImages,
                     'colors' => $colorData['colors'],
@@ -2388,9 +2388,9 @@ class StorefrontController extends Controller
                         'size' => strtoupper(trim((string) data_get($v->attributes, 'size', 'M'))),
                         'color' => data_get($v->attributes, 'color', 'Unico'),
                         'price' => (float) $v->price,
-                        'available' => max(0, $v->inventories->sum('quantity') - $v->inventories->sum('reserved')),
-                        'stockType' => $isScrapedProduct ? 'drop_on_demand' : (max(0, $v->inventories->sum('quantity') - $v->inventories->sum('reserved')) > 0 ? 'ready' : 'on_demand'),
-                        'stockLabel' => $isScrapedProduct ? 'Drop Bajo Pedido' : (max(0, $v->inventories->sum('quantity') - $v->inventories->sum('reserved')) > 0 ? 'Stock Físico' : 'Bajo Pedido'),
+                        'available' => $isScrapedProduct ? 0 : max(0, $v->inventories->sum('quantity') - $v->inventories->sum('reserved')),
+                        'stockType' => $isScrapedProduct ? 'on_demand' : (max(0, $v->inventories->sum('quantity') - $v->inventories->sum('reserved')) > 0 ? 'ready' : 'on_demand'),
+                        'stockLabel' => $isScrapedProduct ? 'Bajo Pedido' : (max(0, $v->inventories->sum('quantity') - $v->inventories->sum('reserved')) > 0 ? 'Stock Físico' : 'Bajo Pedido'),
                     ])->values()->all(),
                 ];
             })

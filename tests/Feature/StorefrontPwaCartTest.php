@@ -15,7 +15,7 @@ class StorefrontPwaCartTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function createProductWithStock(string $sku, int $quantity = 10, float $price = 450.00): array
+    protected function createProductWithStock(string $sku, int $quantity = 10, float $price = 450.00, string $brand = 'Dajo', string $type = 'physical'): array
     {
         $product = Product::create([
             'title' => 'Jockstrap Ergonomico ' . $sku,
@@ -23,8 +23,9 @@ class StorefrontPwaCartTest extends TestCase
             'sku' => $sku,
             'price' => $price,
             'cost' => 120.00,
+            'type' => $type,
             'visible' => true,
-            'brand' => 'Torzo',
+            'brand' => $brand,
         ]);
 
         $variant = ProductVariant::create([
@@ -171,6 +172,63 @@ class StorefrontPwaCartTest extends TestCase
 
         $this->assertCount(1, $response->json('line_a_items'));
         $this->assertCount(1, $response->json('line_b_items'));
+    }
+
+    public function test_scraped_product_is_classified_as_line_b_and_does_not_create_stock_lock(): void
+    {
+        [$prodA, $varA] = $this->createProductWithStock('TEST-STOCK-01', 5, 300.00, 'Dajo', 'physical');
+        [$prodScraped, $varScraped] = $this->createProductWithStock('TEST-SCRAPED-01', 20, 500.00, 'Torzo', 'dropship');
+
+        $this->postJson('/api/v1/store/cart/items', [
+            'cart_id' => 'sess_scraped_split_01',
+            'variant_id' => $varA->id,
+            'quantity' => 1,
+        ]);
+
+        $response = $this->postJson('/api/v1/store/cart/items', [
+            'cart_id' => 'sess_scraped_split_01',
+            'variant_id' => $varScraped->id,
+            'quantity' => 1,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'summary' => [
+                'total_items' => 2,
+                'has_line_a' => true,
+                'has_line_b' => true,
+                'is_mixed_cart' => true,
+                'reservation' => [
+                    'has_active_reservation' => true,
+                    'locked_variants_count' => 1,
+                ],
+            ],
+        ]);
+
+        // Verify that stock lock exists ONLY for product A, NOT for the scraped product
+        $this->assertDatabaseHas('stock_locks', [
+            'cart_id' => 'sess_scraped_split_01',
+            'product_variant_id' => $varA->id,
+            'status' => 'active',
+        ]);
+        $this->assertDatabaseMissing('stock_locks', [
+            'cart_id' => 'sess_scraped_split_01',
+            'product_variant_id' => $varScraped->id,
+            'status' => 'active',
+        ]);
+
+        // Verify items array line types
+        $items = collect($response->json('items'));
+        $itemA = $items->firstWhere('variant_id', $varA->id);
+        $itemB = $items->firstWhere('variant_id', $varScraped->id);
+
+        $this->assertEquals('line_a', $itemA['line_type']);
+        $this->assertFalse($itemA['is_scraped']);
+
+        $this->assertEquals('line_b', $itemB['line_type']);
+        $this->assertTrue($itemB['is_scraped']);
+        $this->assertEquals('Bajo Pedido', $itemB['stock_badge']);
     }
 
     public function test_updating_item_quantity_adjusts_stock_lock_and_reserved_inventory(): void
