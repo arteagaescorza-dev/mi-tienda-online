@@ -129,6 +129,22 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/convenios/aliados/{id}/restaurar', [PortalAlliesController::class, 'restoreAlly'])->name('portal.allies.restore');
 	Route::post('/admin/convenios/aliados/{ally}/liquidar', [PortalAlliesController::class, 'executeSettlement'])->name('portal.allies.settlement.execute')->withTrashed();
 	Route::get('/admin/convenios/aliados/{ally}/export-csv', [PortalAlliesController::class, 'exportDoorListCsv'])->name('portal.allies.export.csv')->withTrashed();
+
+	// Hub 7: Tipos de Aliado Comercial / Categorias (Engranaje Navbar)
+	Route::post('/admin/convenios/tipos-aliado', [PortalAlliesController::class, 'storeAllyType'])->name('portal.allies.types.store');
+	Route::put('/admin/convenios/tipos-aliado/{id}', [PortalAlliesController::class, 'updateAllyType'])->name('portal.allies.types.update');
+	Route::post('/admin/convenios/tipos-aliado/{id}/toggle-active', [PortalAlliesController::class, 'toggleAllyTypeActive'])->name('portal.allies.types.toggle');
+	Route::post('/admin/convenios/tipos-aliado/{id}/archivar', [PortalAlliesController::class, 'archiveAllyType'])->name('portal.allies.types.archive');
+	Route::delete('/admin/convenios/tipos-aliado/{id}', [PortalAlliesController::class, 'destroyAllyType'])->name('portal.allies.types.destroy');
+	Route::post('/admin/convenios/tipos-aliado/{id}/restaurar', [PortalAlliesController::class, 'restoreAllyType'])->name('portal.allies.types.restore');
+
+	// Hub 7: Tipos de Descuento Dir A & Dir B (Engranaje Navbar)
+	Route::post('/admin/convenios/tipos-descuento', [PortalAlliesController::class, 'storeDiscountType'])->name('portal.allies.discounts.store');
+	Route::put('/admin/convenios/tipos-descuento/{id}', [PortalAlliesController::class, 'updateDiscountType'])->name('portal.allies.discounts.update');
+	Route::post('/admin/convenios/tipos-descuento/{id}/toggle-active', [PortalAlliesController::class, 'toggleDiscountTypeActive'])->name('portal.allies.discounts.toggle');
+	Route::post('/admin/convenios/tipos-descuento/{id}/archivar', [PortalAlliesController::class, 'archiveDiscountType'])->name('portal.allies.discounts.archive');
+	Route::delete('/admin/convenios/tipos-descuento/{id}', [PortalAlliesController::class, 'destroyDiscountType'])->name('portal.allies.discounts.destroy');
+	Route::post('/admin/convenios/tipos-descuento/{id}/restaurar', [PortalAlliesController::class, 'restoreDiscountType'])->name('portal.allies.discounts.restore');
 });
 
 // Hub 7: Extranet de Proveedores & Fabricantes (TASK-HUB-VND)

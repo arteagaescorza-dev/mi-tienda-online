@@ -31,6 +31,11 @@ class Ally extends Model
         return $this->status === 'active' && !$this->trashed();
     }
 
+    public function allyType()
+    {
+        return $this->belongsTo(AllyType::class, 'category', 'code');
+    }
+
     public function campaignsDirA(): HasMany
     {
         return $this->hasMany(AllyCampaignDirA::class);

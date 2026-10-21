@@ -243,6 +243,22 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         Route::get('/{id}/export-csv', [AlliesApiController::class, 'exportDoorListCsv']);
         Route::post('/{id}/archive', [AlliesApiController::class, 'archiveAlly']);
         Route::delete('/{id}', [AlliesApiController::class, 'destroyAlly']);
+
+        // Tipos de Aliado & Categorías API
+        Route::get('/types/catalog', [AlliesApiController::class, 'getAllyTypes']);
+        Route::post('/types', [AlliesApiController::class, 'storeAllyType']);
+        Route::put('/types/{id}', [AlliesApiController::class, 'updateAllyType']);
+        Route::post('/types/{id}/toggle-active', [AlliesApiController::class, 'toggleAllyTypeActive']);
+        Route::post('/types/{id}/archive', [AlliesApiController::class, 'archiveAllyType']);
+        Route::delete('/types/{id}', [AlliesApiController::class, 'destroyAllyType']);
+
+        // Tipos de Descuento Dir A & Dir B API
+        Route::get('/discount-types/catalog', [AlliesApiController::class, 'getDiscountTypes']);
+        Route::post('/discount-types', [AlliesApiController::class, 'storeDiscountType']);
+        Route::put('/discount-types/{id}', [AlliesApiController::class, 'updateDiscountType']);
+        Route::post('/discount-types/{id}/toggle-active', [AlliesApiController::class, 'toggleDiscountTypeActive']);
+        Route::post('/discount-types/{id}/archive', [AlliesApiController::class, 'archiveDiscountType']);
+        Route::delete('/discount-types/{id}', [AlliesApiController::class, 'destroyDiscountType']);
     });
 
     // 6.1. EXTRANET PROVEEDORES & FABRICANTES (HUB 7 - TASK-HUB-VND / TASK-INT-20)

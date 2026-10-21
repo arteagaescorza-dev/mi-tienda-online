@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ally;
+use App\Models\AllyType;
+use App\Models\AllyDiscountType;
 use App\Models\AllyCampaignDirA;
 use App\Models\AllyClearingSettlement;
 use App\Models\AllyCouponDirB;
@@ -36,20 +38,26 @@ class PortalAlliesController extends Controller
 
     protected function getAlliesData(?Request $request = null): array
     {
+        $allyTypes = AllyType::withTrashed()->get();
+        $discountTypes = AllyDiscountType::withTrashed()->get();
+
         $allies = Ally::with(['campaignsDirA', 'couponsDirB', 'leadCaptures', 'settlements'])->get();
 
-        $alliesList = $allies->map(function ($a) {
+        $alliesList = $allies->map(function ($a) use ($allyTypes) {
             $leadsReceived = $a->leadCaptures->count() ?: (int)$a->campaignsDirA->sum('leads_count');
             $ordersAttributed = (int)$a->couponsDirB->sum('orders_count');
             $gmvAttributed = (float)$a->couponsDirB->sum('revenue_attributed');
             $commissionEarned = (float)$a->couponsDirB->sum('commission_earned');
+
+            $typeObj = $allyTypes->firstWhere('code', $a->category);
+            $categoryLabel = $a->category_label ?: ($typeObj?->name ?? ucfirst(str_replace('_', ' ', $a->category)));
 
             return [
                 'id' => $a->id,
                 'code' => $a->code,
                 'name' => $a->name,
                 'category' => $a->category,
-                'categoryLabel' => $a->category_label ?? ucfirst(str_replace('_', ' ', $a->category)),
+                'categoryLabel' => $categoryLabel,
                 'universe' => $a->universe,
                 'contactName' => $a->contact_name,
                 'contactWhatsapp' => $a->contact_whatsapp,
@@ -254,6 +262,12 @@ class PortalAlliesController extends Controller
             'totalCommissionsDebit' => $totalCommissionsDebit,
             'totalNetBalance' => $totalNetBalance,
             'selectedAlly' => $selectedAlly,
+            'allyTypes' => $allyTypes,
+            'activeAllyTypes' => $allyTypes->filter(fn($t) => $t->isActive())->values(),
+            'discountTypes' => $discountTypes,
+            'activeDiscountTypes' => $discountTypes->filter(fn($d) => $d->isActive())->values(),
+            'activeDiscountTypesDirA' => $discountTypes->filter(fn($d) => $d->isActive() && in_array($d->direction, ['dir_a', 'both']))->values(),
+            'activeDiscountTypesDirB' => $discountTypes->filter(fn($d) => $d->isActive() && in_array($d->direction, ['dir_b', 'both']))->values(),
         ];
     }
 
@@ -615,22 +629,13 @@ class PortalAlliesController extends Controller
             ? strtoupper(trim($validated['code']))
             : 'ALLY-' . $cleanCode . '-' . rand(100, 999);
 
-        $category = $validated['category'] ?? 'circuit_party';
-        $categoryLabels = [
-            'circuit_party' => 'Festival Circuit & Eventos',
-            'onlyfans_creator' => 'Creador OnlyFans',
-            'sauna' => 'Sauna & Wellness',
-            'beauty_spa' => 'Boutique & Spa',
-            'drag_ballroom' => 'Ballroom & Drag House',
-            'fitness_gym' => 'Fitness & Gym',
-            'bar_nightclub' => 'Bar & Nightclub',
-            'general' => 'Alianza Comercial',
-        ];
-        $categoryLabel = $validated['category_label'] ?? ($categoryLabels[$category] ?? ucfirst(str_replace('_', ' ', $category)));
+        $category = $validated['category'] ?? 'general';
+        $typeObj = AllyType::where('code', $category)->first();
+        $categoryLabel = $validated['category_label'] ?? ($typeObj?->name ?? ucfirst(str_replace('_', ' ', $category)));
 
         $allowedDiscounts = isset($validated['allowed_discount_types']) && is_array($validated['allowed_discount_types'])
             ? array_values(array_unique($validated['allowed_discount_types']))
-            : ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access'];
+            : (AllyDiscountType::active()->pluck('code')->toArray() ?: ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access']);
 
         $portalToken = 'tok_' . strtolower($cleanCode) . '_' . Str::random(16);
 
@@ -697,21 +702,12 @@ class PortalAlliesController extends Controller
         $validated = $request->validated();
 
         $category = $validated['category'] ?? $ally->category;
-        $categoryLabels = [
-            'circuit_party' => 'Festival Circuit & Eventos',
-            'onlyfans_creator' => 'Creador OnlyFans',
-            'sauna' => 'Sauna & Wellness',
-            'beauty_spa' => 'Boutique & Spa',
-            'drag_ballroom' => 'Ballroom & Drag House',
-            'fitness_gym' => 'Fitness & Gym',
-            'bar_nightclub' => 'Bar & Nightclub',
-            'general' => 'Alianza Comercial',
-        ];
-        $categoryLabel = $validated['category_label'] ?? ($categoryLabels[$category] ?? $ally->category_label);
+        $typeObj = AllyType::where('code', $category)->first();
+        $categoryLabel = $validated['category_label'] ?? ($typeObj?->name ?? $ally->category_label);
 
         $allowedDiscounts = isset($validated['allowed_discount_types']) && is_array($validated['allowed_discount_types'])
             ? array_values(array_unique($validated['allowed_discount_types']))
-            : ($ally->allowed_discount_types ?: ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access']);
+            : ($ally->allowed_discount_types ?: (AllyDiscountType::active()->pluck('code')->toArray() ?: ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access']));
 
         $ally->update([
             'name' => trim($validated['name']),
@@ -833,6 +829,341 @@ class PortalAlliesController extends Controller
                 'message' => $msg,
                 'ally' => $ally,
             ]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    /**
+     * =========================================================================
+     * GESTION DE TIPOS DE ALIADO / CATEGORIAS (ENGRANAJE NAVBAR)
+     * =========================================================================
+     */
+
+    public function storeAllyType(Request $request)
+    {
+        Gate::authorize('manage-b2b');
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50',
+            'description' => 'nullable|string|max:500',
+            'default_universe' => 'nullable|string|in:marte,venus,tiresias,terra',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $name = trim($validated['name']);
+        $code = !empty($validated['code'])
+            ? Str::slug($validated['code'], '_')
+            : Str::slug($name, '_');
+
+        if (AllyType::withTrashed()->where('code', $code)->exists()) {
+            return back()->with('error', "El codigo o identificador '{$code}' ya existe en el sistema.");
+        }
+
+        $type = AllyType::create([
+            'name' => $name,
+            'code' => $code,
+            'description' => $validated['description'] ?? null,
+            'default_universe' => $validated['default_universe'] ?? 'marte',
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : true,
+            'status' => 'active',
+        ]);
+
+        $msg = "Tipo de aliado '{$type->name}' registrado exitosamente en el catalogo.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'type' => $type], 201);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function updateAllyType(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::withTrashed()->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50',
+            'description' => 'nullable|string|max:500',
+            'default_universe' => 'nullable|string|in:marte,venus,tiresias,terra',
+            'is_active' => 'nullable|boolean',
+            'status' => 'nullable|string|in:active,archived',
+        ]);
+
+        $name = trim($validated['name']);
+        $code = !empty($validated['code']) ? Str::slug($validated['code'], '_') : $type->code;
+
+        $conflict = AllyType::withTrashed()->where('code', $code)->where('id', '!=', $type->id)->exists();
+        if ($conflict) {
+            return back()->with('error', "El codigo '{$code}' ya esta en uso por otro tipo de aliado.");
+        }
+
+        $type->update([
+            'name' => $name,
+            'code' => $code,
+            'description' => $validated['description'] ?? $type->description,
+            'default_universe' => $validated['default_universe'] ?? $type->default_universe,
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : $type->is_active,
+            'status' => $validated['status'] ?? $type->status,
+        ]);
+
+        $msg = "Tipo de aliado '{$type->name}' actualizado correctamente.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'type' => $type]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function toggleAllyTypeActive(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::withTrashed()->findOrFail($id);
+        $type->update(['is_active' => !$type->is_active]);
+
+        $statusStr = $type->is_active ? 'activado' : 'desactivado';
+        $msg = "Tipo de aliado '{$type->name}' {$statusStr} exitosamente.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'is_active' => $type->is_active]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function archiveAllyType(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::withTrashed()->findOrFail($id);
+        $isArchiving = ($type->status === 'active');
+        $newStatus = $isArchiving ? 'archived' : 'active';
+        $type->update([
+            'status' => $newStatus,
+            'is_active' => !$isArchiving,
+        ]);
+
+        $msg = $isArchiving
+            ? "Tipo de aliado '{$type->name}' archivado correctamente."
+            : "Tipo de aliado '{$type->name}' reactivado correctamente.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'status' => $newStatus, 'is_active' => $type->is_active]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function destroyAllyType(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::withTrashed()->findOrFail($id);
+        $name = $type->name;
+
+        $hasActiveAllies = Ally::where('category', $type->code)->exists();
+        if ($hasActiveAllies) {
+            return back()->with('error', "No se puede eliminar el tipo '{$name}' porque existen socios aliados asignados a esta categoria. Archivalo o reasigna sus aliados primero.");
+        }
+
+        $type->delete();
+
+        $msg = "Tipo de aliado '{$name}' eliminado del catalogo.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function restoreAllyType(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::onlyTrashed()->findOrFail($id);
+        $type->restore();
+        $type->update(['status' => 'active', 'is_active' => true]);
+
+        $msg = "Tipo de aliado '{$type->name}' restaurado exitosamente.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'type' => $type]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    /**
+     * =========================================================================
+     * GESTION DE TIPOS DE DESCUENTO DIR A & DIR B (ENGRANAJE NAVBAR)
+     * =========================================================================
+     */
+
+    public function storeDiscountType(Request $request)
+    {
+        Gate::authorize('manage-b2b');
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50',
+            'direction' => 'required|string|in:dir_a,dir_b,both',
+            'value_type' => 'required|string|in:percentage,fixed_amount,free_item,access',
+            'max_value_default' => 'nullable|numeric|min:0|max:100',
+            'description' => 'nullable|string|max:500',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $name = trim($validated['name']);
+        $code = !empty($validated['code'])
+            ? Str::slug($validated['code'], '_')
+            : Str::slug($name, '_');
+
+        if (AllyDiscountType::withTrashed()->where('code', $code)->exists()) {
+            return back()->with('error', "El codigo de descuento '{$code}' ya existe en el sistema.");
+        }
+
+        $discount = AllyDiscountType::create([
+            'name' => $name,
+            'code' => $code,
+            'direction' => $validated['direction'],
+            'value_type' => $validated['value_type'],
+            'max_value_default' => isset($validated['max_value_default']) ? (float)$validated['max_value_default'] : null,
+            'description' => $validated['description'] ?? null,
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : true,
+            'status' => 'active',
+        ]);
+
+        $msg = "Tipo de descuento '{$discount->name}' registrado exitosamente en el catalogo.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'discount' => $discount], 201);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function updateDiscountType(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::withTrashed()->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50',
+            'direction' => 'required|string|in:dir_a,dir_b,both',
+            'value_type' => 'required|string|in:percentage,fixed_amount,free_item,access',
+            'max_value_default' => 'nullable|numeric|min:0|max:100',
+            'description' => 'nullable|string|max:500',
+            'is_active' => 'nullable|boolean',
+            'status' => 'nullable|string|in:active,archived',
+        ]);
+
+        $name = trim($validated['name']);
+        $code = !empty($validated['code']) ? Str::slug($validated['code'], '_') : $discount->code;
+
+        $conflict = AllyDiscountType::withTrashed()->where('code', $code)->where('id', '!=', $discount->id)->exists();
+        if ($conflict) {
+            return back()->with('error', "El codigo '{$code}' ya esta en uso por otro tipo de descuento.");
+        }
+
+        $discount->update([
+            'name' => $name,
+            'code' => $code,
+            'direction' => $validated['direction'],
+            'value_type' => $validated['value_type'],
+            'max_value_default' => isset($validated['max_value_default']) ? (float)$validated['max_value_default'] : $discount->max_value_default,
+            'description' => $validated['description'] ?? $discount->description,
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : $discount->is_active,
+            'status' => $validated['status'] ?? $discount->status,
+        ]);
+
+        $msg = "Tipo de descuento '{$discount->name}' actualizado correctamente.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'discount' => $discount]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function toggleDiscountTypeActive(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::withTrashed()->findOrFail($id);
+        $discount->update(['is_active' => !$discount->is_active]);
+
+        $statusStr = $discount->is_active ? 'activado' : 'desactivado';
+        $msg = "Tipo de descuento '{$discount->name}' {$statusStr} exitosamente.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'is_active' => $discount->is_active]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function archiveDiscountType(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::withTrashed()->findOrFail($id);
+        $isArchiving = ($discount->status === 'active');
+        $newStatus = $isArchiving ? 'archived' : 'active';
+        $discount->update([
+            'status' => $newStatus,
+            'is_active' => !$isArchiving,
+        ]);
+
+        $msg = $isArchiving
+            ? "Tipo de descuento '{$discount->name}' archivado correctamente."
+            : "Tipo de descuento '{$discount->name}' reactivado correctamente.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'status' => $newStatus, 'is_active' => $discount->is_active]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function destroyDiscountType(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::withTrashed()->findOrFail($id);
+        $name = $discount->name;
+
+        $discount->delete();
+
+        $msg = "Tipo de descuento '{$name}' eliminado del catalogo.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg]);
+        }
+
+        return redirect()->route('portal.allies')->with('success', $msg);
+    }
+
+    public function restoreDiscountType(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::onlyTrashed()->findOrFail($id);
+        $discount->restore();
+        $discount->update(['status' => 'active', 'is_active' => true]);
+
+        $msg = "Tipo de descuento '{$discount->name}' restaurado exitosamente.";
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg, 'discount' => $discount]);
         }
 
         return redirect()->route('portal.allies')->with('success', $msg);

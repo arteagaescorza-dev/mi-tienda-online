@@ -29,7 +29,7 @@ class StoreAllyRequest extends FormRequest
             'bank_clabe' => 'nullable|string|max:30',
             'notes' => 'nullable|string|max:1000',
             'allowed_discount_types' => 'nullable|array',
-            'allowed_discount_types.*' => 'string|in:cover,cover_2x1,free_drink,store_discount,vip_access',
+            'allowed_discount_types.*' => 'string|max:50',
             'max_discount_pct' => 'nullable|numeric|min:0|max:100',
             'commission_type' => 'nullable|string|in:percentage,fixed_per_order',
             'commission_rate' => 'nullable|numeric|min:0|max:100',

@@ -913,17 +913,21 @@
                     <select name="discount_type" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 font-semibold focus:bg-white">
                         @php
                             $allowed = $selectedAlly['allowedDiscountTypes'] ?? ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access'];
-                            $typeLabels = [
-                                'cover' => 'Cover / Acceso Libre (100% cortesía)',
-                                'cover_2x1' => 'Cover 2x1 en Puerta',
-                                'free_drink' => 'Trago o Cóctel de Cortesía',
-                                'store_discount' => '% Descuento en Tienda Online (Tope ' . ($selectedAlly['maxDiscountPct'] ?? 20) . '%)',
-                                'vip_access' => 'Acceso VIP / Pulsera Exclusiva',
-                                'service_promo' => 'Promoción Especial en Servicio'
-                            ];
                         @endphp
                         @foreach($allowed as $dtKey)
-                            <option value="{{ $dtKey }}">{{ $typeLabels[$dtKey] ?? ucfirst(str_replace('_', ' ', $dtKey)) }}</option>
+                            @php
+                                $matchedDt = isset($discountTypes) ? $discountTypes->firstWhere('code', $dtKey) : null;
+                                $dtLabel = $matchedDt ? $matchedDt->name : match($dtKey) {
+                                    'cover' => 'Cover / Acceso Libre (100% cortesía)',
+                                    'cover_2x1' => 'Cover 2x1 en Puerta',
+                                    'free_drink' => 'Trago o Cóctel de Cortesía',
+                                    'store_discount' => '% Descuento en Tienda Online (Tope ' . ($selectedAlly['maxDiscountPct'] ?? 20) . '%)',
+                                    'vip_access' => 'Acceso VIP / Pulsera Exclusiva',
+                                    'service_promo' => 'Promoción Especial en Servicio',
+                                    default => ucfirst(str_replace('_', ' ', $dtKey))
+                                };
+                            @endphp
+                            <option value="{{ $dtKey }}">{{ $dtLabel }}</option>
                         @endforeach
                     </select>
                     <p class="text-[10px] text-slate-500 mt-1">Solo puedes solicitar convenios dentro de los tipos de beneficios autorizados en tu acuerdo comercial.</p>
@@ -1073,17 +1077,21 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-700 mb-1">Tipo de Aliado / Categoría *</label>
                                     <select name="category" id="allyFormCategory" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-semibold focus:outline-none focus:border-indigo-600">
-                                        <option value="sauna">Sauna &amp; Baños de Vapor</option>
-                                        <option value="spa">Spa &amp; Masajes Wellness</option>
-                                        <option value="content_creator">Creador de Contenido / OnlyFans / Influencer</option>
-                                        <option value="party_producer">Productor de Fiestas / Festival Circuit</option>
-                                        <option value="drag_ballroom">Colectivo Drag &amp; Ballroom Culture</option>
-                                        <option value="gym_fitness">Fitness &amp; Gimnasio Especializado</option>
-                                        <option value="bar_nightclub">Bar / Nightclub / Discoteca</option>
-                                        <option value="barbershop">Barbería &amp; Grooming</option>
-                                        <option value="other">Otro Establecimiento o Alianza</option>
+                                        @forelse($activeAllyTypes as $at)
+                                            <option value="{{ $at->code }}">{{ $at->name }}</option>
+                                        @empty
+                                            <option value="sauna">Sauna &amp; Baños de Vapor</option>
+                                            <option value="spa">Spa &amp; Masajes Wellness</option>
+                                            <option value="content_creator">Creador de Contenido / OnlyFans / Influencer</option>
+                                            <option value="party_producer">Productor de Fiestas / Festival Circuit</option>
+                                            <option value="drag_ballroom">Colectivo Drag &amp; Ballroom Culture</option>
+                                            <option value="gym_fitness">Fitness &amp; Gimnasio Especializado</option>
+                                            <option value="bar_nightclub">Bar / Nightclub / Discoteca</option>
+                                            <option value="barbershop">Barbería &amp; Grooming</option>
+                                            <option value="other">Otro Establecimiento o Alianza</option>
+                                        @endforelse
                                     </select>
-                                    <span class="text-[10px] text-slate-500 mt-0.5 block">Define el giro del socio para segmentación de acuerdos y vitrinas.</span>
+                                    <span class="text-[10px] text-slate-500 mt-0.5 block">Define el giro del socio para segmentación de acuerdos y vitrinas. Administrable en pestaña "3. Tipos de Aliado".</span>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-3">
@@ -1155,37 +1163,66 @@
                                 </div>
 
                                 <!-- Tipos de Descuentos que el Aliado Puede Configurar desde su Portal -->
-                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
                                     <div class="flex items-center justify-between">
                                         <label class="block text-xs font-bold text-slate-900">Tipos de Descuentos Autorizados en su Portal:</label>
-                                        <span class="text-[10px] text-slate-400">Restricción activa</span>
+                                        <span class="text-[10px] text-slate-400">Administrable en pestaña 4</span>
                                     </div>
-                                    <div class="grid grid-cols-2 gap-2 text-xs">
-                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
-                                            <input type="checkbox" name="allowed_discount_types[]" value="cover" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
-                                            <span class="text-slate-700 font-medium">Cover Libre (100%)</span>
-                                        </label>
-                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
-                                            <input type="checkbox" name="allowed_discount_types[]" value="cover_2x1" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
-                                            <span class="text-slate-700 font-medium">Cover 2x1 en Puerta</span>
-                                        </label>
-                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
-                                            <input type="checkbox" name="allowed_discount_types[]" value="free_drink" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
-                                            <span class="text-slate-700 font-medium">Trago de Cortesía</span>
-                                        </label>
-                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
-                                            <input type="checkbox" name="allowed_discount_types[]" value="store_discount" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
-                                            <span class="text-slate-700 font-medium">% Descuento Tienda</span>
-                                        </label>
-                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
-                                            <input type="checkbox" name="allowed_discount_types[]" value="vip_access" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
-                                            <span class="text-slate-700 font-medium">Acceso VIP / Pulsera</span>
-                                        </label>
-                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
-                                            <input type="checkbox" name="allowed_discount_types[]" value="service_promo" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
-                                            <span class="text-slate-700 font-medium">Promo en Servicio</span>
-                                        </label>
+
+                                    <!-- Grupo Dirección A: Beneficios Aliado -> Cliente -->
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700">Dirección A (Eventos / Aliado a Cliente)</span>
+                                            <span class="text-[9px] text-slate-400">Canjeables en taquilla/local</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-1.5 text-xs">
+                                            @forelse($activeDiscountTypesDirA as $dt)
+                                                <label class="flex items-center gap-2 p-1.5 rounded hover:bg-indigo-50/50 cursor-pointer border border-slate-100">
+                                                    <input type="checkbox" name="allowed_discount_types[]" value="{{ $dt->code }}" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                                    <span class="text-slate-700 font-medium text-[11px] truncate" title="{{ $dt->name }}">{{ $dt->name }}</span>
+                                                </label>
+                                            @empty
+                                                <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                                    <input type="checkbox" name="allowed_discount_types[]" value="cover" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                                    <span class="text-slate-700 font-medium text-[11px]">Cover Libre</span>
+                                                </label>
+                                                <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                                    <input type="checkbox" name="allowed_discount_types[]" value="cover_2x1" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                                    <span class="text-slate-700 font-medium text-[11px]">Cover 2x1</span>
+                                                </label>
+                                                <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                                    <input type="checkbox" name="allowed_discount_types[]" value="free_drink" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                                    <span class="text-slate-700 font-medium text-[11px]">Trago Cortesía</span>
+                                                </label>
+                                                <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                                    <input type="checkbox" name="allowed_discount_types[]" value="vip_access" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                                    <span class="text-slate-700 font-medium text-[11px]">Acceso VIP</span>
+                                                </label>
+                                            @endforelse
+                                        </div>
                                     </div>
+
+                                    <!-- Grupo Dirección B: Descuentos Tienda -> Audiencia Aliado -->
+                                    <div class="pt-2 border-t border-slate-100">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Dirección B (Tienda Online a Audiencia)</span>
+                                            <span class="text-[9px] text-slate-400">Cupones de ecommerce</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-1.5 text-xs">
+                                            @forelse($activeDiscountTypesDirB as $dt)
+                                                <label class="flex items-center gap-2 p-1.5 rounded hover:bg-emerald-50/50 cursor-pointer border border-slate-100">
+                                                    <input type="checkbox" name="allowed_discount_types[]" value="{{ $dt->code }}" class="rounded text-emerald-600 focus:ring-0 ally-dt-checkbox" checked>
+                                                    <span class="text-slate-700 font-medium text-[11px] truncate" title="{{ $dt->name }}">{{ $dt->name }}</span>
+                                                </label>
+                                            @empty
+                                                <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                                    <input type="checkbox" name="allowed_discount_types[]" value="store_discount" class="rounded text-emerald-600 focus:ring-0 ally-dt-checkbox" checked>
+                                                    <span class="text-slate-700 font-medium text-[11px]">% Descuento Tienda</span>
+                                                </label>
+                                            @endforelse
+                                        </div>
+                                    </div>
+
                                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
                                         <label class="text-[11px] font-bold text-slate-700 shrink-0">Tope Máx. Descuento Tienda (%):</label>
                                         <input type="number" step="0.5" min="0" max="100" name="max_discount_pct" id="allyFormMaxDiscountPct" value="20.00" class="w-24 text-xs border border-slate-300 rounded px-2 py-1 bg-slate-50 font-mono font-bold text-right">
@@ -1318,6 +1355,335 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- PANEL 3: Catálogo Maestro de Tipos de Aliado Comercial -->
+                <div id="panelAllySettingsTypes" class="hidden space-y-6">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div>
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                <span>Tipos de Aliado Comercial &amp; Categorías</span>
+                            </h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Define las clasificaciones de socios comerciales (ej. Sauna, Spa, Creador de Contenido, Festival, etc.) para segmentar convenios y portales.</p>
+                        </div>
+                        <button type="button" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer underline" onclick="window.resetAllyTypeForm()">
+                            + Nuevo Tipo de Aliado
+                        </button>
+                    </div>
+
+                    <!-- Formulario de Alta / Edición de Tipo de Aliado -->
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <span id="allyTypeFormBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800">
+                                Modo: Crear Nuevo Tipo
+                            </span>
+                            <button type="button" class="text-[11px] text-slate-500 hover:text-slate-700" onclick="window.resetAllyTypeForm()">Limpiar</button>
+                        </div>
+                        <form id="allyTypeMasterForm" action="{{ route('portal.allies.types.store') }}" method="POST" class="space-y-4">
+                            @csrf
+                            <input type="hidden" name="_method" id="allyTypeFormMethod" value="POST">
+                            <input type="hidden" id="allyTypeEditId" value="">
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Nombre del Tipo / Giro *</label>
+                                    <input type="text" name="name" id="allyTypeName" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Ej. Sauna &amp; Vapor, Spa Wellness">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Código Identificador (Slug)</label>
+                                    <input type="text" name="code" id="allyTypeCode" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-mono lowercase" placeholder="Ej. sauna (Opcional, autogenerado)">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Universo Afín Sugerido *</label>
+                                    <select name="default_universe" id="allyTypeUniverse" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-2 bg-white font-semibold">
+                                        <option value="marte">Marte (Masculino)</option>
+                                        <option value="venus">Venus (Femenino / Lencería)</option>
+                                        <option value="tiresias">Tiresias (Afirmativo)</option>
+                                        <option value="terra">Terra (Global)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Descripción del Giro o Perfil</label>
+                                    <input type="text" name="description" id="allyTypeDescription" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Breve descripción del perfil del socio y beneficios mutuos">
+                                </div>
+                                <div class="flex items-center gap-4 pt-4 md:pt-2">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="is_active" id="allyTypeIsActive" value="1" class="rounded text-indigo-600 focus:ring-0" checked>
+                                        <span class="text-xs font-bold text-slate-700">Habilitado</span>
+                                    </label>
+                                    <button type="submit" id="allyTypeSubmitBtn" class="ml-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                                        <span id="allyTypeSubmitBtnLabel">Guardar Tipo de Aliado</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tabla de Tipos Registrados -->
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/70">
+                                    <th class="p-3 font-semibold">Tipo &amp; Código</th>
+                                    <th class="p-3 font-semibold">Universo</th>
+                                    <th class="p-3 font-semibold">Descripción</th>
+                                    <th class="p-3 font-semibold">Estatus</th>
+                                    <th class="p-3 font-semibold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse($allyTypes as $at)
+                                    <tr class="hover:bg-slate-50/60 transition-colors {{ $at->trashed() ? 'opacity-60 bg-slate-50' : '' }}">
+                                        <td class="p-3">
+                                            <strong class="text-slate-900 block font-semibold">{{ $at->name }}</strong>
+                                            <span class="text-[10px] text-slate-400 font-mono">{{ $at->code }}</span>
+                                        </td>
+                                        <td class="p-3">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 uppercase font-mono">{{ $at->default_universe ?? 'marte' }}</span>
+                                        </td>
+                                        <td class="p-3 text-slate-600 max-w-xs truncate" title="{{ $at->description }}">
+                                            {{ $at->description ?: 'Sin descripción adicional' }}
+                                        </td>
+                                        <td class="p-3">
+                                            <div class="flex flex-col gap-1 items-start">
+                                                @if($at->trashed())
+                                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800">Eliminado (Papelera)</span>
+                                                @elseif($at->status === 'archived')
+                                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800">Archivado</span>
+                                                @elseif($at->is_active)
+                                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800">Activo</span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-200 text-slate-700">Inactivo</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="p-3 text-right">
+                                            <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                                @if($at->trashed())
+                                                    <form action="{{ route('portal.allies.types.restore', $at->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="px-2 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg cursor-pointer">
+                                                            Restaurar
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <button type="button" class="px-2 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg cursor-pointer" data-action="edit-ally-type-btn" data-type="{{ json_encode($at) }}">
+                                                        Editar
+                                                    </button>
+                                                    <form action="{{ route('portal.allies.types.toggle', $at->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="px-2 py-1 text-xs font-semibold {{ $at->is_active ? 'text-slate-600 bg-slate-100 hover:bg-slate-200' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200' }} rounded-lg cursor-pointer">
+                                                            {{ $at->is_active ? 'Desactivar' : 'Activar' }}
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('portal.allies.types.archive', $at->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="px-2 py-1 text-xs font-semibold {{ $at->status === 'archived' ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100' : 'text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200' }} rounded-lg cursor-pointer">
+                                                            {{ $at->status === 'archived' ? 'Reactivar' : 'Archivar' }}
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('portal.allies.types.destroy', $at->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar tipo de aliado {{ $at->name }}?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="px-2 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg cursor-pointer">
+                                                            Eliminar
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="p-6 text-center text-slate-500 text-xs">
+                                            No hay tipos de aliado registrados. Utiliza el formulario superior para registrar categorías.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PANEL 4: Catálogo de Tipos de Descuento (Dirección A & B) -->
+                <div id="panelAllySettingsDiscounts" class="hidden space-y-6">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div>
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                <span>Tipos de Descuento &amp; Beneficios Comerciales (Dirección A &amp; B)</span>
+                            </h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Control de beneficios que los aliados ofrecen a clientes de la tienda (Dirección A: cover, 2x1, tragos) y cupones de descuento en tienda online (Dirección B).</p>
+                        </div>
+                        <button type="button" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold cursor-pointer underline" onclick="window.resetDiscountTypeForm()">
+                            + Nuevo Tipo de Descuento
+                        </button>
+                    </div>
+
+                    <!-- Formulario de Alta / Edición de Tipo de Descuento -->
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <span id="discountTypeFormBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                                Modo: Crear Nuevo Descuento
+                            </span>
+                            <button type="button" class="text-[11px] text-slate-500 hover:text-slate-700" onclick="window.resetDiscountTypeForm()">Limpiar</button>
+                        </div>
+                        <form id="discountTypeMasterForm" action="{{ route('portal.allies.discounts.store') }}" method="POST" class="space-y-4">
+                            @csrf
+                            <input type="hidden" name="_method" id="discountTypeFormMethod" value="POST">
+                            <input type="hidden" id="discountTypeEditId" value="">
+
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Nombre del Descuento / Beneficio *</label>
+                                    <input type="text" name="name" id="discountTypeName" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Ej. Cover 2x1, 15% Descuento Tienda">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Código Identificador (Slug)</label>
+                                    <input type="text" name="code" id="discountTypeCode" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-mono lowercase" placeholder="Ej. cover_2x1 (Opcional)">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Dirección del Convenio *</label>
+                                    <select name="direction" id="discountTypeDirection" required class="w-full text-xs border border-slate-300 rounded-lg px-2 py-2 bg-white font-semibold">
+                                        <option value="dir_a">Dirección A (Aliado &rarr; Clientes Tienda)</option>
+                                        <option value="dir_b">Dirección B (Tienda Online &rarr; Audiencia Aliado)</option>
+                                        <option value="both">Ambas Direcciones (A &amp; B)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Naturaleza del Valor *</label>
+                                    <select name="value_type" id="discountTypeValueType" required class="w-full text-xs border border-slate-300 rounded-lg px-2 py-2 bg-white font-semibold">
+                                        <option value="percentage">Porcentaje (%)</option>
+                                        <option value="fixed_amount">Monto Fijo ($ MXN)</option>
+                                        <option value="free_item">Cortesía / Obsequio</option>
+                                        <option value="access">Acceso VIP / Pulsera</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Tope Máx. / Valor Defecto</label>
+                                    <input type="number" step="0.5" min="0" max="1000" name="max_value_default" id="discountTypeMaxValue" value="20.00" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-mono font-bold" placeholder="20.00">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Descripción Operativa</label>
+                                    <input type="text" name="description" id="discountTypeDescription" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Condiciones del beneficio o cupón">
+                                </div>
+                                <div class="flex items-center gap-4 pt-4 md:pt-2">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="is_active" id="discountTypeIsActive" value="1" class="rounded text-emerald-600 focus:ring-0" checked>
+                                        <span class="text-xs font-bold text-slate-700">Activo</span>
+                                    </label>
+                                    <button type="submit" id="discountTypeSubmitBtn" class="ml-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                                        <span id="discountTypeSubmitBtnLabel">Guardar Tipo de Descuento</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tabla de Descuentos Registrados -->
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/70">
+                                    <th class="p-3 font-semibold">Descuento &amp; Código</th>
+                                    <th class="p-3 font-semibold">Dirección</th>
+                                    <th class="p-3 font-semibold">Tipo Valor &amp; Tope</th>
+                                    <th class="p-3 font-semibold">Descripción</th>
+                                    <th class="p-3 font-semibold">Estatus</th>
+                                    <th class="p-3 font-semibold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse($discountTypes as $dt)
+                                    <tr class="hover:bg-slate-50/60 transition-colors {{ $dt->trashed() ? 'opacity-60 bg-slate-50' : '' }}">
+                                        <td class="p-3">
+                                            <strong class="text-slate-900 block font-semibold">{{ $dt->name }}</strong>
+                                            <span class="text-[10px] text-slate-400 font-mono">{{ $dt->code }}</span>
+                                        </td>
+                                        <td class="p-3">
+                                            @if($dt->direction === 'dir_a')
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">Dirección A (Aliado)</span>
+                                            @elseif($dt->direction === 'dir_b')
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Dirección B (Tienda)</span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">Ambas (A &amp; B)</span>
+                                            @endif
+                                        </td>
+                                        <td class="p-3 font-mono text-[11px]">
+                                            <span class="font-bold text-slate-800 block">{{ $dt->value_type_label }}</span>
+                                            @if($dt->max_value_default > 0)
+                                                <span class="text-slate-500 text-[10px]">Tope: {{ $dt->max_value_default }}{{ $dt->value_type === 'percentage' ? '%' : ' MXN' }}</span>
+                                            @endif
+                                        </td>
+                                        <td class="p-3 text-slate-600 max-w-xs truncate" title="{{ $dt->description }}">
+                                            {{ $dt->description ?: 'Sin notas' }}
+                                        </td>
+                                        <td class="p-3">
+                                            <div class="flex flex-col gap-1 items-start">
+                                                @if($dt->trashed())
+                                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800">Eliminado (Papelera)</span>
+                                                @elseif($dt->status === 'archived')
+                                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800">Archivado</span>
+                                                @elseif($dt->is_active)
+                                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800">Activo</span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-200 text-slate-700">Inactivo</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="p-3 text-right">
+                                            <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                                @if($dt->trashed())
+                                                    <form action="{{ route('portal.allies.discounts.restore', $dt->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="px-2 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg cursor-pointer">
+                                                            Restaurar
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <button type="button" class="px-2 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg cursor-pointer" data-action="edit-discount-type-btn" data-discount="{{ json_encode($dt) }}">
+                                                        Editar
+                                                    </button>
+                                                    <form action="{{ route('portal.allies.discounts.toggle', $dt->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="px-2 py-1 text-xs font-semibold {{ $dt->is_active ? 'text-slate-600 bg-slate-100 hover:bg-slate-200' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200' }} rounded-lg cursor-pointer">
+                                                            {{ $dt->is_active ? 'Desactivar' : 'Activar' }}
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('portal.allies.discounts.archive', $dt->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="px-2 py-1 text-xs font-semibold {{ $dt->status === 'archived' ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100' : 'text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200' }} rounded-lg cursor-pointer">
+                                                            {{ $dt->status === 'archived' ? 'Reactivar' : 'Archivar' }}
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('portal.allies.discounts.destroy', $dt->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar tipo de descuento {{ $dt->name }}?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="px-2 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg cursor-pointer">
+                                                            Eliminar
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="p-6 text-center text-slate-500 text-xs">
+                                            No hay tipos de descuento registrados. Utiliza el formulario superior para registrar promociones y beneficios.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         @endif
     </div>
@@ -1337,36 +1703,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Subtabs de configuración de módulo (Engranaje)
     window.switchAllySettingsTab = function(target) {
-        const formPanel = document.getElementById('panelAllySettingsForm');
-        const listPanel = document.getElementById('panelAllySettingsList');
-        const btnForm = document.getElementById('tabBtnAllyForm');
-        const btnList = document.getElementById('tabBtnAllyList');
+        const panels = {
+            'form': document.getElementById('panelAllySettingsForm'),
+            'list': document.getElementById('panelAllySettingsList'),
+            'types': document.getElementById('panelAllySettingsTypes'),
+            'discounts': document.getElementById('panelAllySettingsDiscounts')
+        };
+        const buttons = {
+            'form': document.getElementById('tabBtnAllyForm'),
+            'list': document.getElementById('tabBtnAllyList'),
+            'types': document.getElementById('tabBtnAllyTypes'),
+            'discounts': document.getElementById('tabBtnDiscountTypes')
+        };
 
-        if (!formPanel || !listPanel) return;
+        Object.keys(panels).forEach(key => {
+            if (!panels[key]) return;
+            if (key === target) {
+                panels[key].classList.remove('hidden');
+            } else {
+                panels[key].classList.add('hidden');
+            }
+        });
 
-        if (target === 'list') {
-            formPanel.classList.add('hidden');
-            listPanel.classList.remove('hidden');
-            if (btnList) {
-                btnList.classList.add('border-indigo-600', 'text-indigo-700');
-                btnList.classList.remove('border-transparent', 'text-slate-500');
+        Object.keys(buttons).forEach(key => {
+            if (!buttons[key]) return;
+            if (key === target) {
+                buttons[key].classList.add('border-indigo-600', 'text-indigo-700');
+                buttons[key].classList.remove('border-transparent', 'text-slate-500');
+            } else {
+                buttons[key].classList.remove('border-indigo-600', 'text-indigo-700');
+                buttons[key].classList.add('border-transparent', 'text-slate-500');
             }
-            if (btnForm) {
-                btnForm.classList.remove('border-indigo-600', 'text-indigo-700');
-                btnForm.classList.add('border-transparent', 'text-slate-500');
-            }
-        } else {
-            listPanel.classList.add('hidden');
-            formPanel.classList.remove('hidden');
-            if (btnForm) {
-                btnForm.classList.add('border-indigo-600', 'text-indigo-700');
-                btnForm.classList.remove('border-transparent', 'text-slate-500');
-            }
-            if (btnList) {
-                btnList.classList.remove('border-indigo-600', 'text-indigo-700');
-                btnList.classList.add('border-transparent', 'text-slate-500');
-            }
-        }
+        });
     };
 
     window.populateAllyFormForEdit = function(ally) {
@@ -1439,6 +1807,104 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    window.populateAllyTypeForEdit = function(type) {
+        const form = document.getElementById('allyTypeMasterForm');
+        if (!form) return;
+
+        form.action = `/admin/convenios/tipos-aliado/${type.id}`;
+        const methodInput = document.getElementById('allyTypeFormMethod');
+        if (methodInput) methodInput.value = 'PUT';
+
+        const editIdInput = document.getElementById('allyTypeEditId');
+        if (editIdInput) editIdInput.value = type.id;
+
+        const badge = document.getElementById('allyTypeFormBadge');
+        if (badge) badge.textContent = 'Modo: Editando Tipo ' + (type.name || '#' + type.id);
+
+        const btnLabel = document.getElementById('allyTypeSubmitBtnLabel');
+        if (btnLabel) btnLabel.textContent = 'Actualizar Tipo de Aliado';
+
+        if (document.getElementById('allyTypeName')) document.getElementById('allyTypeName').value = type.name || '';
+        if (document.getElementById('allyTypeCode')) document.getElementById('allyTypeCode').value = type.code || '';
+        if (document.getElementById('allyTypeUniverse')) document.getElementById('allyTypeUniverse').value = type.default_universe || 'marte';
+        if (document.getElementById('allyTypeDescription')) document.getElementById('allyTypeDescription').value = type.description || '';
+        if (document.getElementById('allyTypeIsActive')) document.getElementById('allyTypeIsActive').checked = (type.is_active !== false && type.is_active !== 0 && type.is_active !== '0');
+
+        window.switchAllySettingsTab('types');
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.resetAllyTypeForm = function() {
+        const form = document.getElementById('allyTypeMasterForm');
+        if (!form) return;
+
+        form.action = '{{ route("portal.allies.types.store") }}';
+        const methodInput = document.getElementById('allyTypeFormMethod');
+        if (methodInput) methodInput.value = 'POST';
+
+        const editIdInput = document.getElementById('allyTypeEditId');
+        if (editIdInput) editIdInput.value = '';
+
+        const badge = document.getElementById('allyTypeFormBadge');
+        if (badge) badge.textContent = 'Modo: Crear Nuevo Tipo';
+
+        const btnLabel = document.getElementById('allyTypeSubmitBtnLabel');
+        if (btnLabel) btnLabel.textContent = 'Guardar Tipo de Aliado';
+
+        form.reset();
+        if (document.getElementById('allyTypeIsActive')) document.getElementById('allyTypeIsActive').checked = true;
+    };
+
+    window.populateDiscountTypeForEdit = function(disc) {
+        const form = document.getElementById('discountTypeMasterForm');
+        if (!form) return;
+
+        form.action = `/admin/convenios/tipos-descuento/${disc.id}`;
+        const methodInput = document.getElementById('discountTypeFormMethod');
+        if (methodInput) methodInput.value = 'PUT';
+
+        const editIdInput = document.getElementById('discountTypeEditId');
+        if (editIdInput) editIdInput.value = disc.id;
+
+        const badge = document.getElementById('discountTypeFormBadge');
+        if (badge) badge.textContent = 'Modo: Editando Descuento ' + (disc.name || '#' + disc.id);
+
+        const btnLabel = document.getElementById('discountTypeSubmitBtnLabel');
+        if (btnLabel) btnLabel.textContent = 'Actualizar Tipo de Descuento';
+
+        if (document.getElementById('discountTypeName')) document.getElementById('discountTypeName').value = disc.name || '';
+        if (document.getElementById('discountTypeCode')) document.getElementById('discountTypeCode').value = disc.code || '';
+        if (document.getElementById('discountTypeDirection')) document.getElementById('discountTypeDirection').value = disc.direction || 'dir_a';
+        if (document.getElementById('discountTypeValueType')) document.getElementById('discountTypeValueType').value = disc.value_type || 'percentage';
+        if (document.getElementById('discountTypeMaxValue')) document.getElementById('discountTypeMaxValue').value = disc.max_value_default ?? 20.00;
+        if (document.getElementById('discountTypeDescription')) document.getElementById('discountTypeDescription').value = disc.description || '';
+        if (document.getElementById('discountTypeIsActive')) document.getElementById('discountTypeIsActive').checked = (disc.is_active !== false && disc.is_active !== 0 && disc.is_active !== '0');
+
+        window.switchAllySettingsTab('discounts');
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.resetDiscountTypeForm = function() {
+        const form = document.getElementById('discountTypeMasterForm');
+        if (!form) return;
+
+        form.action = '{{ route("portal.allies.discounts.store") }}';
+        const methodInput = document.getElementById('discountTypeFormMethod');
+        if (methodInput) methodInput.value = 'POST';
+
+        const editIdInput = document.getElementById('discountTypeEditId');
+        if (editIdInput) editIdInput.value = '';
+
+        const badge = document.getElementById('discountTypeFormBadge');
+        if (badge) badge.textContent = 'Modo: Crear Nuevo Descuento';
+
+        const btnLabel = document.getElementById('discountTypeSubmitBtnLabel');
+        if (btnLabel) btnLabel.textContent = 'Guardar Tipo de Descuento';
+
+        form.reset();
+        if (document.getElementById('discountTypeIsActive')) document.getElementById('discountTypeIsActive').checked = true;
+    };
+
     function openAlliesSettingsModal() {
         const modal = document.getElementById('alliesModuleSettingsModal');
         if (modal) {
@@ -1468,6 +1934,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 openAlliesSettingsModal();
             } catch(e) {
                 console.error('Error parsing ally json', e);
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-action="edit-ally-type-btn"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const raw = this.getAttribute('data-type');
+            if (!raw) return;
+            try {
+                const type = JSON.parse(raw);
+                window.populateAllyTypeForEdit(type);
+                openAlliesSettingsModal();
+            } catch(e) {
+                console.error('Error parsing ally type json', e);
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-action="edit-discount-type-btn"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const raw = this.getAttribute('data-discount');
+            if (!raw) return;
+            try {
+                const disc = JSON.parse(raw);
+                window.populateDiscountTypeForEdit(disc);
+                openAlliesSettingsModal();
+            } catch(e) {
+                console.error('Error parsing discount type json', e);
             }
         });
     });

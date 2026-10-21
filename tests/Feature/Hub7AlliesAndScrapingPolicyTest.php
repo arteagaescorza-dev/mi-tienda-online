@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Ally;
 use App\Models\AllyCampaignDirA;
 use App\Models\AllyCouponDirB;
+use App\Models\AllyDiscountType;
+use App\Models\AllyType;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -417,5 +419,178 @@ class Hub7AlliesAndScrapingPolicyTest extends TestCase
         $customView->assertOk();
         $customView->assertSee('Mi Propio Aliado 2026', false);
         $customView->assertDontSee('Directorio de Aliados Vacío', false);
+    }
+
+    public function test_superadmin_can_crud_ally_types_including_archive_and_activate()
+    {
+        $superadmin = User::factory()->create([
+            'role' => 'superadmin',
+            'email' => 'superadmin.types@mitienda.test',
+        ]);
+
+        // 1. Create Ally Type
+        $payload = [
+            'name' => 'Barberia & Barber Shop Especializado',
+            'code' => 'barber_shop_custom',
+            'default_universe' => 'marte',
+            'description' => 'Servicios de grooming, corte de barba y cuidado personal masculino.',
+            'is_active' => 1,
+        ];
+
+        $createResponse = $this->actingAs($superadmin)->post(route('portal.allies.types.store'), $payload);
+        $createResponse->assertRedirect(route('portal.allies'));
+
+        $this->assertDatabaseHas('ally_types', [
+            'code' => 'barber_shop_custom',
+            'name' => 'Barberia & Barber Shop Especializado',
+            'is_active' => true,
+            'status' => 'active',
+        ]);
+
+        $type = AllyType::where('code', 'barber_shop_custom')->first();
+        $this->assertNotNull($type);
+
+        // 2. Edit Ally Type
+        $updatePayload = [
+            'name' => 'Barberia & Estilo Masculino Pro',
+            'code' => 'barber_shop_custom',
+            'default_universe' => 'marte',
+            'description' => 'Grooming masculino y venta cruzada de articulos en tienda.',
+            'is_active' => 1,
+            'status' => 'active',
+        ];
+
+        $updateResponse = $this->actingAs($superadmin)->put(route('portal.allies.types.update', $type->id), $updatePayload);
+        $updateResponse->assertRedirect(route('portal.allies'));
+
+        $type->refresh();
+        $this->assertEquals('Barberia & Estilo Masculino Pro', $type->name);
+
+        // 3. Toggle is_active
+        $toggleResponse = $this->actingAs($superadmin)->post(route('portal.allies.types.toggle', $type->id));
+        $toggleResponse->assertRedirect(route('portal.allies'));
+        $type->refresh();
+        $this->assertFalse($type->is_active);
+
+        // 4. Archive Ally Type
+        $archiveResponse = $this->actingAs($superadmin)->post(route('portal.allies.types.archive', $type->id));
+        $archiveResponse->assertRedirect(route('portal.allies'));
+        $type->refresh();
+        $this->assertEquals('archived', $type->status);
+
+        // Reactivate
+        $this->actingAs($superadmin)->post(route('portal.allies.types.archive', $type->id));
+        $type->refresh();
+        $this->assertEquals('active', $type->status);
+
+        // 5. Delete Ally Type (soft delete)
+        $deleteResponse = $this->actingAs($superadmin)->delete(route('portal.allies.types.destroy', $type->id));
+        $deleteResponse->assertRedirect(route('portal.allies'));
+        $this->assertSoftDeleted('ally_types', ['id' => $type->id]);
+
+        // 6. Restore Ally Type
+        $restoreResponse = $this->actingAs($superadmin)->post(route('portal.allies.types.restore', $type->id));
+        $restoreResponse->assertRedirect(route('portal.allies'));
+        $type->refresh();
+        $this->assertFalse($type->trashed());
+        $this->assertEquals('active', $type->status);
+    }
+
+    public function test_superadmin_can_crud_ally_discount_types_for_dir_a_and_dir_b()
+    {
+        $superadmin = User::factory()->create([
+            'role' => 'superadmin',
+            'email' => 'superadmin.discounts@mitienda.test',
+        ]);
+
+        // 1. Create Discount Type Dir A (Ally -> Client)
+        $payloadDirA = [
+            'name' => 'Cover 2x1 Noche Latina',
+            'code' => 'cover_2x1_latina',
+            'direction' => 'dir_a',
+            'value_type' => 'percentage',
+            'max_value_default' => 50.00,
+            'description' => 'Descuento 2x1 en puerta para suscriptores.',
+            'is_active' => 1,
+        ];
+
+        $respA = $this->actingAs($superadmin)->post(route('portal.allies.discounts.store'), $payloadDirA);
+        $respA->assertRedirect(route('portal.allies'));
+
+        $this->assertDatabaseHas('ally_discount_types', [
+            'code' => 'cover_2x1_latina',
+            'direction' => 'dir_a',
+            'is_active' => true,
+        ]);
+
+        $discA = AllyDiscountType::where('code', 'cover_2x1_latina')->first();
+        $this->assertNotNull($discA);
+
+        // 2. Create Discount Type Dir B (Online Store -> Ally Audience)
+        $payloadDirB = [
+            'name' => 'Cupon Exclusivo 25% Off Tienda',
+            'code' => 'store_25_ally_b',
+            'direction' => 'dir_b',
+            'value_type' => 'percentage',
+            'max_value_default' => 25.00,
+            'description' => 'Cupon para la audiencia del creador.',
+            'is_active' => 1,
+        ];
+
+        $respB = $this->actingAs($superadmin)->post(route('portal.allies.discounts.store'), $payloadDirB);
+        $respB->assertRedirect(route('portal.allies'));
+
+        $discB = AllyDiscountType::where('code', 'store_25_ally_b')->first();
+        $this->assertNotNull($discB);
+        $this->assertEquals('dir_b', $discB->direction);
+
+        // 3. Edit Discount Type
+        $updateResp = $this->actingAs($superadmin)->put(route('portal.allies.discounts.update', $discB->id), [
+            'name' => 'Cupon VIP 30% Off Tienda',
+            'code' => 'store_25_ally_b',
+            'direction' => 'dir_b',
+            'value_type' => 'percentage',
+            'max_value_default' => 30.00,
+            'description' => 'Aumentado a 30% maximo.',
+            'is_active' => 1,
+            'status' => 'active',
+        ]);
+        $updateResp->assertRedirect(route('portal.allies'));
+        $discB->refresh();
+        $this->assertEquals('Cupon VIP 30% Off Tienda', $discB->name);
+        $this->assertEquals(30.00, $discB->max_value_default);
+
+        // 4. Toggle active
+        $this->actingAs($superadmin)->post(route('portal.allies.discounts.toggle', $discB->id));
+        $discB->refresh();
+        $this->assertFalse($discB->is_active);
+
+        // 5. Archive
+        $this->actingAs($superadmin)->post(route('portal.allies.discounts.archive', $discB->id));
+        $discB->refresh();
+        $this->assertEquals('archived', $discB->status);
+
+        // 6. Delete and Restore
+        $this->actingAs($superadmin)->delete(route('portal.allies.discounts.destroy', $discB->id));
+        $this->assertSoftDeleted('ally_discount_types', ['id' => $discB->id]);
+
+        $this->actingAs($superadmin)->post(route('portal.allies.discounts.restore', $discB->id));
+        $discB->refresh();
+        $this->assertFalse($discB->trashed());
+    }
+
+    public function test_non_admin_cannot_access_ally_type_and_discount_management()
+    {
+        $customer = User::factory()->create([
+            'role' => 'customer',
+        ]);
+
+        $this->actingAs($customer)
+            ->post(route('portal.allies.types.store'), ['name' => 'Hack Category'])
+            ->assertForbidden();
+
+        $this->actingAs($customer)
+            ->post(route('portal.allies.discounts.store'), ['name' => 'Hack Discount'])
+            ->assertForbidden();
     }
 }

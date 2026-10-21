@@ -8,10 +8,14 @@ use App\Http\Requests\Api\RevOps\AlliesApiExecuteSettlementRequest;
 use App\Http\Requests\Api\RevOps\AlliesApiValidateVoucherRequest;
 use App\Http\Requests\Api\RevOps\AlliesApiExportDoorListCsvRequest;
 use App\Models\Ally;
+use App\Models\AllyType;
+use App\Models\AllyDiscountType;
 use App\Models\AllyLeadCapture;
 use App\Services\ClearingHouseSettlementService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AlliesApiController extends Controller
@@ -203,6 +207,333 @@ class AlliesApiController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Aliado '{$allyName}' eliminado del directorio oficial.",
+        ]);
+    }
+
+    /**
+     * =========================================================================
+     * ENDPOINTS API REST: TIPOS DE ALIADO / CATEGORÍAS
+     * =========================================================================
+     */
+
+    public function getAllyTypes(Request $request): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $includeArchived = $request->boolean('include_archived', true);
+        $query = AllyType::query();
+
+        if ($includeArchived) {
+            $query->withTrashed();
+        } else {
+            $query->active();
+        }
+
+        $types = $query->withCount('allies')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $types,
+        ]);
+    }
+
+    public function storeAllyType(Request $request): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50',
+            'description' => 'nullable|string|max:500',
+            'default_universe' => 'nullable|string|in:marte,venus,tiresias,terra',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $name = trim($validated['name']);
+        $code = !empty($validated['code'])
+            ? Str::slug($validated['code'], '_')
+            : Str::slug($name, '_');
+
+        if (AllyType::withTrashed()->where('code', $code)->exists()) {
+            return response()->json(['success' => false, 'message' => "El código '{$code}' ya existe."], 422);
+        }
+
+        $type = AllyType::create([
+            'name' => $name,
+            'code' => $code,
+            'description' => $validated['description'] ?? null,
+            'default_universe' => $validated['default_universe'] ?? 'marte',
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : true,
+            'status' => 'active',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de aliado '{$type->name}' registrado exitosamente.",
+            'data' => $type,
+        ], 201);
+    }
+
+    public function updateAllyType(Request $request, int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::withTrashed()->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50',
+            'description' => 'nullable|string|max:500',
+            'default_universe' => 'nullable|string|in:marte,venus,tiresias,terra',
+            'is_active' => 'nullable|boolean',
+            'status' => 'nullable|string|in:active,archived',
+        ]);
+
+        $name = trim($validated['name']);
+        $code = !empty($validated['code']) ? Str::slug($validated['code'], '_') : $type->code;
+
+        $conflict = AllyType::withTrashed()->where('code', $code)->where('id', '!=', $type->id)->exists();
+        if ($conflict) {
+            return response()->json(['success' => false, 'message' => "El código '{$code}' ya está en uso."], 422);
+        }
+
+        $type->update([
+            'name' => $name,
+            'code' => $code,
+            'description' => $validated['description'] ?? $type->description,
+            'default_universe' => $validated['default_universe'] ?? $type->default_universe,
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : $type->is_active,
+            'status' => $validated['status'] ?? $type->status,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de aliado '{$type->name}' actualizado correctamente.",
+            'data' => $type,
+        ]);
+    }
+
+    public function toggleAllyTypeActive(int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::withTrashed()->findOrFail($id);
+        $type->update(['is_active' => !$type->is_active]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de aliado '{$type->name}' " . ($type->is_active ? 'activado' : 'desactivado') . ".",
+            'is_active' => $type->is_active,
+        ]);
+    }
+
+    public function archiveAllyType(int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::withTrashed()->findOrFail($id);
+        $isArchiving = ($type->status === 'active');
+        $newStatus = $isArchiving ? 'archived' : 'active';
+        $type->update([
+            'status' => $newStatus,
+            'is_active' => !$isArchiving,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de aliado '{$type->name}' " . ($isArchiving ? 'archivado' : 'reactivado') . ".",
+            'status' => $newStatus,
+            'is_active' => $type->is_active,
+        ]);
+    }
+
+    public function destroyAllyType(int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $type = AllyType::withTrashed()->findOrFail($id);
+        $name = $type->name;
+
+        if (Ally::where('category', $type->code)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => "No se puede eliminar el tipo '{$name}' porque tiene aliados vinculados.",
+            ], 422);
+        }
+
+        $type->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de aliado '{$name}' eliminado del catálogo.",
+        ]);
+    }
+
+    /**
+     * =========================================================================
+     * ENDPOINTS API REST: TIPOS DE DESCUENTO DIR A & DIR B
+     * =========================================================================
+     */
+
+    public function getDiscountTypes(Request $request): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $includeArchived = $request->boolean('include_archived', true);
+        $direction = $request->input('direction');
+
+        $query = AllyDiscountType::query();
+
+        if ($includeArchived) {
+            $query->withTrashed();
+        } else {
+            $query->active();
+        }
+
+        if ($direction === 'dir_a') {
+            $query->dirA();
+        } elseif ($direction === 'dir_b') {
+            $query->dirB();
+        }
+
+        $discounts = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $discounts,
+        ]);
+    }
+
+    public function storeDiscountType(Request $request): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50',
+            'direction' => 'required|string|in:dir_a,dir_b,both',
+            'value_type' => 'required|string|in:percentage,fixed_amount,free_item,access',
+            'max_value_default' => 'nullable|numeric|min:0|max:100',
+            'description' => 'nullable|string|max:500',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $name = trim($validated['name']);
+        $code = !empty($validated['code'])
+            ? Str::slug($validated['code'], '_')
+            : Str::slug($name, '_');
+
+        if (AllyDiscountType::withTrashed()->where('code', $code)->exists()) {
+            return response()->json(['success' => false, 'message' => "El código de descuento '{$code}' ya existe."], 422);
+        }
+
+        $discount = AllyDiscountType::create([
+            'name' => $name,
+            'code' => $code,
+            'direction' => $validated['direction'],
+            'value_type' => $validated['value_type'],
+            'max_value_default' => isset($validated['max_value_default']) ? (float)$validated['max_value_default'] : null,
+            'description' => $validated['description'] ?? null,
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : true,
+            'status' => 'active',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de descuento '{$discount->name}' registrado exitosamente.",
+            'data' => $discount,
+        ], 201);
+    }
+
+    public function updateDiscountType(Request $request, int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::withTrashed()->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50',
+            'direction' => 'required|string|in:dir_a,dir_b,both',
+            'value_type' => 'required|string|in:percentage,fixed_amount,free_item,access',
+            'max_value_default' => 'nullable|numeric|min:0|max:100',
+            'description' => 'nullable|string|max:500',
+            'is_active' => 'nullable|boolean',
+            'status' => 'nullable|string|in:active,archived',
+        ]);
+
+        $name = trim($validated['name']);
+        $code = !empty($validated['code']) ? Str::slug($validated['code'], '_') : $discount->code;
+
+        $conflict = AllyDiscountType::withTrashed()->where('code', $code)->where('id', '!=', $discount->id)->exists();
+        if ($conflict) {
+            return response()->json(['success' => false, 'message' => "El código '{$code}' ya está en uso."], 422);
+        }
+
+        $discount->update([
+            'name' => $name,
+            'code' => $code,
+            'direction' => $validated['direction'],
+            'value_type' => $validated['value_type'],
+            'max_value_default' => isset($validated['max_value_default']) ? (float)$validated['max_value_default'] : $discount->max_value_default,
+            'description' => $validated['description'] ?? $discount->description,
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : $discount->is_active,
+            'status' => $validated['status'] ?? $discount->status,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de descuento '{$discount->name}' actualizado correctamente.",
+            'data' => $discount,
+        ]);
+    }
+
+    public function toggleDiscountTypeActive(int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::withTrashed()->findOrFail($id);
+        $discount->update(['is_active' => !$discount->is_active]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de descuento '{$discount->name}' " . ($discount->is_active ? 'activado' : 'desactivado') . ".",
+            'is_active' => $discount->is_active,
+        ]);
+    }
+
+    public function archiveDiscountType(int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::withTrashed()->findOrFail($id);
+        $isArchiving = ($discount->status === 'active');
+        $newStatus = $isArchiving ? 'archived' : 'active';
+        $discount->update([
+            'status' => $newStatus,
+            'is_active' => !$isArchiving,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de descuento '{$discount->name}' " . ($isArchiving ? 'archivado' : 'reactivado') . ".",
+            'status' => $newStatus,
+            'is_active' => $discount->is_active,
+        ]);
+    }
+
+    public function destroyDiscountType(int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $discount = AllyDiscountType::withTrashed()->findOrFail($id);
+        $name = $discount->name;
+
+        $discount->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Tipo de descuento '{$name}' eliminado del catálogo.",
         ]);
     }
 }
