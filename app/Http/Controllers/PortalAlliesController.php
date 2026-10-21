@@ -36,10 +36,6 @@ class PortalAlliesController extends Controller
 
     protected function getAlliesData(?Request $request = null): array
     {
-        if (Ally::count() === 0) {
-            (new \Database\Seeders\AlliesSeeder())->run();
-        }
-
         $allies = Ally::with(['campaignsDirA', 'couponsDirB', 'leadCaptures', 'settlements'])->get();
 
         $alliesList = $allies->map(function ($a) {
@@ -211,25 +207,26 @@ class PortalAlliesController extends Controller
 
         if (!$selectedAlly) {
             $selectedAlly = [
-                'id' => 1,
-                'code' => 'ALLY-GENERAL',
-                'name' => 'Aliado Comercial General',
+                'id' => null,
+                'code' => 'SIN-ALIADOS',
+                'name' => 'Sin Aliados Registrados',
                 'category' => 'general',
                 'categoryLabel' => 'General',
                 'universe' => 'marte',
-                'contactName' => 'Coordinación Comercial',
-                'contactWhatsapp' => '+525500000000',
-                'contactEmail' => 'aliados@mitienda.com',
-                'socialHandle' => '@mitienda',
-                'portalToken' => 'tok_general_2026',
+                'contactName' => 'No asignado',
+                'contactWhatsapp' => '',
+                'contactEmail' => '',
+                'socialHandle' => '',
+                'portalToken' => '',
                 'commissionType' => 'percentage',
-                'commissionRate' => 10.0,
-                'leadAcquisitionCost' => 20.0,
-                'bankClabe' => '000000000000000000',
-                'bankName' => 'Banco General',
+                'commissionRate' => 0.0,
+                'leadAcquisitionCost' => 0.0,
+                'bankClabe' => '',
+                'bankName' => '',
                 'clearingBalance' => 0.0,
                 'status' => 'active',
-                'notes' => 'Registro base',
+                'isArchived' => false,
+                'notes' => 'Aun no hay aliados registrados en el directorio.',
                 'allowedDiscountTypes' => ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access'],
                 'maxDiscountPct' => 20.0,
                 'stats' => [
@@ -785,7 +782,7 @@ class PortalAlliesController extends Controller
             ]);
         }
 
-        return back()->with('success', $msg);
+        return redirect()->route('portal.allies')->with('success', $msg);
     }
 
     /**
@@ -813,7 +810,7 @@ class PortalAlliesController extends Controller
             ]);
         }
 
-        return back()->with('success', $msg);
+        return redirect()->route('portal.allies')->with('success', $msg);
     }
 
     /**
@@ -838,6 +835,6 @@ class PortalAlliesController extends Controller
             ]);
         }
 
-        return back()->with('success', $msg);
+        return redirect()->route('portal.allies')->with('success', $msg);
     }
 }

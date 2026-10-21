@@ -211,6 +211,9 @@ class RevOpsApiTest extends TestCase
 
     public function test_allies_api_endpoints(): void
     {
+        $admin = \App\Models\User::factory()->create(['role' => 'superadmin']);
+        $this->actingAs($admin);
+
         $ally = Ally::create([
             'code' => 'ALLY-API-TEST',
             'name' => 'Club Nocturno Test',

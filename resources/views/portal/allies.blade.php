@@ -180,8 +180,8 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @foreach($alliesList as $ally)
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="alliesDirectoryGrid">
+                @forelse($alliesList as $ally)
                     <div class="ally-card bg-slate-50 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between hover:border-indigo-300 transition-all {{ ($ally['isArchived'] ?? false) ? 'opacity-80 bg-slate-100/90' : '' }}" data-ally-universe="{{ $ally['universe'] }}" data-ally-status="{{ ($ally['isArchived'] ?? false) ? 'archived' : 'active' }}">
                         <div>
                             <div class="flex items-center justify-between mb-2">
@@ -275,7 +275,21 @@
                         </div>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="col-span-full py-12 px-6 bg-white border border-dashed border-slate-300 rounded-2xl text-center">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-800">Directorio de Aliados Vacío</h4>
+                        <p class="text-xs text-slate-500 max-w-md mx-auto mt-1 leading-relaxed">
+                            No hay aliados comerciales registrados actualmente. Comienza dando de alta a tu primer socio comercial desde el botón "+ Alta de Aliado" o el engranaje del navbar para configurar sus acuerdos comerciales (descuentos, comisiones y compensaciones).
+                        </p>
+                        <button type="button" class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs cursor-pointer transition" onclick="window.dispatchEvent(new CustomEvent('open-module-settings'))">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            <span>+ Alta de Aliado</span>
+                        </button>
+                    </div>
+                @endforelse
             </div>
         </div>
 
@@ -694,6 +708,18 @@
 
         <!-- SUBMÓDULO 5: PANTALLA EXTRANET DEL SOCIO / PARTNER PORTAL (TASK-ALY-05) -->
         <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm mb-6" id="alliesPartnerPortalPanel">
+            @if(empty($selectedAlly['id']))
+                <div class="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>No hay aliados comerciales activos registrados en el directorio. Registra tu primer socio comercial para habilitar el Partner Portal y autorizar eventos o beneficios.</span>
+                    </div>
+                    <button type="button" class="px-3 py-1.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg cursor-pointer shrink-0" onclick="window.dispatchEvent(new CustomEvent('open-module-settings'))">
+                        + Alta de Aliado
+                    </button>
+                </div>
+            @endif
+
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 mb-5 gap-3">
                 <div class="flex items-center gap-3">
                     <button type="button" class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer flex items-center gap-1" data-action="switch-allies-tab" data-tab="directory">
@@ -705,19 +731,19 @@
                             <span class="px-2 py-0.5 text-[10px] font-bold bg-indigo-600 text-white rounded">Partner Portal</span>
                             <h3 class="text-base font-bold text-slate-900">{{ $selectedAlly['name'] ?? 'Aliado Comercial' }}</h3>
                         </div>
-                        <p class="text-xs text-slate-500 font-mono mt-0.5">Token Criptográfico: {{ $selectedAlly['portalToken'] ?? 'tok_demo' }}</p>
+                        <p class="text-xs text-slate-500 font-mono mt-0.5">Token Criptográfico: {{ !empty($selectedAlly['portalToken']) ? $selectedAlly['portalToken'] : 'Sin token activo' }}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold" onclick="document.getElementById('modalNewAllyCampaign').classList.remove('hidden');" type="button">
+                    <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold" onclick="{{ !empty($selectedAlly['id']) ? "document.getElementById('modalNewAllyCampaign').classList.remove('hidden');" : "alert('Primero debes registrar un socio aliado en el Directorio.');" }}" type="button">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         <span>+ Registrar Evento / Beneficio</span>
                     </button>
-                    <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer" data-action="export-door-list-csv" data-ally-id="{{ $selectedAlly['id'] ?? 1 }}" type="button">
+                    <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer" data-action="export-door-list-csv" data-ally-id="{{ $selectedAlly['id'] ?? '' }}" type="button">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <span>Descargar CSV Taquilla</span>
                     </button>
-                    <button class="button button-quiet text-xs py-1.5 px-3 bg-slate-900 text-white rounded-lg cursor-pointer" data-action="open-qr-modal" data-ally-id="{{ $selectedAlly['id'] ?? 1 }}" type="button">
+                    <button class="button button-quiet text-xs py-1.5 px-3 bg-slate-900 text-white rounded-lg cursor-pointer" data-action="open-qr-modal" data-ally-id="{{ $selectedAlly['id'] ?? '' }}" type="button">
                         Generar QR Flyer
                     </button>
                 </div>
@@ -756,7 +782,7 @@
             <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs mb-5">
                 <div class="flex items-center justify-between mb-2">
                     <span class="font-bold text-slate-900 block">Acuerdos Comerciales &amp; Tipos de Descuentos Autorizados:</span>
-                    <span class="text-[10px] text-slate-500 font-mono">ID Aliado: #{{ $selectedAlly['id'] }}</span>
+                    <span class="text-[10px] text-slate-500 font-mono">ID Aliado: #{{ $selectedAlly['id'] ?? 'N/A' }}</span>
                 </div>
                 <div class="flex flex-wrap items-center gap-1.5 mb-2">
                     @foreach($selectedAlly['allowedDiscountTypes'] ?? ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access'] as $dt)
@@ -1227,7 +1253,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                @foreach($alliesList as $al)
+                                @forelse($alliesList as $al)
                                     <tr class="hover:bg-slate-50/60 transition-colors">
                                         <td class="p-3">
                                             <strong class="text-slate-900 block">{{ $al['name'] }}</strong>
@@ -1281,7 +1307,13 @@
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="p-8 text-center text-slate-500 text-xs">
+                                            No hay aliados comerciales registrados en el directorio. Utiliza la pestaña "1. Alta / Edición de Aliado Comercial" para registrar a tu primer socio comercial.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -1525,6 +1557,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-action="export-door-list-csv"]').forEach(btn => {
         btn.addEventListener('click', function () {
             const allyId = this.getAttribute('data-ally-id');
+            if (!allyId) {
+                alert('No hay un socio aliado activo seleccionado para exportar la lista de taquilla.');
+                return;
+            }
             window.location.href = `/admin/convenios/aliados/${allyId}/export-csv`;
         });
     });

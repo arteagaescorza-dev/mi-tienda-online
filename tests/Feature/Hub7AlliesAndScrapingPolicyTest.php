@@ -364,4 +364,58 @@ class Hub7AlliesAndScrapingPolicyTest extends TestCase
         $response->assertSee('Archivar', false);
         $response->assertSee('Eliminar', false);
     }
+
+    public function test_superadmin_can_delete_all_allies_and_view_renders_clean_empty_state_without_404_or_reseeding()
+    {
+        $superadmin = User::factory()->create([
+            'role' => 'superadmin',
+        ]);
+
+        // Delete all allies one by one (simulating user action)
+        $allies = Ally::all();
+        $this->assertGreaterThan(0, $allies->count());
+
+        foreach ($allies as $ally) {
+            $response = $this->actingAs($superadmin)->delete(route('portal.allies.destroy', $ally->id));
+            $response->assertRedirect(route('portal.allies'));
+        }
+
+        // Verify all allies are now soft-deleted (count of non-deleted is 0)
+        $this->assertEquals(0, Ally::count());
+        $this->assertGreaterThan(0, Ally::withTrashed()->count());
+
+        // Visiting /admin/convenios must return 200 OK without 404, without 500, and without auto-reseeding
+        $viewResponse = $this->actingAs($superadmin)->get(route('portal.allies'));
+        $viewResponse->assertOk();
+        $viewResponse->assertSee('Directorio de Aliados Vacío', false);
+        $viewResponse->assertSee('+ Alta de Aliado', false);
+        $viewResponse->assertSee('0 Aliados Activos', false);
+
+        // Verify that visiting the page did NOT reseed demo allies
+        $this->assertEquals(0, Ally::count());
+
+        // Now superadmin creates their own custom ally
+        $newPayload = [
+            'name' => 'Mi Propio Aliado 2026',
+            'code' => 'AL-PROPIO',
+            'category' => 'general',
+            'universe' => 'marte',
+            'lead_acquisition_cost' => 30.00,
+            'commission_type' => 'percentage',
+            'commission_rate' => 10.00,
+            'max_discount_pct' => 15.00,
+            'allowed_discount_types' => ['cover'],
+            'status' => 'active',
+        ];
+
+        $createResponse = $this->actingAs($superadmin)->post(route('portal.allies.store'), $newPayload);
+        $createResponse->assertRedirect();
+
+        // The new custom ally exists and is rendered
+        $this->assertEquals(1, Ally::count());
+        $customView = $this->actingAs($superadmin)->get(route('portal.allies'));
+        $customView->assertOk();
+        $customView->assertSee('Mi Propio Aliado 2026', false);
+        $customView->assertDontSee('Directorio de Aliados Vacío', false);
+    }
 }
