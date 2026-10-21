@@ -153,4 +153,56 @@ class AlliesApiController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
+
+    /**
+     * Alterna el estado de archivo de un aliado comercial (API).
+     */
+    public function archiveAlly(int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $ally = Ally::findOrFail($id);
+        $isArchiving = ($ally->status === 'active');
+        $newStatus = $isArchiving ? 'archived' : 'active';
+        $ally->update(['status' => $newStatus]);
+
+        if ($isArchiving) {
+            $ally->campaignsDirA()->where('status', 'active')->update(['status' => 'paused']);
+            $ally->couponsDirB()->where('status', 'active')->update(['status' => 'paused']);
+            $msg = "Aliado '{$ally->name}' archivado exitosamente. Campañas y cupones pausados.";
+        } else {
+            $ally->couponsDirB()->where('status', 'paused')->update(['status' => 'active']);
+            $msg = "Aliado '{$ally->name}' reactivado exitosamente.";
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $msg,
+            'status' => $newStatus,
+            'is_archived' => $isArchiving,
+            'ally' => $ally,
+        ]);
+    }
+
+    /**
+     * Elimina a un aliado comercial con borrado suave (API).
+     */
+    public function destroyAlly(int $id): JsonResponse
+    {
+        Gate::authorize('manage-b2b');
+
+        $ally = Ally::findOrFail($id);
+        $allyName = $ally->name;
+
+        $ally->campaignsDirA()->where('status', 'active')->update(['status' => 'ended']);
+        $ally->couponsDirB()->where('status', 'active')->update(['status' => 'paused']);
+        $ally->update(['status' => 'archived']);
+
+        $ally->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Aliado '{$allyName}' eliminado del directorio oficial.",
+        ]);
+    }
 }

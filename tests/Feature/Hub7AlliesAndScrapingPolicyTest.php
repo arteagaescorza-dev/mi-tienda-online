@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Ally;
 use App\Models\AllyCampaignDirA;
+use App\Models\AllyCouponDirB;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -243,5 +244,124 @@ class Hub7AlliesAndScrapingPolicyTest extends TestCase
         $campaign->refresh();
         $this->assertEquals('rejected', $campaign->status);
         $this->assertEquals('El descuento excede las políticas comerciales de la tienda.', $campaign->rejection_reason);
+    }
+
+    public function test_superadmin_can_archive_and_reactivate_ally_and_pauses_campaigns()
+    {
+        $superadmin = User::factory()->create([
+            'role' => 'superadmin',
+        ]);
+
+        $ally = Ally::first();
+
+        // Crear una campaña activa y un cupón activo asociados
+        $campaign = AllyCampaignDirA::create([
+            'ally_id' => $ally->id,
+            'title' => 'Campaña Para Archivo',
+            'slug' => 'campana-para-archivo',
+            'universe' => 'marte',
+            'benefit' => 'Descuento 15%',
+            'status' => 'active',
+        ]);
+
+        $coupon = AllyCouponDirB::create([
+            'ally_id' => $ally->id,
+            'coupon_code' => 'ARCHIVE15',
+            'discount_pct' => 15.00,
+            'commission_rate' => 10.00,
+            'universe' => 'marte',
+            'utm_source' => 'test',
+            'utm_campaign' => 'test_camp',
+            'status' => 'active',
+        ]);
+
+        // 1. Archivar aliado
+        $response = $this->actingAs($superadmin)->post(route('portal.allies.archive', $ally->id));
+        $response->assertRedirect();
+
+        $ally->refresh();
+        $campaign->refresh();
+        $coupon->refresh();
+
+        $this->assertEquals('archived', $ally->status);
+        $this->assertTrue($ally->isArchived());
+        $this->assertEquals('paused', $campaign->status);
+        $this->assertEquals('paused', $coupon->status);
+
+        // 2. Reactivar aliado
+        $response2 = $this->actingAs($superadmin)->post(route('portal.allies.archive', $ally->id));
+        $response2->assertRedirect();
+
+        $ally->refresh();
+        $coupon->refresh();
+
+        $this->assertEquals('active', $ally->status);
+        $this->assertFalse($ally->isArchived());
+        $this->assertEquals('active', $coupon->status);
+    }
+
+    public function test_superadmin_can_delete_and_restore_ally_with_soft_deletes()
+    {
+        $superadmin = User::factory()->create([
+            'role' => 'superadmin',
+        ]);
+
+        $ally = Ally::first();
+        $allyId = $ally->id;
+
+        // 1. Eliminar (soft delete)
+        $response = $this->actingAs($superadmin)->delete(route('portal.allies.destroy', $allyId));
+        $response->assertRedirect();
+
+        $this->assertSoftDeleted('allies', ['id' => $allyId]);
+        $this->assertNull(Ally::find($allyId));
+        $this->assertNotNull(Ally::withTrashed()->find($allyId));
+
+        // 2. Restaurar
+        $responseRestore = $this->actingAs($superadmin)->post(route('portal.allies.restore', $allyId));
+        $responseRestore->assertRedirect();
+
+        $restoredAlly = Ally::find($allyId);
+        $this->assertNotNull($restoredAlly);
+        $this->assertEquals('active', $restoredAlly->status);
+    }
+
+    public function test_unauthorized_user_cannot_archive_or_delete_ally()
+    {
+        $customer = User::factory()->create([
+            'role' => 'customer',
+        ]);
+
+        $ally = Ally::first();
+
+        $resArchive = $this->actingAs($customer)->post(route('portal.allies.archive', $ally->id));
+        $resArchive->assertStatus(403);
+
+        $resDelete = $this->actingAs($customer)->delete(route('portal.allies.destroy', $ally->id));
+        $resDelete->assertStatus(403);
+    }
+
+    public function test_allies_hub_view_renders_clean_subnav_without_duplicate_mode_switcher()
+    {
+        $superadmin = User::factory()->create([
+            'role' => 'superadmin',
+        ]);
+
+        $response = $this->actingAs($superadmin)->get(route('portal.allies'));
+        $response->assertOk();
+
+        // Comprobar que NO existe la barra duplicada superior 'allies-mode-switcher'
+        $response->assertDontSee('allies-mode-switcher', false);
+
+        // Comprobar que la barra de submódulos 'allies-subnav-bar' está presente como navegación única
+        $response->assertSee('allies-subnav-bar', false);
+        $response->assertSee('1. Directorio &amp; Acuerdos', false);
+        $response->assertSee('2. Solicitudes de Eventos &amp; Convenios', false);
+        $response->assertSee('6. Previsualizar Partner Portal', false);
+        $response->assertSee('7. Extranet Proveedores B2B', false);
+
+        // Comprobar que los botones de Archivar y Eliminar están disponibles en la vista
+        $response->assertSee('Archivar', false);
+        $response->assertSee('Eliminar', false);
     }
 }

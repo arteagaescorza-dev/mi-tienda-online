@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ally extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -19,6 +20,16 @@ class Ally extends Model
         'lead_acquisition_cost' => 'float',
         'clearing_balance' => 'float',
     ];
+
+    public function isArchived(): bool
+    {
+        return in_array($this->status, ['archived', 'paused', 'terminated'], true) || $this->trashed();
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active' && !$this->trashed();
+    }
 
     public function campaignsDirA(): HasMany
     {

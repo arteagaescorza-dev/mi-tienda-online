@@ -67,6 +67,7 @@ class PortalAlliesController extends Controller
                 'bankName' => $a->bank_name,
                 'clearingBalance' => (float)$a->clearing_balance,
                 'status' => $a->status,
+                'isArchived' => in_array($a->status, ['archived', 'paused', 'terminated'], true) || $a->trashed(),
                 'notes' => $a->notes,
                 'allowedDiscountTypes' => $a->allowed_discount_types ?: ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access'],
                 'maxDiscountPct' => (float)($a->max_discount_pct ?: 20.00),
@@ -240,8 +241,13 @@ class PortalAlliesController extends Controller
             ];
         }
 
+        $activeAlliesCount = collect($alliesList)->filter(fn($a) => ($a['status'] ?? 'active') === 'active')->count();
+        $archivedAlliesCount = collect($alliesList)->filter(fn($a) => ($a['status'] ?? 'active') !== 'active')->count();
+
         return [
             'alliesList' => $alliesList,
+            'activeAlliesCount' => $activeAlliesCount,
+            'archivedAlliesCount' => $archivedAlliesCount,
             'campaignsDirA' => $campaignsDirA,
             'pendingCampaigns' => $pendingCampaigns,
             'leadCaptures' => $leadCaptures,
@@ -728,7 +734,15 @@ class PortalAlliesController extends Controller
             'lead_acquisition_cost' => (float)($validated['lead_acquisition_cost'] ?? $ally->lead_acquisition_cost),
             'commission_type' => $validated['commission_type'] ?? $ally->commission_type,
             'commission_rate' => (float)($validated['commission_rate'] ?? $ally->commission_rate),
+            'status' => $validated['status'] ?? $ally->status,
         ]);
+
+        if (in_array($ally->status, ['archived', 'paused', 'inactive'], true)) {
+            $ally->campaignsDirA()->where('status', 'active')->update(['status' => 'paused']);
+            $ally->couponsDirB()->where('status', 'active')->update(['status' => 'paused']);
+        } elseif ($ally->status === 'active') {
+            $ally->couponsDirB()->where('status', 'paused')->update(['status' => 'active']);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -739,5 +753,91 @@ class PortalAlliesController extends Controller
         }
 
         return back()->with('success', "Configuración del aliado '{$ally->name}' actualizada correctamente.");
+    }
+
+    /**
+     * Alterna el estado de archivo de un aliado comercial (Activo <-> Archivado).
+     */
+    public function archiveAlly(Request $request, Ally $ally)
+    {
+        Gate::authorize('manage-b2b');
+
+        $isArchiving = ($ally->status === 'active');
+        $newStatus = $isArchiving ? 'archived' : 'active';
+        $ally->update(['status' => $newStatus]);
+
+        if ($isArchiving) {
+            $ally->campaignsDirA()->where('status', 'active')->update(['status' => 'paused']);
+            $ally->couponsDirB()->where('status', 'active')->update(['status' => 'paused']);
+            $msg = "Aliado '{$ally->name}' archivado exitosamente. Sus campañas y cupones han sido pausados.";
+        } else {
+            $ally->couponsDirB()->where('status', 'paused')->update(['status' => 'active']);
+            $msg = "Aliado '{$ally->name}' reactivado exitosamente.";
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $msg,
+                'status' => $newStatus,
+                'is_archived' => $isArchiving,
+                'ally' => $ally,
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    /**
+     * Elimina (soft delete) a un aliado comercial del directorio.
+     */
+    public function destroyAlly(Request $request, Ally $ally)
+    {
+        Gate::authorize('manage-b2b');
+
+        $allyName = $ally->name;
+
+        // Pausar campañas y cupones asociados antes de eliminar
+        $ally->campaignsDirA()->where('status', 'active')->update(['status' => 'ended']);
+        $ally->couponsDirB()->where('status', 'active')->update(['status' => 'paused']);
+        $ally->update(['status' => 'archived']);
+
+        $ally->delete();
+
+        $msg = "Aliado '{$allyName}' eliminado del directorio oficial. Sus registros históricos se preservan de forma segura.";
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $msg,
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    /**
+     * Restaura a un aliado comercial previamente eliminado.
+     */
+    public function restoreAlly(Request $request, int $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $ally = Ally::onlyTrashed()->findOrFail($id);
+        $ally->restore();
+        $ally->update(['status' => 'active']);
+        $ally->couponsDirB()->where('status', 'paused')->update(['status' => 'active']);
+
+        $msg = "Aliado '{$ally->name}' restaurado exitosamente en el directorio oficial.";
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $msg,
+                'ally' => $ally,
+            ]);
+        }
+
+        return back()->with('success', $msg);
     }
 }

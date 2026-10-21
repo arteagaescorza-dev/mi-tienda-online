@@ -241,6 +241,8 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         Route::post('/{id}/settle', [AlliesApiController::class, 'executeSettlement']);
         Route::post('/validate-voucher', [AlliesApiController::class, 'validateVoucher']);
         Route::get('/{id}/export-csv', [AlliesApiController::class, 'exportDoorListCsv']);
+        Route::post('/{id}/archive', [AlliesApiController::class, 'archiveAlly']);
+        Route::delete('/{id}', [AlliesApiController::class, 'destroyAlly']);
     });
 
     // 6.1. EXTRANET PROVEEDORES & FABRICANTES (HUB 7 - TASK-HUB-VND / TASK-INT-20)

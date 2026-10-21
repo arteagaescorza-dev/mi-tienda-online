@@ -26,31 +26,7 @@
         </div>
     @endif
 
-    {{-- ========================================================================= --}}
-    {{-- CONMUTADOR DE MODO: CONSOLA REVOPS vs EXTRANET SOCIO                     --}}
-    {{-- ========================================================================= --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div class="allies-mode-switcher flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
-            <button class="allies-mode-btn {{ ($initialMode ?? 'admin') === 'admin' ? 'active' : '' }} px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer" data-action="switch-allies-mode" data-mode="admin" type="button">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                <span>Vista Administrador RevOps</span>
-            </button>
-            <button class="allies-mode-btn {{ ($initialMode ?? 'admin') === 'partner' ? 'active' : '' }} px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer" data-action="switch-allies-mode" data-mode="partner" type="button">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
-                <span>Pantalla Extranet del Aliado (Partner Portal)</span>
-            </button>
-            <a href="{{ route('portal.vendor.extranet') }}" class="allies-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-700 hover:text-indigo-700 hover:bg-slate-200" title="Acceso al portal B2B de proveedores y confeccionistas">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                <span>Pantalla Extranet del Proveedor (B2B Supplier)</span>
-            </a>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-500 font-medium">Modo activo:</span>
-            <span class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-900 text-white font-mono" id="alliesActiveModeLabel">
-                {{ ($initialMode ?? 'admin') === 'partner' ? 'Extranet Aliado' : 'Control RevOps' }}
-            </span>
-        </div>
-    </div>
+
 
     {{-- ========================================================================= --}}
     {{-- REGLA 10: BARRA DE PESTAÑAS DE SUBMÓDULO PRIMERO (SUBNAV BAR)             --}}
@@ -123,8 +99,12 @@
                 <button class="section-help-btn" type="button" aria-label="Ayuda Socios" data-help-title="Aliados Comerciales" data-help-desc="Número de acuerdos activos con festivales, creadores, saunas y colectivos.">?</button>
             </div>
             <div class="mt-3 flex items-baseline justify-between">
-                <span class="text-2xl font-black font-mono tracking-tight text-slate-900">{{ count($alliesList) }} Activos</span>
-                <span class="text-xs font-bold text-indigo-600 font-mono">CDMX &bull; Multiverso</span>
+                <span class="text-2xl font-black font-mono tracking-tight text-slate-900">{{ $activeAlliesCount ?? count($alliesList) }} Activos</span>
+                @if(($archivedAlliesCount ?? 0) > 0)
+                    <span class="text-xs font-bold text-amber-600 font-mono">{{ $archivedAlliesCount }} Archivados</span>
+                @else
+                    <span class="text-xs font-bold text-indigo-600 font-mono">CDMX &bull; Multiverso</span>
+                @endif
             </div>
             <div class="mt-2 text-[11px] text-slate-400">Festivales &bull; Creadores OF &bull; Saunas &bull; Ballroom</div>
         </div>
@@ -186,6 +166,13 @@
                     <button class="px-2.5 py-1 text-xs rounded font-semibold bg-white text-slate-600 border border-slate-200 cursor-pointer" data-action="filter-allies-universe" data-universe="marte" type="button">Marte</button>
                     <button class="px-2.5 py-1 text-xs rounded font-semibold bg-white text-slate-600 border border-slate-200 cursor-pointer" data-action="filter-allies-universe" data-universe="venus" type="button">Venus</button>
                     <button class="px-2.5 py-1 text-xs rounded font-semibold bg-white text-slate-600 border border-slate-200 cursor-pointer" data-action="filter-allies-universe" data-universe="tiresias" type="button">Tiresias</button>
+
+                    <div class="h-4 w-px bg-slate-200 mx-1"></div>
+
+                    <button class="px-2.5 py-1 text-xs rounded font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-pointer" data-action="filter-allies-status" data-status="all" type="button">Todos</button>
+                    <button class="px-2.5 py-1 text-xs rounded font-semibold bg-white text-slate-600 border border-slate-200 cursor-pointer" data-action="filter-allies-status" data-status="active" type="button">Activos ({{ $activeAlliesCount ?? count($alliesList) }})</button>
+                    <button class="px-2.5 py-1 text-xs rounded font-semibold bg-white text-slate-600 border border-slate-200 cursor-pointer" data-action="filter-allies-status" data-status="archived" type="button">Archivados ({{ $archivedAlliesCount ?? 0 }})</button>
+
                     <button type="button" class="px-3 py-1 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer ml-auto sm:ml-2" onclick="window.dispatchEvent(new CustomEvent('open-module-settings'))" title="Dar de alta nuevo aliado y configurar acuerdos comerciales (Engranaje Navbar)">
                         <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                         <span>+ Alta de Aliado</span>
@@ -195,12 +182,23 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($alliesList as $ally)
-                    <div class="ally-card bg-slate-50 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between hover:border-indigo-300 transition-all" data-ally-universe="{{ $ally['universe'] }}">
+                    <div class="ally-card bg-slate-50 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between hover:border-indigo-300 transition-all {{ ($ally['isArchived'] ?? false) ? 'opacity-80 bg-slate-100/90' : '' }}" data-ally-universe="{{ $ally['universe'] }}" data-ally-status="{{ ($ally['isArchived'] ?? false) ? 'archived' : 'active' }}">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="ally-category-badge px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ str_contains($ally['category'], 'circuit') ? 'bg-indigo-100 text-indigo-800' : (str_contains($ally['category'], 'onlyfans') ? 'bg-sky-100 text-sky-800' : (str_contains($ally['category'], 'sauna') ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800')) }}">
-                                    {{ $ally['categoryLabel'] }}
-                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="ally-category-badge px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ str_contains($ally['category'], 'circuit') ? 'bg-indigo-100 text-indigo-800' : (str_contains($ally['category'], 'onlyfans') ? 'bg-sky-100 text-sky-800' : (str_contains($ally['category'], 'sauna') ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800')) }}">
+                                        {{ $ally['categoryLabel'] }}
+                                    </span>
+                                    @if($ally['isArchived'] ?? false)
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 font-mono">
+                                            Archivado
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 font-mono">
+                                            Activo
+                                        </span>
+                                    @endif
+                                </div>
                                 <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 font-mono">{{ $ally['universe'] }}</span>
                             </div>
 
@@ -245,8 +243,8 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 pt-3 border-t border-slate-200/70 flex items-center justify-between gap-1.5">
-                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $ally['contactWhatsapp']) }}" target="_blank" class="px-2.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors flex items-center gap-1" style="text-decoration:none;">
+                        <div class="mt-4 pt-3 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-1.5">
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $ally['contactWhatsapp']) }}" target="_blank" class="px-2 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors flex items-center gap-1" style="text-decoration:none;">
                                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                                 <span>WhatsApp</span>
                             </a>
@@ -254,10 +252,27 @@
                                 <button class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-lg transition-colors cursor-pointer" data-action="edit-ally-btn" data-ally="{{ json_encode($ally) }}" type="button" title="Editar acuerdos comerciales de este aliado">
                                     Editar
                                 </button>
+
+                                <form action="{{ route('portal.allies.archive', $ally['id']) }}" method="POST" class="inline" onsubmit="return confirm('{{ ($ally['isArchived'] ?? false) ? '¿Deseas reactivar a este socio aliado?' : '¿Deseas archivar a este socio aliado? Sus campañas y cupones activos serán pausados.' }}');">
+                                    @csrf
+                                    <button type="submit" class="px-2.5 py-1.5 text-xs font-semibold {{ ($ally['isArchived'] ?? false) ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200' : 'text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200' }} rounded-lg transition-colors cursor-pointer" title="{{ ($ally['isArchived'] ?? false) ? 'Reactivar aliado' : 'Archivar aliado' }}">
+                                        {{ ($ally['isArchived'] ?? false) ? 'Reactivar' : 'Archivar' }}
+                                    </button>
+                                </form>
+
+                                <form action="{{ route('portal.allies.destroy', $ally['id']) }}" method="POST" class="inline" onsubmit="return confirm('¿Confirmas que deseas eliminar al aliado \'{{ $ally['name'] }}\'? Se preservarán sus registros de forma segura en histórico.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-2 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors cursor-pointer" title="Eliminar aliado">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" class="inline-block"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                </form>
+
                                 <button class="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors shadow-2xs cursor-pointer" data-action="open-partner-portal-for-ally" data-ally-id="{{ $ally['id'] }}" type="button">
                                     Ver Extranet
                                 </button>
                             </div>
+                        </div>
                         </div>
                     </div>
                 @endforeach
@@ -680,12 +695,18 @@
         <!-- SUBMÓDULO 5: PANTALLA EXTRANET DEL SOCIO / PARTNER PORTAL (TASK-ALY-05) -->
         <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm mb-6" id="alliesPartnerPortalPanel">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 mb-5 gap-3">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 text-[10px] font-bold bg-indigo-600 text-white rounded">Partner Portal</span>
-                        <h3 class="text-base font-bold text-slate-900">{{ $selectedAlly['name'] ?? 'Aliado Comercial' }}</h3>
+                <div class="flex items-center gap-3">
+                    <button type="button" class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer flex items-center gap-1" data-action="switch-allies-tab" data-tab="directory">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                        <span>Volver al Directorio</span>
+                    </button>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-[10px] font-bold bg-indigo-600 text-white rounded">Partner Portal</span>
+                            <h3 class="text-base font-bold text-slate-900">{{ $selectedAlly['name'] ?? 'Aliado Comercial' }}</h3>
+                        </div>
+                        <p class="text-xs text-slate-500 font-mono mt-0.5">Token Criptográfico: {{ $selectedAlly['portalToken'] ?? 'tok_demo' }}</p>
                     </div>
-                    <p class="text-xs text-slate-500 font-mono mt-0.5">Token Criptográfico: {{ $selectedAlly['portalToken'] ?? 'tok_demo' }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold" onclick="document.getElementById('modalNewAllyCampaign').classList.remove('hidden');" type="button">
@@ -1155,6 +1176,8 @@
                                         <label class="block text-xs font-bold text-slate-700 mb-1">Estatus</label>
                                         <select name="status" id="allyFormStatus" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white font-semibold">
                                             <option value="active">Activo (Habilitado)</option>
+                                            <option value="archived">Archivado</option>
+                                            <option value="paused">Pausado</option>
                                             <option value="inactive">Inactivo</option>
                                         </select>
                                     </div>
@@ -1238,9 +1261,24 @@
                                             ${{ number_format($al['clearingBalance'], 2) }}
                                         </td>
                                         <td class="p-3 text-right">
-                                            <button type="button" class="px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition cursor-pointer" data-action="edit-ally-btn" data-ally="{{ json_encode($al) }}">
-                                                Editar Acuerdos
-                                            </button>
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                <button type="button" class="px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition cursor-pointer" data-action="edit-ally-btn" data-ally="{{ json_encode($al) }}">
+                                                    Editar Acuerdos
+                                                </button>
+                                                <form action="{{ route('portal.allies.archive', $al['id']) }}" method="POST" class="inline" onsubmit="return confirm('{{ ($al['isArchived'] ?? false) ? '¿Reactivar socio?' : '¿Archivar socio? Sus campañas y cupones serán pausados.' }}');">
+                                                    @csrf
+                                                    <button type="submit" class="px-2 py-1 text-xs font-semibold {{ ($al['isArchived'] ?? false) ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200' : 'text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200' }} rounded-lg transition cursor-pointer">
+                                                        {{ ($al['isArchived'] ?? false) ? 'Reactivar' : 'Archivar' }}
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('portal.allies.destroy', $al['id']) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar socio {{ $al['name'] }}?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="px-2 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition cursor-pointer" title="Eliminar">
+                                                        Eliminar
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -1403,8 +1441,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const tabButtons = document.querySelectorAll('[data-action="switch-allies-tab"]');
-    const modeButtons = document.querySelectorAll('[data-action="switch-allies-mode"]');
-    const modeLabel = document.getElementById('alliesActiveModeLabel');
 
     function switchTab(targetTab) {
         Object.keys(panels).forEach(tabKey => {
@@ -1431,28 +1467,13 @@ document.addEventListener('DOMContentLoaded', function () {
         url.searchParams.set('tab', targetTab);
         window.history.replaceState({}, '', url);
     }
+    window.switchTab = switchTab;
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', function (e) {
             if (e.target.classList.contains('section-help-btn')) return;
             const tab = this.getAttribute('data-tab');
             if (tab) switchTab(tab);
-        });
-    });
-
-    modeButtons.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const mode = this.getAttribute('data-mode');
-            modeButtons.forEach(b => b.classList.remove('active', 'bg-white', 'shadow-xs', 'text-slate-900'));
-            this.classList.add('active', 'bg-white', 'shadow-xs', 'text-slate-900');
-
-            if (mode === 'partner') {
-                if (modeLabel) modeLabel.textContent = 'Extranet Aliado';
-                switchTab('partner_portal');
-            } else {
-                if (modeLabel) modeLabel.textContent = 'Control RevOps';
-                switchTab('directory');
-            }
         });
     });
 
@@ -1582,28 +1603,52 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Filter Allies by Universe in Directory Tab
+    // Filter Allies by Universe & Status in Directory Tab
     const universeFilterBtns = document.querySelectorAll('[data-action="filter-allies-universe"]');
+    const statusFilterBtns = document.querySelectorAll('[data-action="filter-allies-status"]');
     const allyCards = document.querySelectorAll('.ally-card');
+
+    let currentUniverse = 'all';
+    let currentStatus = 'all';
+
+    function applyAllyFilters() {
+        allyCards.forEach(card => {
+            const cardUniverse = card.getAttribute('data-ally-universe');
+            const cardStatus = card.getAttribute('data-ally-status');
+            const matchUniverse = (currentUniverse === 'all' || cardUniverse === currentUniverse);
+            const matchStatus = (currentStatus === 'all' || cardStatus === currentStatus);
+
+            if (matchUniverse && matchStatus) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    }
 
     universeFilterBtns.forEach(btn => {
         btn.addEventListener('click', function () {
-            const universe = this.getAttribute('data-universe');
+            currentUniverse = this.getAttribute('data-universe');
             universeFilterBtns.forEach(b => {
                 b.classList.remove('bg-slate-900', 'text-white');
                 b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
             });
             this.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
             this.classList.add('bg-slate-900', 'text-white');
+            applyAllyFilters();
+        });
+    });
 
-            allyCards.forEach(card => {
-                const cardUniverse = card.getAttribute('data-ally-universe');
-                if (universe === 'all' || cardUniverse === universe) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
+    statusFilterBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            currentStatus = this.getAttribute('data-status');
+            statusFilterBtns.forEach(b => {
+                b.classList.remove('bg-emerald-50', 'text-emerald-800', 'border-emerald-200', 'bg-slate-900', 'text-white');
+                b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
             });
+            this.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            this.classList.add('bg-slate-900', 'text-white');
+            applyAllyFilters();
         });
     });
 });

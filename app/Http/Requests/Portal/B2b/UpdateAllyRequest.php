@@ -29,6 +29,7 @@ class UpdateAllyRequest extends FormRequest
             'contact_whatsapp' => 'nullable|string|max:30',
             'contact_email' => 'nullable|email|max:150',
             'social_handle' => 'nullable|string|max:80',
+            'status' => 'nullable|string|in:active,inactive,archived,paused,terminated',
             'bank_name' => 'nullable|string|max:60',
             'bank_clabe' => 'nullable|string|max:30',
             'notes' => 'nullable|string|max:1000',

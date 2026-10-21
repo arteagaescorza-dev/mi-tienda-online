@@ -124,6 +124,9 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/convenios/campanas/{id}/rechazar', [PortalAlliesController::class, 'rejectCampaign'])->name('portal.allies.campaign.reject');
 	Route::post('/admin/convenios/aliados', [PortalAlliesController::class, 'storeAlly'])->name('portal.allies.store');
 	Route::put('/admin/convenios/aliados/{ally}', [PortalAlliesController::class, 'updateAlly'])->name('portal.allies.update');
+	Route::post('/admin/convenios/aliados/{ally}/archivar', [PortalAlliesController::class, 'archiveAlly'])->name('portal.allies.archive');
+	Route::delete('/admin/convenios/aliados/{ally}', [PortalAlliesController::class, 'destroyAlly'])->name('portal.allies.destroy');
+	Route::post('/admin/convenios/aliados/{id}/restaurar', [PortalAlliesController::class, 'restoreAlly'])->name('portal.allies.restore');
 	Route::post('/admin/convenios/aliados/{ally}/liquidar', [PortalAlliesController::class, 'executeSettlement'])->name('portal.allies.settlement.execute');
 	Route::get('/admin/convenios/aliados/{ally}/export-csv', [PortalAlliesController::class, 'exportDoorListCsv'])->name('portal.allies.export.csv');
 });
