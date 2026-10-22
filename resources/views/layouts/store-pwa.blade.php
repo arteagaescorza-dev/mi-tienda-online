@@ -747,23 +747,19 @@
 
     <!-- 2. Header Móvil & Tablet App (Compacto, Táctil y Sin Desbordamiento) -->
     <header class="navbar-mobile">
-      <div style="display: flex; align-items: center; gap: 6px;">
+      <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
         <button type="button" class="mobile-icon-btn" id="mobileFilterToggleBtn" data-action="open-filter-drawer" aria-label="Abrir filtros" style="display: none;">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
         </button>
 
-        <!-- Logo de Marca Adaptativo para Formato App (Móvil & Tablet) -->
-        <a href="{{ route('store.home') }}" class="nav-brand-group">
+        <!-- Logo de Marca Adaptativo para Formato App (Sin texto para evitar desbordamiento) -->
+        <a href="{{ route('store.home') }}" class="nav-brand-group" aria-label="{{ $currentStorefront['brandName'] ?? 'MARTE' }}">
           <div class="brand-logo-box">
             @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
               <img src="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}">
             @else
               <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="var(--text-primary, #050505)"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             @endif
-          </div>
-          <div class="brand-titles tablet-only-brand-titles">
-            <span class="brand-name">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
-            <span class="brand-sub">{{ $currentStorefront['kicker'] ?? $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
           </div>
         </a>
       </div>
@@ -2004,11 +2000,11 @@
       <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; font-weight: 700;">
         <div style="display: flex; align-items: center; gap: 6px;">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#e11d48" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span style="color: #9f1239; text-transform: uppercase; letter-spacing: 0.04em;">Stock Apartado Exclusivo</span>
+          <span class="checkout-timer-label" style="color: #9f1239; text-transform: uppercase; letter-spacing: 0.04em;">Stock Apartado Exclusivo</span>
         </div>
         <span id="checkoutStockTimerRemaining" style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #e11d48;">05:00</span>
       </div>
-      <div style="width: 100%; height: 3px; background: #ffe4e6; border-radius: 2px; overflow: hidden; margin-top: 5px;">
+      <div class="checkout-timer-progress-track" style="width: 100%; height: 3px; background: #ffe4e6; border-radius: 2px; overflow: hidden; margin-top: 5px;">
         <div id="checkoutStockProgressBar" style="width: 100%; height: 100%; background: #e11d48; transition: width 1s linear;"></div>
       </div>
     </div>
@@ -2099,8 +2095,8 @@
           <div id="mixedCartStrategyCard" class="mixed-shipping-strategy-card" style="display: none;">
             <div class="mixed-strategy-header">
               <div style="display: flex; align-items: center; gap: 6px;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563eb" stroke-width="2"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><rect x="18" y="8" width="5" height="11" rx="1"/><circle cx="5" cy="18" r="2"/><circle cx="12" cy="18" r="2"/><circle cx="20" cy="18" r="2"/></svg>
-                <strong style="font-family: var(--font-heading); font-size: 0.78rem; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.04em;">Estrategia de Despacho // Carrito Mixto</strong>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><rect x="18" y="8" width="5" height="11" rx="1"/><circle cx="5" cy="18" r="2"/><circle cx="12" cy="18" r="2"/><circle cx="20" cy="18" r="2"/></svg>
+                <strong class="mixed-strategy-title" style="font-family: var(--font-heading); font-size: 0.78rem; text-transform: uppercase; color: var(--text-primary); letter-spacing: 0.04em;">Estrategia de Despacho // Carrito Mixto</strong>
               </div>
               <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 4px 0 0; line-height: 1.35;">
                 Tu orden combina prendas en bodega y prendas bajo pedido. Selecciona la modalidad de entrega:
@@ -2111,8 +2107,8 @@
               <label class="mixed-option-card active" for="strategyConsolidated">
                 <input type="radio" name="checkoutDispatchStrategy" id="strategyConsolidated" value="consolidated" checked>
                 <div class="mixed-option-body">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-size: 0.78rem; color: #050505;">Despacho Consolidado Ecológico (1 Solo Paquete)</strong>
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+                    <strong class="mixed-option-heading" style="font-size: 0.78rem; color: var(--text-primary);">Despacho Consolidado Ecológico (1 Solo Paquete)</strong>
                     <span class="badge-mixed-rec">RECOMENDADO</span>
                   </div>
                   <p style="font-size: 0.7rem; color: var(--text-secondary); margin: 3px 0 4px; line-height: 1.35;">
@@ -2125,8 +2121,8 @@
               <label class="mixed-option-card" for="strategySplit">
                 <input type="radio" name="checkoutDispatchStrategy" id="strategySplit" value="split">
                 <div class="mixed-option-body">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-size: 0.78rem; color: #050505;">Despacho Dividido / Split (2 Paquetes Separados)</strong>
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+                    <strong class="mixed-option-heading" style="font-size: 0.78rem; color: var(--text-primary);">Despacho Dividido / Split (2 Paquetes Separados)</strong>
                     <span class="badge-mixed-fast">ENTREGA RÁPIDA</span>
                   </div>
                   <p style="font-size: 0.7rem; color: var(--text-secondary); margin: 3px 0 4px; line-height: 1.35;">

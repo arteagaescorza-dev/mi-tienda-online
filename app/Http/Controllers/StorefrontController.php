@@ -743,13 +743,22 @@ class StorefrontController extends Controller
             ];
         })->values();
 
+        $pwaProducts = $this->getPwaStoreProducts();
+        $matchedPwa = collect($pwaProducts)->firstWhere('id', (string) $dbProduct->id);
+
         $productPayload = [
             'id' => (string) $dbProduct->id,
             'sku' => $dbProduct->sku,
             'name' => $dbProduct->title,
             'slug' => $dbProduct->slug,
             'brand' => $dbProduct->brand ?: 'TORZO',
-            'categoryName' => $dbProduct->brand ?: (data_get($dbProduct->meta, 'category', 'Prenda')),
+            'category' => $matchedPwa['category'] ?? ($dbProduct->categories->first()?->slug ?? \Illuminate\Support\Str::slug((string) data_get($dbProduct->meta, 'category', 'general'))),
+            'categoryName' => $matchedPwa['categoryName'] ?? ($dbProduct->brand ?: (data_get($dbProduct->meta, 'category', 'Prenda'))),
+            'garment_type' => (string) data_get($dbProduct->meta, 'garment_type', ''),
+            'section_name' => (string) ($dbProduct->section_name ?? data_get($dbProduct->meta, 'section', '')),
+            'abc_class' => $matchedPwa['abc_class'] ?? strtoupper((string) data_get($dbProduct->meta, 'abc_class', 'C')),
+            'discount_pct' => (float) data_get($dbProduct->meta, 'discount_pct', 0),
+            'compare_at_price' => (float) ($dbProduct->compare_at_price ?? data_get($dbProduct->meta, 'compare_at_price', 0)),
             'price' => (float) $dbProduct->price,
             'price_formatted' => 'MXN $' . number_format((float) $dbProduct->price, 2),
             'availableStock' => $isScrapedProduct ? 0 : $availableStock,
@@ -770,8 +779,6 @@ class StorefrontController extends Controller
             'sizes' => $variantList->pluck('size')->unique()->values()->all() ?: ['CH', 'M', 'G', 'XG'],
             'variants' => $variantList->all(),
         ];
-
-        $pwaProducts = $this->getPwaStoreProducts();
 
         return view('store.pwa.product-detail', [
             'product' => $productPayload,
@@ -2383,6 +2390,16 @@ class StorefrontController extends Controller
                 );
 
                 $isScrapedProduct = $product->isScraped();
+                $explicitAbc = strtoupper(trim((string) (data_get($product->meta, 'abc_class') ?? data_get($product->meta, 'classification') ?? '')));
+                $monthlySales = (int) data_get($product->meta, 'monthly_sales', $availableStock ?: 10);
+                if (!in_array($explicitAbc, ['A', 'B', 'C'], true)) {
+                    $explicitAbc = $monthlySales >= 120 ? 'A' : ($monthlySales >= 50 ? 'B' : 'C');
+                }
+                $compareAtPrice = (float) ($product->compare_at_price ?? data_get($product->meta, 'compare_at_price', 0));
+                $discountPct = (float) data_get($product->meta, 'discount_pct', 0);
+                if ($discountPct <= 0 && $compareAtPrice > (float) $product->price && (float) $product->price > 0) {
+                    $discountPct = round((($compareAtPrice - (float) $product->price) / $compareAtPrice) * 100, 1);
+                }
 
                 return [
                     'id' => (string) $product->id,
@@ -2392,8 +2409,10 @@ class StorefrontController extends Controller
                     'category' => $categorySlug,
                     'categoryName' => $categoryName,
                     'price' => (float) $product->price,
+                    'compare_at_price' => $compareAtPrice,
                     'price_formatted' => 'MXN $' . number_format((float) $product->price, 2),
                     'universes' => $universes,
+                    'abc_class' => $explicitAbc,
                     'stockType' => $isScrapedProduct ? 'on_demand' : ($availableStock > 0 ? 'ready' : 'on_demand'),
                     'stockLabel' => $isScrapedProduct ? 'Bajo Pedido' : ($availableStock > 0 ? 'Stock Físico' : 'Bajo Pedido'),
                     'is_scraped' => $isScrapedProduct,
@@ -2409,7 +2428,7 @@ class StorefrontController extends Controller
                     'section_name' => (string) ($product->section_name ?? data_get($product->meta, 'section', '')),
                     'garment_type' => (string) data_get($product->meta, 'garment_type', ''),
                     'fabric_type' => (string) ($product->fabric ?: data_get($product->meta, 'fabric', data_get($product->meta, 'fabric_type', ''))),
-                    'discount_pct' => (float) data_get($product->meta, 'discount_pct', 0),
+                    'discount_pct' => $discountPct,
                     'category_ids' => $product->categories->pluck('id')->all(),
                     'variants' => $variants->map(fn ($v) => [
                         'id' => $v->id,

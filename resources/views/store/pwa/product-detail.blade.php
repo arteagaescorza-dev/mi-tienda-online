@@ -1017,6 +1017,120 @@
   html.dark #pdpStockNoticeText strong {
     color: #f4f4f6 !important;
   }
+
+  /* ==========================================================================
+     SECCIONES DINAMICAS EN FICHA DE PRODUCTO (PDP):
+     2.1 Productos Sugeridos (Clasificacion C Stock Fisico -> Fallback Bajo Pedido / Relacionados)
+     2.2 Perfil Anatomico (Logueado) -> Mas Productos con Descuento -> Relacionados con Consulta
+     ========================================================================== */
+  .pdp-dynamic-sections-wrap {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+  .pdp-dynamic-section {
+    border-top: 1px solid var(--border-subtle, #e4e4e7);
+    padding-top: 28px;
+  }
+  .pdp-dynamic-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .pdp-dynamic-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-heading, 'Outfit', sans-serif);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #18181b;
+    color: #ffffff;
+    margin-bottom: 6px;
+  }
+  .pdp-dynamic-badge.badge-anatomy {
+    background: #4f46e5;
+    color: #ffffff;
+  }
+  .pdp-dynamic-badge.badge-discount {
+    background: #e11d48;
+    color: #ffffff;
+  }
+  .pdp-dynamic-title {
+    font-family: var(--font-heading, 'Outfit', sans-serif);
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--text-primary, #09090b);
+    margin: 0 0 4px;
+  }
+  .pdp-dynamic-sub {
+    font-size: 0.8rem;
+    color: var(--text-secondary, #52525b);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .pdp-dynamic-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-medium, #d4d4d8);
+    background: var(--bg-surface, #ffffff);
+    color: var(--text-primary, #09090b);
+    font-family: var(--font-heading, 'Outfit', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .pdp-dynamic-action-btn:hover {
+    background: var(--bg-tertiary, #f4f4f5);
+  }
+  html.dark .pdp-dynamic-section {
+    border-top-color: #272732;
+  }
+  html.dark .pdp-dynamic-badge {
+    background: #272b3a;
+    color: #f8fafc;
+    border: 1px solid #383e54;
+  }
+  html.dark .pdp-dynamic-badge.badge-anatomy {
+    background: rgba(99, 102, 241, 0.25);
+    color: #c7d2fe;
+    border: 1px solid rgba(129, 140, 248, 0.45);
+  }
+  html.dark .pdp-dynamic-badge.badge-discount {
+    background: rgba(225, 29, 72, 0.25);
+    color: #fecdd3;
+    border: 1px solid rgba(244, 63, 94, 0.45);
+  }
+  html.dark .pdp-dynamic-title {
+    color: #f8fafc !important;
+  }
+  html.dark .pdp-dynamic-sub {
+    color: #94a3b8 !important;
+  }
+  html.dark .pdp-dynamic-action-btn {
+    background: #1e212d !important;
+    border-color: #383e54 !important;
+    color: #f8fafc !important;
+  }
+  html.dark .pdp-dynamic-action-btn:hover {
+    background: #282c3d !important;
+    border-color: #6366f1 !important;
+  }
 </style>
 @endpush
 
@@ -1275,6 +1389,37 @@
 
   </div>
 
+  <!-- 2 SECCIONES DINAMICAS DE RECOMENDACION EN CADA PAGINA DE PRODUCTO -->
+  <div class="pdp-dynamic-sections-wrap" id="pdpDynamicSectionsWrap">
+    <!-- 2.1 Primera Seccion Dinamica: Productos Sugeridos (Clasificacion C Stock Fisico -> Fallback Bajo Pedido / Relacionados) -->
+    <section class="pdp-dynamic-section" id="pdpDynamicSuggestedSection" aria-labelledby="pdpSuggestedTitle">
+      <div class="pdp-dynamic-header">
+        <div>
+          <span class="pdp-dynamic-badge" id="pdpSuggestedBadge">CURADURÍA DE STOCK FÍSICO // CLASIFICACIÓN C</span>
+          <h2 class="pdp-dynamic-title" id="pdpSuggestedTitle">Productos Sugeridos para Ti</h2>
+          <p class="pdp-dynamic-sub" id="pdpSuggestedSub">Selección de piezas en existencia física (Clasificación C) y alternativas afines a esta prenda.</p>
+        </div>
+      </div>
+      <div class="product-feed-grid" id="pdpSuggestedProductsGrid"></div>
+    </section>
+
+    <!-- 2.2 Segunda Seccion Dinamica: Perfil Anatomico (Logueado) -> Descuentos (No logueado) -> Relacionados con Consulta -->
+    <section class="pdp-dynamic-section" id="pdpDynamicProfileSection" aria-labelledby="pdpProfileSectionTitle">
+      <div class="pdp-dynamic-header">
+        <div>
+          <span class="pdp-dynamic-badge badge-anatomy" id="pdpProfileSectionBadge">RECOMENDACIÓN INTELIGENTE</span>
+          <h2 class="pdp-dynamic-title" id="pdpProfileSectionTitle">Seleccionados para tu Perfil Anatómico</h2>
+          <p class="pdp-dynamic-sub" id="pdpProfileSectionSub">Prendas filtradas según tu perfil anatómico guardado o promociones activas del catálogo.</p>
+        </div>
+        <button type="button" class="pdp-dynamic-action-btn" id="pdpProfileActionBtn" data-action="open-anatomy-profile">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="pdpProfileActionBtnText">Configurar Perfil Anatómico</span>
+        </button>
+      </div>
+      <div class="product-feed-grid" id="pdpProfileProductsGrid"></div>
+    </section>
+  </div>
+
 </div>
 
 <!-- Barra Fija Inferior para Móviles (Sticky Mobile Bar) -->
@@ -1381,7 +1526,7 @@
       </div>
 
       <div style="margin-top: 16px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.76rem; color: #475569; line-height: 1.45;">
-        💡 <strong>Recomendación de calce:</strong> Si tus medidas se encuentran en el límite superior de una talla, o prefieres un calce más relajado, te sugerimos elegir la talla inmediata siguiente.
+        <strong>Recomendación de calce:</strong> Si tus medidas se encuentran en el límite superior de una talla, o prefieres un calce más relajado, te sugerimos elegir la talla inmediata siguiente.
       </div>
     </div>
   </div>
@@ -1457,6 +1602,7 @@
 
 @push('scripts')
 <script>
+  window.CURRENT_PDP_PRODUCT = @json($product);
   let currentSelectedSize = @json($product['sizes'][0] ?? 'M');
   let currentSelectedColor = @json($product['colors'][0]['name'] ?? 'Único');
   const pdpImagesByColor = @json($product['images_by_color'] ?? []);
@@ -1795,6 +1941,12 @@
           closePdpInfoModal(id);
         }
       });
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.renderPdpDynamicSections === 'function') {
+      window.renderPdpDynamicSections();
     }
   });
 </script>

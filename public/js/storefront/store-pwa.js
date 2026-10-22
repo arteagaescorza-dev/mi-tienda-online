@@ -583,6 +583,108 @@
     });
   }
 
+  // Generar HTML de Tarjeta de Producto Reutilizable (Catálogo, Home y Secciones Dinámicas PDP)
+  function createProductCardHTML(prod) {
+    const sizesList = Array.isArray(prod.sizes) && prod.sizes.length > 0 ? prod.sizes : ['CH', 'M', 'G', 'XG'];
+    const selectedSize = storeState.selectedSizes[prod.id] || sizesList[0] || 'M';
+    const isFav = isInWishlist(prod.id);
+    const discPct = Number(prod.discount_pct || 0);
+    const hasDiscount = discPct > 0 || (Number(prod.compare_at_price || 0) > Number(prod.price || 0));
+    const displayDiscPct = discPct > 0
+      ? Math.round(discPct)
+      : (hasDiscount && Number(prod.compare_at_price) > 0
+          ? Math.round(((Number(prod.compare_at_price) - Number(prod.price)) / Number(prod.compare_at_price)) * 100)
+          : 0);
+
+    return `
+      <div class="product-card" data-product-id="${prod.id}">
+        <div class="product-image-wrap">
+          <!-- Botón Flotante de Deseos / Wishlist -->
+          <button type="button" class="btn-wishlist-toggle ${isFav ? 'active' : ''}" data-action="toggle-wishlist" data-product-id="${prod.id}" title="${isFav ? 'Quitar de mis deseos' : 'Guardar en mis deseos'}" aria-label="Guardar en favoritos">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </button>
+
+          <span class="product-stock-badge ${prod.stockType === 'ready' ? 'ready' : (prod.stockType === 'drop_on_demand' ? 'drop_on_demand' : '')}">
+            ${prod.stockLabel || (prod.stockType === 'ready' ? 'Stock Físico' : 'Bajo Pedido')}
+          </span>
+
+          ${displayDiscPct > 0 ? `
+            <span class="product-discount-badge" style="position: absolute; bottom: 8px; left: 8px; z-index: 4; background: #e11d48; color: #ffffff; font-family: var(--font-heading); font-size: 0.62rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; letter-spacing: 0.04em;">
+              -${displayDiscPct}% OFF
+            </span>
+          ` : ''}
+
+          <!-- Imagen / Logo con enlace a PDP -->
+          <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: pointer; text-decoration: none; position: relative;" title="${prod.name}">
+            ${prod.image && prod.image !== '/user-avatar.png' ? `
+              <img src="${prod.image}" alt="${prod.name}" loading="lazy" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              <div class="product-fallback-silhouette" style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; position: absolute; inset: 0;">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span style="font-family: var(--font-heading); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #71717a;">${prod.sku || ''}</span>
+              </div>
+            ` : `
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%;">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span style="font-family: var(--font-heading); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #71717a;">${prod.sku || ''}</span>
+              </div>
+            `}
+          </a>
+        </div>
+        
+        <div class="product-body">
+          <div>
+            <div class="product-category-label">${prod.categoryName || prod.brand || 'Prenda'}</div>
+            <h3 class="product-title">
+              <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="cursor: pointer; color: inherit; text-decoration: none;">${prod.name}</a>
+            </h3>
+            <div class="product-pricing-row">
+              <span class="product-price">MXN $${Number(prod.price || 0).toFixed(2)}</span>
+              ${Number(prod.compare_at_price || 0) > Number(prod.price || 0) ? `
+                <span style="font-size: 0.68rem; color: var(--text-muted); text-decoration: line-through;">$${Number(prod.compare_at_price).toFixed(2)}</span>
+              ` : `
+                <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
+              `}
+            </div>
+            ${Array.isArray(prod.colors) && prod.colors.length > 0 ? `
+              <div class="product-card-colors">
+                ${prod.colors.map(c => {
+                  const isMulti = (c.name || '').toLowerCase().includes('multicolor');
+                  const dotBg = isMulti
+                    ? 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)'
+                    : (c.hex || '#0f172a');
+                  return `<span class="product-card-color-dot ${isMulti ? 'color-dot-multicolor' : ''}" data-color-name="${c.name}" title="${c.name}" style="background: ${dotBg};"></span>`;
+                }).join('')}
+                <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 2px;">${prod.colors.length} ${prod.colors.length === 1 ? 'color' : 'colores'}</span>
+              </div>
+            ` : ''}
+          </div>
+
+          <div>
+            <!-- Selector Rápido de Talla -->
+            <div class="product-sizes-selector">
+              ${sizesList.map(sz => `
+                <button type="button" class="size-pill-btn ${sz === selectedSize ? 'selected' : ''}" data-action="select-size" data-product-id="${prod.id}" data-size="${sz}">
+                  ${sz}
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- Botonera: Ficha PDP + Agregar al Carrito -->
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+              <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica">
+                FICHA
+              </a>
+              <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="${prod.id}" style="flex: 1;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>AGREGAR</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // Renderizar Grid de Productos
   function renderProductsGrid(containerId) {
     const container = document.getElementById(containerId);
@@ -593,7 +695,7 @@
     if (products.length === 0) {
       container.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; color: var(--text-muted);">
-          <div style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: #f4f4f5; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: var(--bg-tertiary, #f4f4f5); display: flex; align-items: center; justify-content: center;">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
           </div>
           <strong style="font-family: var(--font-heading); color: var(--text-primary); display: block; font-size: 0.95rem;">Sin prendas en esta selección</strong>
@@ -603,87 +705,279 @@
       return;
     }
 
-    container.innerHTML = products.map(prod => {
-      const selectedSize = storeState.selectedSizes[prod.id] || 'M';
-      const isFav = isInWishlist(prod.id);
-      return `
-        <div class="product-card" data-product-id="${prod.id}">
-          <div class="product-image-wrap">
-            <!-- Botón Flotante de Deseos / Wishlist -->
-            <button type="button" class="btn-wishlist-toggle ${isFav ? 'active' : ''}" data-action="toggle-wishlist" data-product-id="${prod.id}" title="${isFav ? 'Quitar de mis deseos' : 'Guardar en mis deseos'}" aria-label="Guardar en favoritos">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-            </button>
+    container.innerHTML = products.map(prod => createProductCardHTML(prod)).join('');
+  }
 
-            <span class="product-stock-badge ${prod.stockType === 'ready' ? 'ready' : (prod.stockType === 'drop_on_demand' ? 'drop_on_demand' : '')}">
-              ${prod.stockLabel}
-            </span>
+  // ============================================================================
+  // SECCIONES DINÁMICAS EN PÁGINA DE PRODUCTO (PDP):
+  // 2.1 Productos Sugeridos: Clasificación C dentro del stock físico -> Fallback Bajo Pedido o Relacionados con el tipo de producto.
+  // 2.2 Segunda Sección: Perfil Anatómico guardado (si está logueado) -> Más productos con descuentos (si no está logueado) -> Relacionados con su consulta.
+  // ============================================================================
+  function renderPdpDynamicSections() {
+    const suggestedGrid = document.getElementById('pdpSuggestedProductsGrid');
+    const profileGrid = document.getElementById('pdpProfileProductsGrid');
+    if (!suggestedGrid && !profileGrid) return;
 
-            <!-- Imagen / Logo con enlace a PDP -->
-            <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: pointer; text-decoration: none; position: relative;" title="${prod.name}">
-              ${prod.image && prod.image !== '/user-avatar.png' ? `
-                <img src="${prod.image}" alt="${prod.name}" loading="lazy" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-                <div class="product-fallback-silhouette" style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; position: absolute; inset: 0;">
-                  <svg width="40" height="40" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <span style="font-family: var(--font-heading); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #71717a;">${prod.sku || ''}</span>
-                </div>
-              ` : `
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%;">
-                  <svg width="40" height="40" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <span style="font-family: var(--font-heading); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #71717a;">${prod.sku || ''}</span>
-                </div>
-              `}
-            </a>
-          </div>
-          
-          <div class="product-body">
-            <div>
-              <div class="product-category-label">${prod.categoryName}</div>
-              <h3 class="product-title">
-                <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="cursor: pointer; color: inherit; text-decoration: none;">${prod.name}</a>
-              </h3>
-              <div class="product-pricing-row">
-                <span class="product-price">MXN $${prod.price.toFixed(2)}</span>
-                <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
-              </div>
-              ${Array.isArray(prod.colors) && prod.colors.length > 0 ? `
-                <div class="product-card-colors">
-                  ${prod.colors.map(c => {
-                    const isMulti = (c.name || '').toLowerCase().includes('multicolor');
-                    const dotBg = isMulti
-                      ? 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)'
-                      : (c.hex || '#0f172a');
-                    return `<span class="product-card-color-dot ${isMulti ? 'color-dot-multicolor' : ''}" data-color-name="${c.name}" title="${c.name}" style="background: ${dotBg};"></span>`;
-                  }).join('')}
-                  <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 2px;">${prod.colors.length} ${prod.colors.length === 1 ? 'color' : 'colores'}</span>
-                </div>
-              ` : ''}
-            </div>
+    const currentProd = (typeof window !== 'undefined' && window.CURRENT_PDP_PRODUCT) ? window.CURRENT_PDP_PRODUCT : null;
+    const currentId = currentProd ? String(currentProd.id) : '';
+    const catalog = Array.isArray(STORE_PRODUCTS) ? STORE_PRODUCTS : [];
+    const others = catalog.filter(p => String(p.id) !== currentId);
 
-            <div>
-              <!-- Selector Rápido de Talla -->
-              <div class="product-sizes-selector">
-                ${prod.sizes.map(sz => `
-                  <button type="button" class="size-pill-btn ${sz === selectedSize ? 'selected' : ''}" data-action="select-size" data-product-id="${prod.id}" data-size="${sz}">
-                    ${sz}
-                  </button>
-                `).join('')}
-              </div>
+    const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/(s|es)$/, '');
+    const curCat = norm(currentProd?.category || currentProd?.categoryName || '');
+    const curGarment = norm(currentProd?.garment_type || '');
+    const curBrand = norm(currentProd?.brand || '');
 
-              <!-- Botonera: Ficha PDP + Agregar al Carrito -->
-              <div style="display: flex; gap: 6px; margin-top: 8px;">
-                <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica">
-                  FICHA
-                </a>
-                <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="${prod.id}" style="flex: 1;">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  <span>AGREGAR</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
+    const isRelatedToCurrent = (p) => {
+      const pCat = norm(p.category || p.categoryName || '');
+      const pGarment = norm(p.garment_type || '');
+      const pBrand = norm(p.brand || '');
+      const pName = norm(p.name || '');
+      if (curCat && (pCat === curCat || pCat.includes(curCat) || curCat.includes(pCat) || pName.includes(curCat))) return true;
+      if (curGarment && (pGarment === curGarment || pName.includes(curGarment))) return true;
+      if (curBrand && pBrand === curBrand) return true;
+      return false;
+    };
+
+    // -------------------------------------------------------------------------
+    // SECCIÓN 2.1: PRODUCTOS SUGERIDOS
+    // Prioridad 1: Clasificación C dentro del Stock Físico (ready & availableStock > 0 & !is_scraped)
+    // Fallback: Productos Bajo Pedido (on_demand) o Relacionados con el tipo de producto buscado
+    // -------------------------------------------------------------------------
+    if (suggestedGrid) {
+      const physicalClassC = others.filter(p => {
+        const isPhysicalReady = (p.stockType === 'ready' && !p.is_scraped && Number(p.availableStock || 0) > 0);
+        const abc = String(p.abc_class || 'C').toUpperCase();
+        return isPhysicalReady && abc === 'C';
+      }).sort((a, b) => (isRelatedToCurrent(b) ? 1 : 0) - (isRelatedToCurrent(a) ? 1 : 0));
+
+      let suggestedList = [...physicalClassC];
+      const usedSuggestedIds = new Set(suggestedList.map(p => String(p.id)));
+
+      if (suggestedList.length < 4) {
+        // Fallback: productos bajo pedido o relacionados con el tipo de producto que están buscando
+        const fallbackPool = others.filter(p => {
+          if (usedSuggestedIds.has(String(p.id))) return false;
+          const isOnDemand = (p.stockType === 'on_demand' || p.stockType === 'drop_on_demand' || Boolean(p.is_scraped) || Number(p.availableStock || 0) <= 0);
+          return isRelatedToCurrent(p) || isOnDemand;
+        }).sort((a, b) => (isRelatedToCurrent(b) ? 1 : 0) - (isRelatedToCurrent(a) ? 1 : 0));
+
+        for (const item of fallbackPool) {
+          if (suggestedList.length >= 4) break;
+          suggestedList.push(item);
+          usedSuggestedIds.add(String(item.id));
+        }
+      }
+
+      if (suggestedList.length < 4) {
+        for (const item of others) {
+          if (suggestedList.length >= 4) break;
+          if (!usedSuggestedIds.has(String(item.id))) {
+            suggestedList.push(item);
+            usedSuggestedIds.add(String(item.id));
+          }
+        }
+      }
+
+      const finalSuggested = suggestedList.slice(0, 4);
+      const badgeEl = document.getElementById('pdpSuggestedBadge');
+      const subEl = document.getElementById('pdpSuggestedSub');
+
+      if (physicalClassC.length > 0) {
+        if (badgeEl) badgeEl.textContent = 'STOCK FÍSICO // CLASIFICACIÓN C';
+        if (subEl) {
+          subEl.textContent = physicalClassC.length >= 4
+            ? 'Selección prioritaria de piezas con Clasificación C disponibles en stock físico para envío inmediato.'
+            : 'Piezas con Clasificación C en stock físico complementadas con alternativas bajo pedido y afines a tu búsqueda.';
+        }
+      } else {
+        if (badgeEl) badgeEl.textContent = 'BAJO PEDIDO & RELACIONADOS';
+        if (subEl) {
+          subEl.textContent = 'Sugerencias confeccionadas bajo pedido y prendas relacionadas con el tipo de silueta que estás consultando.';
+        }
+      }
+
+      suggestedGrid.innerHTML = finalSuggested.map(prod => createProductCardHTML(prod)).join('');
+    }
+
+    // -------------------------------------------------------------------------
+    // SECCIÓN 2.2: PERFIL ANATÓMICO (SI ESTÁ LOGUEADO) -> DESCUENTOS (SI NO ESTÁ LOGUEADO) -> RELACIONADOS
+    // -------------------------------------------------------------------------
+    if (profileGrid) {
+      let session = null;
+      try {
+        session = JSON.parse(localStorage.getItem('multiverse_customer_session') || 'null');
+      } catch (e) {}
+
+      const isUserLoggedIn = Boolean(
+        session && (
+          session.email ||
+          session.name ||
+          session.phone ||
+          session.loggedIn ||
+          session.provider ||
+          session.twoFactorEnrolled ||
+          (session.anatomicalProfile && session.anatomicalProfile.size)
+        )
+      );
+
+      const badgeEl = document.getElementById('pdpProfileSectionBadge');
+      const titleEl = document.getElementById('pdpProfileSectionTitle');
+      const subEl = document.getElementById('pdpProfileSectionSub');
+      const actionBtnText = document.getElementById('pdpProfileActionBtnText');
+
+      let section2Products = [];
+
+      if (isUserLoggedIn) {
+        const anat = (session && session.anatomicalProfile) ? session.anatomicalProfile : {
+          waistCm: 82,
+          size: 'M',
+          pants: '31-32',
+          silhouettes: { jocks: true, boxers: true, tangas: false, bikinis: false, tanktops: true }
+        };
+        const prefSize = String(anat.size || 'M').toUpperCase();
+        const silObj = anat.silhouettes || { jocks: true, boxers: true, tanktops: true };
+        const activeSilhouettes = Array.isArray(silObj)
+          ? silObj.map(s => norm(s))
+          : Object.keys(silObj).filter(k => silObj[k]).map(k => norm(k));
+
+        const matchesSilhouette = (p) => {
+          if (activeSilhouettes.length === 0) return true;
+          const pCat = norm(p.category || p.categoryName || '');
+          const pGarment = norm(p.garment_type || '');
+          const pName = norm(p.name || '');
+          return activeSilhouettes.some(s => pCat.includes(s) || s.includes(pCat) || pGarment.includes(s) || pName.includes(s));
+        };
+
+        const matchesSize = (p) => {
+          const sizes = Array.isArray(p.sizes) ? p.sizes.map(sz => String(sz).toUpperCase()) : [];
+          return sizes.includes(prefSize) || sizes.includes('UNI');
+        };
+
+        // Prendas que coinciden tanto con su talla anatómica como con sus siluetas favoritas
+        const strictAnatomyMatches = others.filter(p => matchesSize(p) && matchesSilhouette(p));
+        const usedIds = new Set(strictAnatomyMatches.map(p => String(p.id)));
+        section2Products = [...strictAnatomyMatches];
+
+        if (section2Products.length < 4) {
+          const partialMatches = others.filter(p => !usedIds.has(String(p.id)) && (matchesSize(p) || matchesSilhouette(p)));
+          for (const item of partialMatches) {
+            if (section2Products.length >= 4) break;
+            section2Products.push(item);
+            usedIds.add(String(item.id));
+          }
+        }
+
+        if (section2Products.length < 4) {
+          for (const item of others) {
+            if (section2Products.length >= 4) break;
+            if (!usedIds.has(String(item.id))) {
+              section2Products.push(item);
+              usedIds.add(String(item.id));
+            }
+          }
+        }
+
+        section2Products = section2Products.slice(0, 4);
+
+        // Pre-seleccionar la talla anatómica del usuario en las tarjetas de esta sección
+        section2Products.forEach(p => {
+          if (Array.isArray(p.sizes) && p.sizes.map(s => String(s).toUpperCase()).includes(prefSize)) {
+            storeState.selectedSizes[p.id] = prefSize;
+          }
+        });
+
+        if (badgeEl) {
+          badgeEl.className = 'pdp-dynamic-badge badge-anatomy';
+          badgeEl.textContent = `PERFIL ANATÓMICO // TALLA ${prefSize}`;
+        }
+        if (titleEl) {
+          titleEl.textContent = 'Para tu Perfil Anatómico y Cuenta';
+        }
+        if (subEl) {
+          const waistLabel = anat.waistCm ? ` (${anat.waistCm} cm cintura)` : '';
+          subEl.textContent = `Prendas compatibles con tu talla recomendada ${prefSize}${waistLabel} y las siluetas guardadas en tu perfil.`;
+        }
+        if (actionBtnText) {
+          actionBtnText.textContent = 'Actualizar Perfil Anatómico';
+        }
+      } else {
+        // Usuario NO logueado: Mostrar más productos con descuentos; de no existir, productos relacionados con su consulta
+        const discountedProducts = others.filter(p => {
+          const disc = Number(p.discount_pct || 0);
+          const comp = Number(p.compare_at_price || 0);
+          const pr = Number(p.price || 0);
+          return disc > 0 || (comp > pr && pr > 0);
+        }).sort((a, b) => Number(b.discount_pct || 0) - Number(a.discount_pct || 0));
+
+        if (discountedProducts.length > 0) {
+          section2Products = [...discountedProducts];
+          const usedIds = new Set(section2Products.map(p => String(p.id)));
+          if (section2Products.length < 4) {
+            const relatedPool = others.filter(p => !usedIds.has(String(p.id)) && isRelatedToCurrent(p));
+            for (const item of relatedPool) {
+              if (section2Products.length >= 4) break;
+              section2Products.push(item);
+              usedIds.add(String(item.id));
+            }
+          }
+          if (section2Products.length < 4) {
+            for (const item of others) {
+              if (section2Products.length >= 4) break;
+              if (!usedIds.has(String(item.id))) {
+                section2Products.push(item);
+                usedIds.add(String(item.id));
+              }
+            }
+          }
+          section2Products = section2Products.slice(0, 4);
+
+          if (badgeEl) {
+            badgeEl.className = 'pdp-dynamic-badge badge-discount';
+            badgeEl.textContent = 'PROMOCIONES & DESCUENTOS ACTIVOS';
+          }
+          if (titleEl) {
+            titleEl.textContent = 'Más Productos con Descuento';
+          }
+          if (subEl) {
+            subEl.textContent = 'Aprovecha prendas seleccionadas con beneficio activo. Inicia sesión para recibir sugerencias de tu perfil anatómico.';
+          }
+        } else {
+          // De no existir productos con descuento, se muestran productos relacionados con su consulta
+          const relatedProducts = others.filter(p => isRelatedToCurrent(p));
+          const usedIds = new Set(relatedProducts.map(p => String(p.id)));
+          section2Products = [...relatedProducts];
+
+          if (section2Products.length < 4) {
+            for (const item of others) {
+              if (section2Products.length >= 4) break;
+              if (!usedIds.has(String(item.id))) {
+                section2Products.push(item);
+                usedIds.add(String(item.id));
+              }
+            }
+          }
+          section2Products = section2Products.slice(0, 4);
+
+          if (badgeEl) {
+            badgeEl.className = 'pdp-dynamic-badge';
+            badgeEl.textContent = 'AFINES A TU CONSULTA';
+          }
+          if (titleEl) {
+            titleEl.textContent = 'Productos Relacionados con tu Consulta';
+          }
+          if (subEl) {
+            subEl.textContent = 'Alternativas ergonómicas de la misma categoría y corte. Inicia sesión en tu cuenta para personalizar por perfil anatómico.';
+          }
+        }
+
+        if (actionBtnText) {
+          actionBtnText.textContent = 'Iniciar Sesión / Crear Perfil Anatómico';
+        }
+      }
+
+      profileGrid.innerHTML = section2Products.map(prod => createProductCardHTML(prod)).join('');
+    }
   }
 
   // Conmutador de Universos (Top bar & Drawer ZARA)
@@ -2877,25 +3171,25 @@
     if (paymentBox) {
       if (checkoutState.paymentMethod === 'oxxo_pay') {
         paymentBox.innerHTML = `
-          <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 14px; text-align: center;">
-            <strong style="font-family: var(--font-heading); font-size: 0.82rem; color: #92400e; display: block; margin-bottom: 6px;">
+          <div class="checkout-oxxo-box" style="background: #fef3c7; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <strong class="checkout-oxxo-title" style="font-family: var(--font-heading); font-size: 0.82rem; color: #92400e; display: block; margin-bottom: 6px;">
               Referencia Digital OXXO Pay
             </strong>
-            <div style="font-family: monospace; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; color: #78350f; background: #ffffff; padding: 10px; border-radius: 6px; border: 1px dashed #d97706; margin-bottom: 8px;">
+            <div class="checkout-oxxo-ref" style="font-family: monospace; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; color: #78350f; background: #ffffff; padding: 10px; border-radius: 6px; border: 1px dashed #d97706; margin-bottom: 8px;">
               ${oxxoRef}
             </div>
-            <p style="font-size: 0.72rem; color: #92400e; margin: 0; line-height: 1.4;">
+            <p class="checkout-oxxo-desc" style="font-size: 0.72rem; color: #92400e; margin: 0; line-height: 1.4;">
               Indica en caja que realizarás un pago OXXO Pay con esta referencia. Tu stock de prendas queda apartado por <strong>48 horas</strong>.
             </p>
           </div>
         `;
       } else {
         paymentBox.innerHTML = `
-          <div style="background: var(--accent-emerald-soft); border: 1px solid var(--accent-emerald-border); border-radius: var(--radius-sm); padding: 14px;">
+          <div class="checkout-card-approved-box" style="background: var(--accent-emerald-soft); border: 1px solid var(--accent-emerald-border); border-radius: var(--radius-sm); padding: 14px;">
             <strong style="font-family: var(--font-heading); font-size: 0.85rem; color: var(--accent-emerald); display: block; margin-bottom: 4px;">
               Pago con Tarjeta Aprobado
             </strong>
-            <p style="font-size: 0.75rem; color: #065f46; margin: 0; line-height: 1.4;">
+            <p class="checkout-card-approved-desc" style="font-size: 0.75rem; color: #065f46; margin: 0; line-height: 1.4;">
               El cargo por MXN $${total.toFixed(2)} fue autorizado con tu tarjeta terminación <strong>${cardLast4}</strong>. Recibirás confirmación y guía de rastreo en tu correo.
             </p>
           </div>
@@ -2909,20 +3203,20 @@
       if (cartType === 'mixed') {
         confirmedMixedEl.style.display = 'block';
         confirmedMixedEl.innerHTML = `
-          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px; margin-bottom: 14px;">
-            <strong style="font-family: var(--font-heading); font-size: 0.8rem; color: #1e40af; display: block; margin-bottom: 4px;">
+          <div class="checkout-confirmed-mixed-box" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px; margin-bottom: 14px;">
+            <strong class="checkout-confirmed-mixed-title" style="font-family: var(--font-heading); font-size: 0.8rem; color: #1e40af; display: block; margin-bottom: 4px;">
               LOGISTICA DE CARRITO MIXTO // BIFURCACION CONFIRMADA
             </strong>
-            <p style="font-size: 0.72rem; color: #1e3a8a; margin: 0 0 8px; line-height: 1.35;">
+            <p class="checkout-confirmed-mixed-desc" style="font-size: 0.72rem; color: #1e3a8a; margin: 0 0 8px; line-height: 1.35;">
               Estrategia: <strong>${checkoutState.dispatchStrategy === 'split' ? 'Despacho Dividido (2 Guias de Rastreo Courier)' : 'Despacho Consolidado (1 Guia Courier Consolidada)'}</strong>
             </p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.7rem;">
-              <div style="background: #ffffff; border: 1px solid #dbeafe; border-radius: 4px; padding: 8px;">
-                <span style="display: block; font-weight: 700; color: #047857; margin-bottom: 2px;">[LINEA A] STOCK FISICO BODEGA</span>
+              <div class="checkout-confirmed-line-card" style="background: #ffffff; border: 1px solid #dbeafe; border-radius: 4px; padding: 8px;">
+                <span style="display: block; font-weight: 700; color: #10b981; margin-bottom: 2px;">[LINEA A] STOCK FISICO BODEGA</span>
                 <span style="color: var(--text-secondary);">${readyItems.length} prenda(s) - Salida en 24-48h</span>
               </div>
-              <div style="background: #ffffff; border: 1px solid #dbeafe; border-radius: 4px; padding: 8px;">
-                <span style="display: block; font-weight: 700; color: #b45309; margin-bottom: 2px;">[LINEA B] TALLER ON-DEMAND</span>
+              <div class="checkout-confirmed-line-card" style="background: #ffffff; border: 1px solid #dbeafe; border-radius: 4px; padding: 8px;">
+                <span style="display: block; font-weight: 700; color: #f59e0b; margin-bottom: 2px;">[LINEA B] TALLER ON-DEMAND</span>
                 <span style="color: var(--text-secondary);">${onDemandItems.length} prenda(s) - Confeccion: 3-5 dias</span>
               </div>
             </div>
@@ -3105,7 +3399,7 @@
           </button>
         </div>
         <div class="review-card-body">
-          <div style="font-weight: 700; font-size: 0.82rem; color: #050505;">${payLabel}</div>
+          <div class="review-pay-label" style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">${payLabel}</div>
           <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 2px;">${paySub}</div>
         </div>
       </div>
@@ -3120,8 +3414,8 @@
         </div>
         <div class="review-card-body">
           ${cartType === 'mixed' ? `
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; padding: 8px; margin-bottom: 8px;">
-              <span style="font-size: 0.72rem; font-weight: 700; color: #166534; display: block;">
+            <div class="review-mixed-strategy-banner" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; padding: 8px; margin-bottom: 8px;">
+              <span class="review-mixed-strategy-text" style="font-size: 0.72rem; font-weight: 700; color: #166534; display: block;">
                 Estrategia: ${checkoutState.dispatchStrategy === 'split' ? 'Despacho Dividido / Split (2 Paquetes Separados)' : 'Despacho Consolidado Ecologico (1 Solo Paquete)'}
               </span>
             </div>
@@ -3151,7 +3445,7 @@
       </div>
 
       <!-- Tarjeta 4: Auditoria Financiera Oficial -->
-      <div class="checkout-review-card" style="background: var(--bg-secondary); border-color: var(--border-medium);">
+      <div class="checkout-review-card checkout-audit-card" style="background: var(--bg-secondary); border-color: var(--border-medium);">
         <div class="review-card-header">
           <div class="review-card-title-group">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -3185,7 +3479,7 @@
           </div>
           <div class="checkout-summary-line total" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-medium);">
             <span>Gran Total a Pagar</span>
-            <span style="color: #050505; font-size: 0.95rem;">MXN $${total.toFixed(2)}</span>
+            <span class="review-grand-total-val" style="color: var(--text-primary); font-size: 0.95rem;">MXN $${total.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -3245,6 +3539,9 @@
     }
 
     renderAccountSheetContent();
+    if (typeof renderPdpDynamicSections === 'function') {
+      renderPdpDynamicSections();
+    }
     showToastNotification('Sesión iniciada con Google.');
   }
 
@@ -3922,6 +4219,9 @@
       })
     }).catch(e => console.warn('Error sincronizando perfil anatómico:', e));
 
+    if (typeof renderPdpDynamicSections === 'function') {
+      renderPdpDynamicSections();
+    }
     showToastNotification('Perfil Anatómico guardado exitosamente.');
   }
 
@@ -4969,11 +5269,24 @@
     } catch (e) {}
     checkoutState.customer = { name: '', phone: '', email: '' };
     renderAccountSheetContent();
+    if (typeof renderPdpDynamicSections === 'function') {
+      renderPdpDynamicSections();
+    }
     showToastNotification('Sesión cerrada correctamente.');
   }
 
   // Delegación de Eventos Click
   document.addEventListener('click', function(e) {
+    // 0. Abrir Perfil Anatómico desde PDP
+    const openAnatBtn = e.target.closest('[data-action="open-anatomy-profile"]');
+    if (openAnatBtn) {
+      e.preventDefault();
+      openDrawer('accountSheet');
+      if (typeof switchAccountTab === 'function') {
+        switchAccountTab('profile');
+      }
+      return;
+    }
     // 1. Selector de Talla en Tarjeta de Producto
     const sizeBtn = e.target.closest('[data-action="select-size"]');
     if (sizeBtn) {
@@ -6482,10 +6795,17 @@
     if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
+
+    // Renderizar Secciones Dinámicas si estamos en una Página de Producto (PDP)
+    if (typeof renderPdpDynamicSections === 'function') {
+      renderPdpDynamicSections();
+    }
   }
 
   // Exponer a Window para pruebas automatizadas
   if (typeof window !== 'undefined') {
+    window.createProductCardHTML = createProductCardHTML;
+    window.renderPdpDynamicSections = renderPdpDynamicSections;
     window.setAppTheme = setAppTheme;
     window.getAppTheme = getAppTheme;
     window.storeState = storeState;

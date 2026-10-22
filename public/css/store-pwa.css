@@ -5474,18 +5474,33 @@ html.dark .discount-filter-btn.active {
 }
 
 /* ============================================================================
-   TABLET APP MODE (<= 1024px) & ANTI-OVERFLOW NAVBAR
+   TABLET APP MODE (<= 1024px) & ANTI-OVERFLOW NAVBAR (iPhone 12 mini / Mobile)
    ============================================================================ */
+.navbar-mobile .brand-titles,
 .tablet-only-brand-titles {
-  display: none;
+  display: none !important;
+}
+
+@media (max-width: 420px) {
+  .navbar-mobile {
+    padding: 0 10px !important;
+    height: 52px !important;
+    overflow: hidden;
+  }
+  .navbar-mobile .pwa-btn-text,
+  .navbar-mobile .btn-pwa-app-header-text {
+    display: none !important;
+  }
+  .navbar-mobile .btn-pwa-app-header {
+    padding: 6px 8px !important;
+  }
+  .navbar-mobile .mobile-icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
 }
 
 @media (min-width: 600px) and (max-width: 1024px) {
-  .tablet-only-brand-titles {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-  }
   .navbar-mobile {
     height: 62px;
     padding: 0 24px;
@@ -5723,6 +5738,7 @@ html.dark .cart-Urgency-banner {
 html.dark .mixed-shipping-strategy-card,
 html.dark .mixed-option-card,
 html.dark .mixed-line-group,
+html.dark .mixed-line-col,
 html.dark .review-summary-card,
 html.dark .payment-method-card,
 html.dark .spei-bank-details-box {
@@ -5735,6 +5751,441 @@ html.dark .mixed-option-card.active,
 html.dark .payment-method-card.active {
   background: rgba(99, 102, 241, 0.14) !important;
   border-color: #6366f1 !important;
+}
+
+/* ============================================================================
+   OPTIMIZACION INTEGRAL MODO OSCURO PARA CHECKOUT EN 4 PASOS (#checkoutModal)
+   Paso 1 (Envío & Estrategia Mixta), Paso 2 (Pago), Paso 3 (Resumen), Paso 4 (Confirmación)
+   ============================================================================ */
+html.dark #checkoutModal,
+html.dark .checkout-modal-sheet {
+  background: #12141c !important;
+  color: #f8fafc !important;
+  border: 1px solid #272b3a !important;
+}
+
+html.dark .checkout-header {
+  background: #12141c !important;
+  border-bottom-color: #272b3a !important;
+}
+
+html.dark .checkout-brand-title {
+  color: #94a3b8 !important;
+}
+
+html.dark .checkout-close-btn {
+  background: #1e2230 !important;
+  border-color: #32384e !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .checkout-close-btn:hover {
+  background: #282d40 !important;
+  color: #ffffff !important;
+}
+
+/* Stepper 4 Pasos en Modo Oscuro */
+html.dark .stepper-step {
+  color: #64748b !important;
+}
+
+html.dark .stepper-step.active {
+  color: #f8fafc !important;
+}
+
+html.dark .stepper-step.completed {
+  color: #34d399 !important;
+}
+
+html.dark .stepper-num {
+  background: #1e2230 !important;
+  color: #94a3b8 !important;
+  border: 1px solid #2d3348 !important;
+}
+
+html.dark .stepper-step.active .stepper-num {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  border-color: #818cf8 !important;
+}
+
+html.dark .stepper-step.completed .stepper-num {
+  background: #059669 !important;
+  color: #ffffff !important;
+  border-color: #10b981 !important;
+}
+
+html.dark .stepper-divider {
+  background: #272b3a !important;
+}
+
+/* Barra de Urgencia y Avisos de Tipo de Carrito en Modo Oscuro */
+html.dark .checkout-timer-bar {
+  background: rgba(225, 29, 72, 0.14) !important;
+  border-bottom-color: rgba(244, 63, 94, 0.3) !important;
+}
+
+html.dark .checkout-timer-label {
+  color: #fda4af !important;
+}
+
+html.dark .checkout-timer-progress-track {
+  background: rgba(255, 228, 230, 0.15) !important;
+}
+
+html.dark .checkout-cart-type-notice {
+  background: #161923 !important;
+  border-bottom-color: #272b3a !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .checkout-cart-type-notice.type-notice-mixed,
+html.dark .checkout-cart-type-notice.mixed {
+  background: rgba(37, 99, 235, 0.14) !important;
+  border-bottom-color: rgba(59, 130, 246, 0.35) !important;
+  color: #bfdbfe !important;
+}
+
+html.dark .checkout-cart-type-notice .cart-type-desc {
+  color: #cbd5e1 !important;
+}
+
+html.dark .checkout-cart-type-notice .cart-type-desc strong {
+  color: #f8fafc !important;
+}
+
+html.dark .type-pill-ready {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #6ee7b7 !important;
+}
+
+html.dark .type-pill-demand {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  color: #fcd34d !important;
+}
+
+/* Paso 1: Google Auth, Inputs, Estrategia Mixta, Opt-In, Cupones y Resumen */
+html.dark .checkout-content-scroll {
+  background: #12141c !important;
+  color: #f8fafc !important;
+}
+
+html.dark .checkout-section-title {
+  color: #f8fafc !important;
+}
+
+html.dark .checkout-section-desc {
+  color: #94a3b8 !important;
+}
+
+html.dark .btn-google-auth {
+  background: #1b1f2c !important;
+  color: #f8fafc !important;
+  border-color: #32384e !important;
+}
+
+html.dark .btn-google-auth:hover {
+  background: #24293a !important;
+  border-color: #4f46e5 !important;
+}
+
+html.dark .checkout-label {
+  color: #cbd5e1 !important;
+}
+
+html.dark .checkout-input {
+  background: #181b26 !important;
+  border-color: #2e3448 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .checkout-input::placeholder {
+  color: #64748b !important;
+}
+
+html.dark .checkout-input:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25) !important;
+}
+
+html.dark .btn-zip-lookup {
+  background: #1e2230 !important;
+  border-color: #32384e !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .btn-zip-lookup:hover {
+  background: #282d40 !important;
+  color: #ffffff !important;
+}
+
+html.dark .mixed-strategy-title,
+html.dark .mixed-option-heading {
+  color: #f8fafc !important;
+}
+
+html.dark .strategy-shipping-fee {
+  color: #93c5fd !important;
+}
+
+html.dark .badge-mixed-rec {
+  background: rgba(22, 163, 74, 0.2) !important;
+  color: #86efac !important;
+}
+
+html.dark .badge-mixed-fast {
+  background: rgba(99, 102, 241, 0.25) !important;
+  color: #c7d2fe !important;
+}
+
+html.dark .mixed-cart-lines-breakdown {
+  border-top-color: #2b3042 !important;
+}
+
+html.dark .line-title-ready {
+  color: #34d399 !important;
+}
+
+html.dark .line-title-demand {
+  color: #fbbf24 !important;
+}
+
+html.dark .line-items {
+  color: #e2e8f0 !important;
+}
+
+html.dark .line-timing {
+  color: #94a3b8 !important;
+}
+
+html.dark .checkout-checkbox-card {
+  background: #181b26 !important;
+  border-color: #2b3042 !important;
+}
+
+html.dark .checkout-checkbox-card input[type="checkbox"] {
+  accent-color: #6366f1 !important;
+}
+
+html.dark .optin-title {
+  color: #f8fafc !important;
+}
+
+html.dark .optin-sub {
+  color: #94a3b8 !important;
+}
+
+/* Cupones en Checkout Modo Oscuro */
+html.dark .coupon-input-field {
+  background: #181b26 !important;
+  border-color: #2e3448 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .btn-apply-coupon {
+  background: #282d40 !important;
+  color: #f8fafc !important;
+  border-color: #3b425c !important;
+}
+
+html.dark .btn-apply-coupon:hover {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+html.dark .coupon-applied-card {
+  background: rgba(16, 185, 129, 0.14) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #d1fae5 !important;
+}
+
+/* Resumen Financiero & Botones de Navegación Checkout en Modo Oscuro */
+html.dark .checkout-summary-card {
+  background: #181b26 !important;
+  border-color: #2b3042 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .checkout-summary-line {
+  color: #cbd5e1 !important;
+}
+
+html.dark .checkout-summary-line.total {
+  color: #ffffff !important;
+  border-top-color: #2e3448 !important;
+}
+
+html.dark .btn-checkout-primary {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+}
+
+html.dark .btn-checkout-primary:hover {
+  background: #4f46e5 !important;
+}
+
+html.dark .btn-checkout-secondary {
+  background: #1e2230 !important;
+  color: #f8fafc !important;
+  border-color: #32384e !important;
+}
+
+html.dark .btn-checkout-secondary:hover {
+  background: #282d40 !important;
+}
+
+/* Paso 2: Métodos de Pago en Modo Oscuro */
+html.dark .payment-method-name {
+  color: #f8fafc !important;
+}
+
+html.dark .payment-radio-wrap input[type="radio"] {
+  accent-color: #6366f1 !important;
+}
+
+html.dark .card-tag {
+  background: #24293a !important;
+  border-color: #363d54 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .payment-badge-oxxo {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+html.dark .payment-card-body {
+  border-top-color: #2b3042 !important;
+}
+
+/* Paso 3: Tarjetas de Revisión y Resumen Integral en Modo Oscuro */
+html.dark .checkout-review-card {
+  background: #181b26 !important;
+  border-color: #2b3042 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .checkout-review-card.checkout-audit-card {
+  background: #151822 !important;
+  border-color: #32384e !important;
+}
+
+html.dark .review-card-header {
+  border-bottom-color: #272b3a !important;
+}
+
+html.dark .review-card-title-group,
+html.dark .review-card-title-group strong,
+html.dark .review-card-title,
+html.dark .review-pay-label,
+html.dark .review-grand-total-val {
+  color: #f8fafc !important;
+}
+
+html.dark .btn-review-edit,
+html.dark .review-edit-btn {
+  color: #818cf8 !important;
+}
+
+html.dark .review-meta-line,
+html.dark .review-row {
+  color: #cbd5e1 !important;
+}
+
+html.dark .review-meta-line strong,
+html.dark .review-row strong,
+html.dark .review-item-row strong {
+  color: #f8fafc !important;
+}
+
+html.dark .review-item-row {
+  color: #e2e8f0 !important;
+  border-bottom-color: #272b3a !important;
+}
+
+html.dark .review-mixed-strategy-banner {
+  background: rgba(22, 163, 74, 0.16) !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+}
+
+html.dark .review-mixed-strategy-text {
+  color: #86efac !important;
+}
+
+html.dark .review-line-box,
+html.dark .review-line-card {
+  background: #131620 !important;
+  border-color: #272b3a !important;
+  color: #e2e8f0 !important;
+}
+
+/* Paso 4: Confirmación Oficial, Folio, OXXO Pay y Tarjetas Finales en Modo Oscuro */
+html.dark .order-success-title {
+  color: #f8fafc !important;
+}
+
+html.dark .order-success-sub {
+  color: #94a3b8 !important;
+}
+
+html.dark .order-folio-badge {
+  background: #1e2230 !important;
+  border: 1px solid #363d54 !important;
+  color: #ffffff !important;
+}
+
+html.dark .confirmed-items-card,
+html.dark .confirmed-shipping-card {
+  background: #181b26 !important;
+  border-color: #2b3042 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .checkout-oxxo-box {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: rgba(245, 158, 11, 0.38) !important;
+}
+
+html.dark .checkout-oxxo-title,
+html.dark .checkout-oxxo-desc {
+  color: #fde68a !important;
+}
+
+html.dark .checkout-oxxo-ref {
+  background: #12141c !important;
+  color: #fbbf24 !important;
+  border-color: #f59e0b !important;
+}
+
+html.dark .checkout-card-approved-box {
+  background: rgba(16, 185, 129, 0.14) !important;
+  border-color: rgba(16, 185, 129, 0.38) !important;
+}
+
+html.dark .checkout-card-approved-desc {
+  color: #d1fae5 !important;
+}
+
+html.dark .checkout-confirmed-mixed-box {
+  background: rgba(37, 99, 235, 0.14) !important;
+  border-color: rgba(59, 130, 246, 0.35) !important;
+}
+
+html.dark .checkout-confirmed-mixed-title {
+  color: #93c5fd !important;
+}
+
+html.dark .checkout-confirmed-mixed-desc {
+  color: #dbeafe !important;
+}
+
+html.dark .checkout-confirmed-line-card {
+  background: #141722 !important;
+  border-color: #2b3042 !important;
+  color: #e2e8f0 !important;
 }
 
 /* ============================================================================
