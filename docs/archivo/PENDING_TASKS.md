@@ -107,6 +107,7 @@
 | `TASK-STR-07` | Ficha Independiente de Producto (PDP): Supresión de WhatsApp & Visor Modal con Swipe | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `resources/views/store/pwa/product-detail.blade.php`, `PROJECT_RULES.md` |
 | `TASK-STR-08` | Gobernanza Storefront: Filtros Drawer Izquierdo, Reserva en Checkout, Supresión SPEI y Norma UTF-8 | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.css`, `store-pwa.js`, `store-pwa.blade.php`, `PROJECT_RULES.md` |
 | `TASK-STR-09` | Navbar Sticky Permanente, Editor de Marquesina & Páginas Desktop/Móvil con SEO Integral | **Tienda Pública / Hub 2 (CMS)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.blade.php`, `PortalStoreController`, `StorefrontController`, `PROJECT_RULES.md` |
+| `TASK-STR-10` | Operatividad Real de Inscripción Storefront, Google OAuth2 & 2FA (TOTP RFC 6238) | **Tienda Pública (Storefront D2C)** | **Alta (Deuda Técnica)** | **Planificada (Deuda Técnica Registrada)** | `PLAN_OPERATIVIDAD_AUTH_GOOGLE_2FA.md`, App Authenticator, 1-Click Checkout, GIS |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Ajustes Inventario, Catálogo Operativo, Tag v1.3 |
 | `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Panorámico max-w-7xl, 4 KPIs Live, Margen Real, Tag v1.6 |
@@ -2422,3 +2423,36 @@ graph TD
      - Formalizadas las **Reglas 12.3.6, 12.4.4, 12.6.1, 12.7.1 y 12.7.2** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf` mediante Chrome Headless.
 * **Verificación Automatizada:**
   - **421/421 pruebas pasando al 100% (2,772 aserciones, 0 fallos).**
+
+---
+
+### `TASK-STR-10`: Operatividad Real de Inscripción de Usuarios en Storefront, Vinculación con Google OAuth2 y 2FA (TOTP RFC 6238)
+* **Estado:** **Planificada (Deuda Técnica Registrada)**
+* **Módulo / Hub:** **Tienda Pública (Storefront D2C) $\leftrightarrow$ Hub 1 (Dashboard) $\leftrightarrow$ Autenticación Core**
+* **Prioridad:** **Alta (Deuda Técnica Estratégica)**
+* **Referencia Arquitectónica:** `PLAN_OPERATIVIDAD_AUTH_GOOGLE_2FA.md`
+* **Definiciones y Acuerdos de Negocio Registrados:**
+  1. *Canal de Segundo Factor (2FA) Prioritario:*
+     - Se implementará inicialmente **App Authenticator (TOTP RFC 6238)** utilizando `pragmarx/google2fa` y `bacon/bacon-qr-code`.
+     - Es compatible con Google Authenticator, Microsoft Authenticator, Authy y Apple Keychain.
+     - Ventaja: Costo \$0, no consume saldo por SMS/WhatsApp y es 100% funcional sin depender de cobertura celular.
+  2. *Infraestructura Google Cloud Console (Pendiente de Alta):*
+     - El usuario aún no cuenta con el proyecto creado en Google Cloud Console.
+     - Se mantendrá la arquitectura desacoplada lista para recibir `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` en `.env`.
+     - Flujo previsto: Google Identity Services (GIS) con verificación criptográfica de ID Token (JWT) en backend mediante `POST /auth/google/verify-token`.
+  3. *Estrategia de Conversión y Registro en Checkout:*
+     - Se preserva la estrategia de **crear cuenta con un solo clic (*Guest Checkout* con conversión fluida)**.
+     - La inscripción NO será obligatoria para completar una compra. El comprador puede pagar como invitado y consolidar su cuenta al finalizar con el checkbox `#checkoutCreateAccount`.
+* **Alcance Técnico & Brecha a Subsanar al Reactivar la Tarea:**
+  1. *Eliminación de Mocks:*
+     - Erradicar el objeto estático `'Carlos Mendoza'` / `carlos.mendoza@gmail.com` de `store-pwa.js`.
+     - Eliminar banderas booleanas de 2FA simuladas en `localStorage.multiverse_customer_session`.
+  2. *Capa de Persistencia Relacional (DDL & Eloquent):*
+     - Migración `add_oauth_and_2fa_columns_to_users_table`: `google_id`, `google_avatar`, `two_factor_enabled`, `two_factor_secret` (encriptado con `Crypt::encryptString`), `two_factor_recovery_codes` (8 códigos cifrados) y `two_factor_confirmed_at`.
+     - Migración `create_customer_addresses_table`: persistencia real de libreta de direcciones con soporte SEPOMEX.
+     - Migración `create_customer_profiles_table`: persistencia real del perfil anatómico (cintura, siluetas) y preferencia de empaque discreto.
+  3. *Seguridad y Middleware de Desafío:*
+     - Middleware `RequireTwoFactorChallenge` para proteger la sesión del usuario cuando `two_factor_enabled` esté activo.
+     - Endpoint seguro para generación y renderizado de código QR en SVG.
+     - Confirmación previa del código de 6 dígitos antes de activar formalmente el 2FA en base de datos.
+
