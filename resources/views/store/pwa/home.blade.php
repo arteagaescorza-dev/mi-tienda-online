@@ -727,7 +727,7 @@
                       </div>
                       <div style="display: flex; gap: 6px; margin-top: 8px;">
                         <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica completa">
-                          FICHA
+                          DETALLES
                         </a>
                         <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -955,6 +955,9 @@
                     <div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 0.65rem; color: #cbd5e1; text-align: center; margin-top: 2px;">
                       <svg width="10" height="10" fill="none" stroke="#34d399" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                       <span>Código único de un solo uso &bull; Envío instantáneo a WhatsApp</span>
+                    </div>
+                    <div style="font-size: 0.62rem; color: #94a3b8; text-align: center; margin-top: 4px; line-height: 1.35;">
+                      Al registrarte confirmas tu consentimiento para recibir este beneficio vía WhatsApp conforme a nuestra <a href="{{ route('store.privacy') }}" target="_blank" style="color: #cbd5e1; text-decoration: underline;">Política de Privacidad</a>.
                     </div>
                   </form>
                 </div>
@@ -1202,7 +1205,7 @@
                   </div>
                   <div style="display: flex; gap: 6px; margin-top: 8px;">
                     <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica completa">
-                      FICHA
+                      DETALLES
                     </a>
                     <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1639,7 +1642,7 @@
               </div>
               <div style="display: flex; gap: 6px; margin-top: 8px;">
                 <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica completa">
-                  FICHA
+                  DETALLES
                 </a>
                 <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>

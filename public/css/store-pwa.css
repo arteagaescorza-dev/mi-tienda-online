@@ -979,7 +979,7 @@ body.store-body {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 1000;
+  z-index: 1150;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -998,7 +998,7 @@ body.store-body {
   max-height: 85vh;
   background: #ffffff;
   border-radius: 16px 16px 0 0;
-  z-index: 1001;
+  z-index: 1200;
   transform: translateY(100%);
   transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
   display: flex;
@@ -3839,7 +3839,7 @@ html.dark .category-filter-pill.active {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-  z-index: 1050;
+  z-index: 990;
   padding: 14px 16px;
   animation: slideUpPushPrompt 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -6478,6 +6478,69 @@ html.dark .pwa-step-icon-box {
   border-color: #353b52;
   color: #a5b4fc;
 }
+
+/* ==========================================================================
+   ADAPTACIONES DE ERGONOMÍA RESPONSIVE: iPHONE 12 MINI & PANTALLAS COMPACTAS
+   ========================================================================== */
+@media (max-width: 420px) {
+  /* 1. Despeje de Fondo para que el Dock Inferior no tape los Botones de Acción */
+  .store-body,
+  .pdp-page-container,
+  .catalog-page-container,
+  .store-section:last-of-type,
+  .catalog-grid {
+    padding-bottom: calc(85px + env(safe-area-inset-bottom, 16px)) !important;
+  }
+
+  /* 2. Microajustes de Tipografía y Wrapping en Ficha de Producto */
+  .product-sku-code,
+  .pdp-sku-line {
+    font-size: 0.72rem !important;
+    white-space: nowrap !important;
+  }
+
+  .pdp-meta-row {
+    flex-wrap: wrap !important;
+    gap: 4px 10px !important;
+  }
+
+  /* 3. Ajuste de Botones en Tarjeta de Catálogo para 375px (iPhone 12 mini) */
+  .product-sizes-selector {
+    gap: 3px !important;
+  }
+
+  .size-pill-btn {
+    min-width: 28px !important;
+    padding: 3px 4px !important;
+    font-size: 0.65rem !important;
+  }
+
+  /* 4. Modal de Checkout Compacto: Mayor área visible para formularios */
+  .checkout-modal-sheet {
+    max-height: 94vh !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  .checkout-modal-header {
+    padding: 10px 14px 6px !important;
+  }
+
+  .checkout-stock-lock-alert {
+    padding: 4px 10px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .checkout-section-desc {
+    font-size: 0.72rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .checkout-field-group {
+    margin-bottom: 10px !important;
+  }
+}
+
 
 
 

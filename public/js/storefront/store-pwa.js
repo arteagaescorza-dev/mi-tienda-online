@@ -672,7 +672,7 @@
             <!-- Botonera: Ficha PDP + Agregar al Carrito -->
             <div style="display: flex; gap: 6px; margin-top: 8px;">
               <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica">
-                FICHA
+                DETALLES
               </a>
               <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="${prod.id}" style="flex: 1;">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -784,11 +784,11 @@
       const subEl = document.getElementById('pdpSuggestedSub');
 
       if (physicalClassC.length > 0) {
-        if (badgeEl) badgeEl.textContent = 'STOCK FÍSICO // CLASIFICACIÓN C';
+        if (badgeEl) badgeEl.textContent = 'STOCK FÍSICO // EDICIÓN LIMITADA';
         if (subEl) {
           subEl.textContent = physicalClassC.length >= 4
-            ? 'Selección prioritaria de piezas con Clasificación C disponibles en stock físico para envío inmediato.'
-            : 'Piezas con Clasificación C en stock físico complementadas con alternativas bajo pedido y afines a tu búsqueda.';
+            ? 'Selección exclusiva de prendas con disponibilidad inmediata en bodega para despacho express.'
+            : 'Prendas con entrega inmediata en bodega complementadas con alternativas bajo pedido afines a tu estilo.';
         }
       } else {
         if (badgeEl) badgeEl.textContent = 'BAJO PEDIDO & RELACIONADOS';
@@ -1917,14 +1917,14 @@
       itemsHtml += `
         <div style="margin-top: 10px;">
           <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Linea A - Bodega Local (Entrega Express 24-48h)</span>
+            <span>Entrega Inmediata // Bodega Local (24-48h)</span>
             <span style="color: #059669; font-size: 0.65rem;">Stock Apartado</span>
           </div>
           ${lineAEntries.map(renderItemHtml).join('')}
         </div>
         <div style="margin-top: 16px;">
           <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Linea B - Bajo Pedido / Proveedor (Entrega 3-5 días)</span>
+            <span>Confección Bajo Pedido (Entrega 3-5 días hábiles)</span>
             <span style="color: #d97706; font-size: 0.65rem;">Bajo Pedido</span>
           </div>
           ${lineBEntries.map(renderItemHtml).join('')}
@@ -1934,7 +1934,7 @@
       itemsHtml += `
         <div style="margin-top: 10px;">
           <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Linea A - Bodega Local (Entrega Express 24-48h)</span>
+            <span>Entrega Inmediata // Bodega Local (24-48h)</span>
             <span style="color: #059669; font-size: 0.65rem;">Stock Apartado</span>
           </div>
           ${lineAEntries.map(renderItemHtml).join('')}
@@ -1944,7 +1944,7 @@
       itemsHtml += `
         <div style="margin-top: 10px;">
           <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Linea B - Bajo Pedido / Proveedor (Entrega 3-5 días)</span>
+            <span>Confección Bajo Pedido (Entrega 3-5 días hábiles)</span>
             <span style="color: #d97706; font-size: 0.65rem;">Bajo Pedido</span>
           </div>
           ${lineBEntries.map(renderItemHtml).join('')}
@@ -2692,14 +2692,14 @@
         breakdownEl.innerHTML = `
           <div class="mixed-lines-grid">
             <div class="mixed-line-col">
-              <strong class="line-title line-title-ready">[LINEA A] STOCK FISICO EN BODEGA</strong>
+              <strong class="line-title line-title-ready">[STOCK FÍSICO] ENTREGA INMEDIATA BODEGA</strong>
               <div class="line-items">
                 ${readyItems.map(it => `<div>- ${it.quantity}x ${it.name} (${it.size})</div>`).join('')}
               </div>
               <span class="line-timing">Despacho express courier: 24 a 48 hrs</span>
             </div>
             <div class="mixed-line-col">
-              <strong class="line-title line-title-demand">[LINEA B] CONFECCION BAJO PEDIDO</strong>
+              <strong class="line-title line-title-demand">[BAJO PEDIDO] CONFECCIÓN ON-DEMAND</strong>
               <div class="line-items">
                 ${onDemandItems.map(it => `<div>- ${it.quantity}x ${it.name} (${it.size})</div>`).join('')}
               </div>
@@ -3212,11 +3212,11 @@
             </p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.7rem;">
               <div class="checkout-confirmed-line-card" style="background: #ffffff; border: 1px solid #dbeafe; border-radius: 4px; padding: 8px;">
-                <span style="display: block; font-weight: 700; color: #10b981; margin-bottom: 2px;">[LINEA A] STOCK FISICO BODEGA</span>
+                <span style="display: block; font-weight: 700; color: #10b981; margin-bottom: 2px;">[STOCK FÍSICO] BODEGA LOCAL</span>
                 <span style="color: var(--text-secondary);">${readyItems.length} prenda(s) - Salida en 24-48h</span>
               </div>
               <div class="checkout-confirmed-line-card" style="background: #ffffff; border: 1px solid #dbeafe; border-radius: 4px; padding: 8px;">
-                <span style="display: block; font-weight: 700; color: #f59e0b; margin-bottom: 2px;">[LINEA B] TALLER ON-DEMAND</span>
+                <span style="display: block; font-weight: 700; color: #f59e0b; margin-bottom: 2px;">[BAJO PEDIDO] TALLER ON-DEMAND</span>
                 <span style="color: var(--text-secondary);">${onDemandItems.length} prenda(s) - Confeccion: 3-5 dias</span>
               </div>
             </div>
@@ -3421,12 +3421,12 @@
             </div>
             <div class="review-lines-breakdown">
               <div class="review-line-box ready">
-                <span class="review-line-tag">[LINEA A] STOCK FISICO EN BODEGA</span>
+                <span class="review-line-tag">[STOCK FÍSICO] ENTREGA INMEDIATA BODEGA</span>
                 ${readyItems.map(it => `<div class="review-item-row"><span>${it.quantity}x ${it.name} (${it.size})</span><strong>MXN $${(it.price * it.quantity).toFixed(2)}</strong></div>`).join('')}
                 <div class="review-line-timing">Salida express courier en 24-48h</div>
               </div>
               <div class="review-line-box demand">
-                <span class="review-line-tag">[LINEA B] CONFECCION BAJO PEDIDO</span>
+                <span class="review-line-tag">[BAJO PEDIDO] CONFECCIÓN ON-DEMAND</span>
                 ${onDemandItems.map(it => `<div class="review-item-row"><span>${it.quantity}x ${it.name} (${it.size})</span><strong>MXN $${(it.price * it.quantity).toFixed(2)}</strong></div>`).join('')}
                 <div class="review-line-timing">Confeccion artesanal en taller: 3-5 dias habiles</div>
               </div>
@@ -4804,7 +4804,7 @@
             <div class="sub-plan-card">
               <div class="sub-plan-header">
                 <div>
-                  <span class="sub-badge-mrr">CLUB MRR MARTE</span>
+                  <span class="sub-badge-mrr">CLUB VIP MARTE</span>
                   <h4 class="sub-plan-title">Elige tu Nivel de Experiencia</h4>
                 </div>
               </div>
@@ -4839,7 +4839,7 @@
               <div class="sub-plan-header">
                 <div>
                   <span class="sub-badge-mrr">MEMBRESIA VIP D2C</span>
-                  <h4 class="sub-plan-title">MARTE Club MRR</h4>
+                  <h4 class="sub-plan-title">MARTE Club VIP</h4>
                 </div>
                 <div class="sub-plan-price">
                   <strong>$399</strong>
@@ -5237,7 +5237,7 @@
       action = 'open_orders';
       tag = 'multiverse-courier';
     } else if (type === 'subscription_mrr') {
-      title = 'MARTE Club MRR // Próxima Caja Mensual';
+      title = 'MARTE Club VIP // Próxima Caja Mensual';
       body = 'Tu próxima prenda curada se procesará este viernes. Revisa tu Perfil Anatómico.';
       action = 'open_subscription';
       tag = 'multiverse-mrr';
