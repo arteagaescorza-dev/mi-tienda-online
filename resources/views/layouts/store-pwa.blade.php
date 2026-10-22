@@ -907,12 +907,19 @@
         }
       @endphp
 
+      @php
+        $visibleFilterCount = 0;
+      @endphp
       @foreach($cmsFiltersList as $cmsFilter)
         @continue(!$cmsFilter->is_visible)
+        @php
+          $isFirstVisibleAccordion = ($visibleFilterCount === 0);
+          $visibleFilterCount++;
+        @endphp
 
         @if($cmsFilter->filter_key === 'universe')
           <!-- Universos del Catálogo (Checkbox) -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -936,7 +943,7 @@
 
         @elseif($cmsFilter->filter_key === 'category')
           <!-- Categorías & Familias en Formato Árbol Jerárquico -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -991,7 +998,7 @@
 
         @elseif($cmsFilter->filter_key === 'subcategory')
           <!-- Subcategorías Específicas Registradas -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1022,7 +1029,7 @@
 
         @elseif($cmsFilter->filter_key === 'brand')
           <!-- Marcas de Diseñador & Fabricantes Registradas -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1041,7 +1048,7 @@
 
         @elseif($cmsFilter->filter_key === 'supplier')
           <!-- Proveedores Registrados -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1060,7 +1067,7 @@
 
         @elseif($cmsFilter->filter_key === 'size')
           <!-- Curva de Tallas Anatómicas Registradas -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1085,7 +1092,7 @@
 
         @elseif($cmsFilter->filter_key === 'color')
           <!-- Colores & Tornasoles Iridiscentes Registrados en Catálogo -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1105,7 +1112,7 @@
 
         @elseif($cmsFilter->filter_key === 'textile_family')
           <!-- Telas & Fibras Textiles Registradas -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1124,7 +1131,7 @@
 
         @elseif($cmsFilter->filter_key === 'garment_type')
           <!-- Siluetas & Tipos de Prenda -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1154,7 +1161,7 @@
 
         @elseif($cmsFilter->filter_key === 'style_tag')
           <!-- Estilo & Ocasión -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1179,7 +1186,7 @@
 
         @elseif($cmsFilter->filter_key === 'price')
           <!-- Rango de Precio (Checkbox) -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1203,7 +1210,7 @@
 
         @elseif($cmsFilter->filter_key === 'discount')
           <!-- Descuentos & Ofertas (Checkbox) -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1226,7 +1233,7 @@
 
         @elseif($cmsFilter->filter_key === 'volume')
           <!-- Volúmenes de Perfumería -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1245,7 +1252,7 @@
 
         @elseif($cmsFilter->filter_key === 'shade')
           <!-- Tonos Cosméticos & Shading -->
-          <div class="filter-accordion-block">
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -1256,6 +1263,28 @@
                   <label class="filter-checkbox-label">
                     <input type="checkbox" name="filter_shade" value="{{ $tKey }}" class="filter-facet-checkbox filter-shade-checkbox" data-action="filter-facet" data-facet-type="shade" data-val="{{ $tKey }}">
                     <span>{{ $tLabel }}</span>
+                  </label>
+                @endforeach
+              </div>
+            </div>
+          </div>
+
+        @elseif($cmsFilter->filter_key === 'availability' || $cmsFilter->filter_key === 'stock_type')
+          <!-- Disponibilidad de Stock & Modalidad de Entrega (En Stock / Bajo Pedido) -->
+          <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
+            <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
+              <span>{{ $cmsFilter->label }}</span>
+              <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="filter-accordion-content">
+              <div class="filter-checkbox-grid">
+                @foreach([
+                  'in_stock' => 'En Stock',
+                  'on_demand' => 'Bajo Pedido',
+                ] as $avKey => $avLabel)
+                  <label class="filter-checkbox-label">
+                    <input type="checkbox" name="filter_availability" value="{{ $avKey }}" class="filter-facet-checkbox filter-availability-checkbox" data-action="filter-facet" data-facet-type="availability" data-val="{{ $avKey }}">
+                    <span>{{ $avLabel }}</span>
                   </label>
                 @endforeach
               </div>

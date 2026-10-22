@@ -414,6 +414,7 @@ class PortalStoreController extends Controller
             ['filter_key' => 'discount', 'label' => 'Descuentos & Ofertas', 'display_type' => 'checkbox', 'sort_order' => 12, 'is_visible' => true],
             ['filter_key' => 'volume', 'label' => 'Volúmenes de Perfumería', 'display_type' => 'checkbox', 'sort_order' => 13, 'is_visible' => true],
             ['filter_key' => 'shade', 'label' => 'Tonos Cosméticos & Shading', 'display_type' => 'checkbox', 'sort_order' => 14, 'is_visible' => true],
+            ['filter_key' => 'availability', 'label' => 'Disponibilidad (Stock / Bajo Pedido)', 'display_type' => 'checkbox', 'sort_order' => 15, 'is_visible' => true],
         ];
         foreach ($allCatalogDimensions as $dim) {
             $existingDim = CmsCatalogFilter::where('filter_key', $dim['filter_key'])->first();

@@ -202,6 +202,7 @@
     activeStyleTags: [],
     activePrices: [],
     activeDiscounts: [],
+    activeAvailability: [],
     searchQuery: '',         // Búsqueda en tiempo real (Regla 5)
     cart: [],
     savedForLater: [],       // Array de prendas guardadas para después
@@ -554,6 +555,19 @@
           return true;
         });
         if (!matchesDisc) return false;
+      }
+
+      // Filtro de Disponibilidad de Stock & Modalidad de Entrega (En Stock vs Bajo Pedido)
+      if (Array.isArray(storeState.activeAvailability) && storeState.activeAvailability.length > 0) {
+        const isReady = (prod.stockType === 'ready' || prod.stock_type === 'ready' || (!prod.is_scraped && (Number(prod.availableStock || 0) > 0 || Number(prod.total_available_stock || 0) > 0)));
+        const isOnDemand = (prod.stockType === 'on_demand' || prod.stock_type === 'on_demand' || Boolean(prod.is_scraped) || (Number(prod.availableStock || 0) <= 0 && Number(prod.total_available_stock || 0) <= 0));
+
+        const matchesAvail = storeState.activeAvailability.some(a => {
+          if (a === 'in_stock' || a === 'ready' || a === 'stock') return isReady;
+          if (a === 'on_demand' || a === 'bajo_pedido' || a === 'pedido') return isOnDemand;
+          return true;
+        });
+        if (!matchesAvail) return false;
       }
 
       return true;
@@ -5116,6 +5130,7 @@
       storeState.activeStyleTags = Array.from(document.querySelectorAll('input[name="filter_style_tag"]:checked')).map(cb => cb.value);
       storeState.activePrices = Array.from(document.querySelectorAll('input[name="filter_price"]:checked')).map(cb => cb.value);
       storeState.activeDiscounts = Array.from(document.querySelectorAll('input[name="filter_discount"]:checked')).map(cb => cb.value);
+      storeState.activeAvailability = Array.from(document.querySelectorAll('input[name="filter_availability"]:checked, input[name="filter_stock_type"]:checked')).map(cb => cb.value);
 
       const pendingFacets = {
         activeUniverses: storeState.activeUniverses,
@@ -5131,6 +5146,7 @@
         activeStyleTags: storeState.activeStyleTags,
         activePrices: storeState.activePrices,
         activeDiscounts: storeState.activeDiscounts,
+        activeAvailability: storeState.activeAvailability,
       };
       try {
         sessionStorage.setItem('multiverse_active_facets', JSON.stringify(pendingFacets));
@@ -5168,6 +5184,7 @@
       storeState.activeStyleTags = [];
       storeState.activePrices = [];
       storeState.activeDiscounts = [];
+      storeState.activeAvailability = [];
       storeState.activeCategory = 'all';
       storeState.activeBrand = 'all';
       storeState.activeSupplier = 'all';
@@ -6083,6 +6100,7 @@
         if (Array.isArray(f.activeStyleTags)) storeState.activeStyleTags = f.activeStyleTags;
         if (Array.isArray(f.activePrices)) storeState.activePrices = f.activePrices;
         if (Array.isArray(f.activeDiscounts)) storeState.activeDiscounts = f.activeDiscounts;
+        if (Array.isArray(f.activeAvailability)) storeState.activeAvailability = f.activeAvailability;
 
         document.querySelectorAll('.filter-facet-checkbox').forEach(cb => {
           const type = cb.dataset.facetType;
@@ -6100,6 +6118,7 @@
           if (type === 'style_tag' && storeState.activeStyleTags.includes(val)) cb.checked = true;
           if (type === 'price' && storeState.activePrices.includes(val)) cb.checked = true;
           if (type === 'discount' && storeState.activeDiscounts.includes(val)) cb.checked = true;
+          if ((type === 'availability' || type === 'stock_type') && storeState.activeAvailability.includes(val)) cb.checked = true;
         });
 
         if (document.getElementById('catalogProductsGrid')) {
@@ -6125,6 +6144,7 @@
         storeState.activeStyleTags = Array.from(document.querySelectorAll('input[name="filter_style_tag"]:checked')).map(cb => cb.value);
         storeState.activePrices = Array.from(document.querySelectorAll('input[name="filter_price"]:checked')).map(cb => cb.value);
         storeState.activeDiscounts = Array.from(document.querySelectorAll('input[name="filter_discount"]:checked')).map(cb => cb.value);
+        storeState.activeAvailability = Array.from(document.querySelectorAll('input[name="filter_availability"]:checked, input[name="filter_stock_type"]:checked')).map(cb => cb.value);
 
         if (document.getElementById('catalogProductsGrid')) {
           renderProductsGrid('catalogProductsGrid');
