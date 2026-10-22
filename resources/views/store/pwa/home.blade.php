@@ -105,9 +105,9 @@
           <section id="section-{{ $sec->id }}" class="hero-editorial-section {{ $isFullWidth ? 'hero-fullpage-v' : '' }} {{ $isFullWidthH ? 'hero-full-width-h' : '' }} {{ ($isFullWidth && $isFullWidthH) ? 'hero-full-width' : '' }} {{ $isHeroParallax ? 'has-hero-parallax' : '' }}" style="{{ $secSpacingStyle }} padding-top: 0 !important; padding-bottom: 0 !important;" data-section-id="{{ $sec->id }}">
             @if($heroMode === 'custom')
               {{-- MODO CÓDIGO PERSONALIZADO (AISLADO, NO DUPLICA EL HERO) --}}
-              <div class="hero-custom-container" style="position: relative; overflow: hidden; {!! $heroBgStyle !!} {{ (!$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" @if(!$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
+              <div class="hero-custom-container {{ $isHeroParallax ? 'hero-card-parallax-enabled' : '' }}" style="position: relative; overflow: hidden; {!! $heroBgStyle !!} {{ (!$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" @if(!$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
                 @if($isHeroParallax && !empty($parallaxLayerCss))
-                  <div class="hero-parallax-bg-layer" data-hero-parallax-layer="1" style="position: absolute; top: -24%; left: 0; width: 100%; height: 148%; z-index: 0; pointer-events: none; will-change: transform; {!! $parallaxLayerCss !!} transform: translate3d(0, 0, 0) scale(1.08);"></div>
+                  <div class="hero-parallax-bg-layer" data-hero-parallax-layer="1" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; {!! $parallaxLayerCss !!}"></div>
                 @endif
                 @if(!$heroHasButtons && !empty($heroClickUrl))
                   <a href="{{ $heroClickUrl }}" class="hero-full-click-link" style="position: absolute; inset: 0; z-index: 15; width: 100%; height: 100%; text-decoration: none;" aria-label="{{ $sec->title ?? 'Hero' }}"></a>
@@ -128,7 +128,7 @@
               {{-- MODO VISUAL ESTRUCTURADO (FORMULARIO DINÁMICO) --}}
               <div class="hero-banner-card {{ $isHeroParallax ? 'hero-card-parallax-enabled' : '' }}" style="{!! $heroBgStyle !!} {{ $isCarousel ? 'position: relative !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important;' : '' }} {{ ($isCarousel && (empty($settings['hero_height_value']) || (float)$settings['hero_height_value'] <= 0) && !$isFullWidth) ? 'min-height: 440px;' : '' }} {{ ($isCarousel && $isFullWidth) ? 'min-height: calc(100vh - 56px) !important; height: calc(100vh - 56px) !important;' : '' }} {{ (!$isCarousel && !$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" aria-label="{{ $settings['background_image_alt'] ?? '' }}" @if(!$isCarousel && !$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
                 @if($isHeroParallax && !empty($parallaxLayerCss))
-                  <div class="hero-parallax-bg-layer" data-hero-parallax-layer="1" style="position: absolute; top: -24%; left: 0; width: 100%; height: 148%; z-index: 0; pointer-events: none; will-change: transform; {!! $parallaxLayerCss !!} transform: translate3d(0, 0, 0) scale(1.08);"></div>
+                  <div class="hero-parallax-bg-layer" data-hero-parallax-layer="1" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; {!! $parallaxLayerCss !!}"></div>
                 @endif
                 @if(!$isCarousel && !$heroHasButtons && !empty($heroClickUrl))
                   <a href="{{ $heroClickUrl }}" class="hero-full-click-link" style="position: absolute; inset: 0; z-index: 15; width: 100%; height: 100%; text-decoration: none;" aria-label="{{ $sec->title ?? 'Hero' }}"></a>
@@ -209,9 +209,9 @@
                                   elseif ($rawShadow === 'shadow-lg') $sBtnShadow = 'box-shadow: 0 10px 20px -3px rgba(0,0,0,0.3);';
                                   elseif ($rawShadow === 'shadow-xl') $sBtnShadow = 'box-shadow: 0 20px 28px -5px rgba(0,0,0,0.4);';
                               @endphp
-                              <div class="carousel-slide" data-slide-index="{{ $sIdx }}" style="{{ $isCarouselParallax ? 'position: absolute; inset: 0; width: 100%; height: 100%; z-index: ' . ($sIdx === 0 ? '2' : '0') . '; visibility: ' . ($sIdx === 0 ? 'visible' : 'hidden') . '; will-change: clip-path;' : 'flex: 0 0 100%; min-width: 100%; width: 100%; height: 100%; position: relative;' }} overflow: hidden; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 36px max(24px, calc((100vw - 1280px) / 2 + 24px));">
+                              <div class="carousel-slide" data-slide-index="{{ $sIdx }}" style="{{ $isCarouselParallax ? 'position: absolute; inset: 0; width: 100%; height: 100%; z-index: ' . ($sIdx === 0 ? '2' : '0') . '; visibility: ' . ($sIdx === 0 ? 'visible' : 'hidden') . '; -webkit-clip-path: inset(0 0 0 0); clip-path: inset(0 0 0 0); will-change: clip-path;' : 'flex: 0 0 100%; min-width: 100%; width: 100%; height: 100%; position: relative;' }} overflow: hidden; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 36px max(24px, calc((100vw - 1280px) / 2 + 24px));">
                                   @if(!empty($slideImgSrc))
-                                      <img src="{{ $slideImgSrc }}" class="carousel-slide-bg-img" @if($isCarouselParallax) data-hero-parallax-layer="1" @endif alt="{{ $slide['alt_text'] ?? ($slide['title'] ?? 'Slide ' . ($sIdx + 1)) }}" style="position: absolute; {{ $isCarouselParallax ? 'top: -18%; left: 0; width: 100%; height: 136%; will-change: transform;' : 'inset: 0; width: 100%; height: 100%;' }} object-fit: cover; object-position: {{ $slideFocal }}; z-index: 0; pointer-events: none; display: block;" loading="{{ $sIdx === 0 ? 'eager' : 'lazy' }}">
+                                      <img src="{{ $slideImgSrc }}" class="carousel-slide-bg-img" @if($isCarouselParallax) data-hero-parallax-layer="1" @endif alt="{{ $slide['alt_text'] ?? ($slide['title'] ?? 'Slide ' . ($sIdx + 1)) }}" style="position: {{ $isCarouselParallax ? 'fixed' : 'absolute' }}; {{ $isCarouselParallax ? 'top: 0; left: 0; width: 100vw; height: 100vh; height: 100lvh;' : 'inset: 0; width: 100%; height: 100%;' }} object-fit: cover; object-position: {{ $slideFocal }}; z-index: 0; pointer-events: none; display: block;" loading="{{ $sIdx === 0 ? 'eager' : 'lazy' }}">
                                   @else
                                       <div style="position: absolute; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #09090b 100%); z-index: 0;"></div>
                                   @endif
@@ -312,7 +312,7 @@
                                   s.style.zIndex = idx === 0 ? '2' : '0';
                                   s.style.visibility = idx === 0 ? 'visible' : 'hidden';
                                   s.style.opacity = '1';
-                                  s.style.clipPath = 'none';
+                                  s.style.clipPath = 'inset(0 0 0 0)';
                               });
                           }
 
@@ -336,7 +336,7 @@
                                   targetSlide.style.zIndex = '1';
                                   targetSlide.style.visibility = 'visible';
                                   targetSlide.style.opacity = '1';
-                                  targetSlide.style.clipPath = 'none';
+                                  targetSlide.style.clipPath = 'inset(0 0 0 0)';
                                   targetSlide.style.transition = 'none';
 
                                   // Slide actual por encima en z-index 3
@@ -377,7 +377,7 @@
                                       targetSlide.style.zIndex = '2';
                                       currentSlide.style.zIndex = '0';
                                       currentSlide.style.visibility = 'hidden';
-                                      currentSlide.style.clipPath = 'none';
+                                      currentSlide.style.clipPath = 'inset(0 0 0 0)';
                                       currentSlide.style.transition = 'none';
                                       if (curContent) {
                                           curContent.style.opacity = '1';

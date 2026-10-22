@@ -6303,57 +6303,22 @@
   }
 
   // ============================================================================
-  // MOTOR DE PARALLAX SCROLLING 60FPS PARA HERO (COMPATIBLE CON iOS, ANDROID & WEB)
+  // MOTOR DE PARALLAX SCROLLING ("SCROLL FIJO DINAMICO") PARA HERO
   // ============================================================================
   function initHeroParallaxEngine() {
-    let ticking = false;
+    const layers = document.querySelectorAll('[data-hero-parallax-layer="1"]');
+    if (!layers.length) return;
 
-    const updateParallaxLayers = () => {
-      const layers = document.querySelectorAll('[data-hero-parallax-layer="1"]');
-      if (!layers.length) {
-        ticking = false;
-        return;
+    // Las capas usan position: fixed dentro de un contenedor con clip-path: inset(0),
+    // lo que reproduce exactamente el efecto "background-attachment: fixed" (scroll fijo dinamico)
+    // tanto en Desktop como en iOS Safari, iPadOS y Android sin saltos ni desfasajes.
+    layers.forEach((layer) => {
+      layer.style.transform = 'translate3d(0, 0, 0)';
+      const container = layer.closest('.hero-banner-card, .hero-custom-container');
+      if (container) {
+        container.classList.add('hero-card-parallax-enabled');
       }
-
-      const viewportH = window.innerHeight || document.documentElement.clientHeight || 800;
-
-      layers.forEach((layer) => {
-        const container = layer.parentElement;
-        if (!container) return;
-        const rect = container.getBoundingClientRect();
-
-        // Solo calcular si el hero es visible en el viewport
-        if (rect.bottom < -120 || rect.top > viewportH + 120) return;
-
-        // Progreso relativo del centro del hero respecto al centro de la pantalla
-        const containerCenter = rect.top + rect.height * 0.5;
-        const viewportCenter = viewportH * 0.5;
-        const delta = viewportCenter - containerCenter;
-
-        // Desplazamiento vertical suave y perceptible en móvil y desktop
-        const maxShift = Math.min(85, rect.height * 0.22);
-        const rawShift = delta * 0.24;
-        const clampedShift = Math.max(-maxShift, Math.min(maxShift, rawShift));
-
-        layer.style.transform = `translate3d(0, ${clampedShift.toFixed(1)}px, 0) scale(1.08)`;
-      });
-
-      ticking = false;
-    };
-
-    const requestParallaxTick = () => {
-      if (!ticking) {
-        ticking = true;
-        window.requestAnimationFrame(updateParallaxLayers);
-      }
-    };
-
-    window.addEventListener('scroll', requestParallaxTick, { passive: true });
-    window.addEventListener('touchmove', requestParallaxTick, { passive: true });
-    window.addEventListener('resize', requestParallaxTick, { passive: true });
-
-    // Ejecución inicial
-    updateParallaxLayers();
+    });
   }
 
   // Inicialización de la Aplicación
