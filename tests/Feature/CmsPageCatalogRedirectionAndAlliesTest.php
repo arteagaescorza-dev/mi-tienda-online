@@ -136,4 +136,82 @@ class CmsPageCatalogRedirectionAndAlliesTest extends TestCase
         $this->assertEquals('tangas', $tangaItem['category']);
         $this->assertEquals('Tangas', $tangaItem['categoryName']);
     }
+
+    public function test_explore_page_badges_are_homologated_and_strip_unwanted_text()
+    {
+        CmsPage::updateOrCreate(['slug' => 'boxer'], [
+            'title' => 'Boxer',
+            'filter_category' => 'boxer',
+            'filter_universe' => 'all',
+            'image_source_mode' => 'catalog',
+            'status' => 'active',
+            'navbar_order' => 1,
+        ]);
+
+        CmsPage::updateOrCreate(['slug' => 'aliados'], [
+            'title' => 'Convenios con aliados',
+            'status' => 'active',
+            'navbar_order' => 2,
+        ]);
+
+        CmsPage::updateOrCreate(['slug' => 'q&a'], [
+            'title' => 'Q&A Preguntas Frecuentes',
+            'status' => 'active',
+            'navbar_order' => 3,
+        ]);
+
+        $response = $this->get('/explorar');
+        $response->assertStatus(200);
+
+        // No debe mostrar etiquetas no deseadas
+        $response->assertDontSee('EVENTOS HUB 7');
+        $response->assertDontSee('AEO OPTIMIZADO');
+        $response->assertDontSee('CATÁLOGO // BOXER');
+        $response->assertDontSee('ALL // BOXER');
+
+        // Debe contener los badges homologados
+        $response->assertSee('class="explore-card-badge"', false);
+        $response->assertSee('BOXER');
+        $response->assertSee('CONVENIOS');
+        $response->assertSee('Q&A');
+    }
+
+    public function test_boxer_page_resolves_images_and_filters_products_in_catalog()
+    {
+        $boxerProduct = \App\Models\Product::create([
+            'sku' => 'TEST-BX-001',
+            'title' => 'Boxer Ondas Test',
+            'slug' => 'boxer-ondas-test',
+            'brand' => 'Torzo',
+            'price' => 280.00,
+            'visible' => true,
+            'meta' => [
+                'category' => 'Boxers',
+                'universes' => ['marte', 'terra'],
+                'image' => 'https://torzo.kexe.mx/imagenes_productos/boxer_test.jpg',
+                'images' => [
+                    'https://torzo.kexe.mx/imagenes_productos/boxer_test_1.jpg',
+                    'https://torzo.kexe.mx/imagenes_productos/boxer_test_2.jpg',
+                ],
+            ],
+        ]);
+
+        $boxerPage = CmsPage::updateOrCreate(['slug' => 'boxer'], [
+            'title' => 'Boxer',
+            'filter_category' => 'boxer',
+            'filter_universe' => null,
+            'image_source_mode' => 'catalog',
+            'status' => 'active',
+        ]);
+
+        // Verificar resolución de imágenes para la tarjeta de explorar
+        $images = $boxerPage->getResolvedImages();
+        $this->assertNotEmpty($images);
+        $this->assertContains('https://torzo.kexe.mx/imagenes_productos/boxer_test.jpg', $images);
+
+        // Verificar respuesta de catálogo con filtro de categoría boxer
+        $catalogResponse = $this->get('/?tab=catalog&categoria=boxer&universo=marte');
+        $catalogResponse->assertStatus(200);
+        $catalogResponse->assertSee('Boxer Ondas Test');
+    }
 }

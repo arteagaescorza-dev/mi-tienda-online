@@ -287,6 +287,23 @@ class StorefrontController extends Controller
                 ->all();
         }
 
+        $selectedCat = $request->query('categoria') ?: $request->query('category');
+        $catalogProducts = $pwaProducts;
+        if (!empty($selectedCat) && $selectedCat !== 'all') {
+            $normCat = preg_replace('/(s|es)$/i', '', strtolower(trim((string)$selectedCat)));
+            $catalogProducts = array_values(array_filter($pwaProducts, function ($p) use ($normCat, $selectedCat) {
+                $pCat = strtolower(trim((string)($p['category'] ?? '')));
+                $pCatName = strtolower(trim((string)($p['categoryName'] ?? '')));
+                $pName = strtolower(trim((string)($p['name'] ?? '')));
+                $normP = preg_replace('/(s|es)$/i', '', $pCat);
+                return $pCat === strtolower($selectedCat)
+                    || $normP === $normCat
+                    || str_contains($pCat, $normCat)
+                    || str_contains($pCatName, $normCat)
+                    || str_contains($pName, $normCat);
+            }));
+        }
+
         return view('store.pwa.home', [
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
@@ -303,7 +320,7 @@ class StorefrontController extends Controller
             'tracking' => $trackingSettings,
             'trackingSettings' => $trackingSettings,
             'officialDocs' => $officialDocs,
-            'products' => $pwaProducts,
+            'products' => $catalogProducts,
             'initialProducts' => $pwaProducts,
             'categories' => \App\Models\Category::all(),
             'categoriesTree' => $this->getCategoriesTree(),

@@ -1321,6 +1321,79 @@
         flex-direction: column;
         pointer-events: none;
       }
+      .explore-button-card .explore-card-content h3,
+      .explore-card-title {
+        font-family: var(--font-heading, sans-serif) !important;
+        font-size: 1.12rem !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        margin: 0 0 4px !important;
+        line-height: 1.25 !important;
+        text-shadow: 0 3px 12px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+        letter-spacing: 0.01em !important;
+      }
+      .explore-button-card .explore-card-content p,
+      .explore-card-desc {
+        font-size: 0.72rem !important;
+        color: #f1f5f9 !important;
+        opacity: 0.95 !important;
+        margin: 0 0 10px !important;
+        line-height: 1.35 !important;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+      }
+      .explore-card-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        background: rgba(15, 23, 42, 0.85) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        color: #ffffff !important;
+        font-size: 0.62rem !important;
+        font-weight: 800 !important;
+        padding: 4px 10px !important;
+        border-radius: 9999px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        border: 1px solid rgba(255, 255, 255, 0.28) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+        white-space: nowrap !important;
+      }
+      .explore-card-corner-link {
+        background: rgba(255, 255, 255, 0.22) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        color: #ffffff !important;
+        border-radius: 9999px !important;
+        padding: 4px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: 1px solid rgba(255, 255, 255, 0.38) !important;
+        transition: background 0.2s, transform 0.2s !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+      .explore-card-action-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        font-size: 0.68rem !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.22) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        padding: 5px 12px !important;
+        border-radius: 9999px !important;
+        border: 1px solid rgba(255, 255, 255, 0.35) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+      }
     </style>
 
     <div class="explore-buttons-grid">
@@ -1333,6 +1406,24 @@
           $hasCarousel = count($resolvedImages) > 1;
           $catalogTargetUrl = $ep->getCatalogUrl($activeUniverse);
           $effectiveCategory = $ep->getEffectiveCategory();
+
+          // Homologación y limpieza estricta del badge superior (Punto 2)
+          $rawBadge = '';
+          if ($hasFilters) {
+              $rawBadge = $effectiveCategory ?: ($ep->filter_category ?: $ep->title);
+          } elseif (in_array($ep->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($ep->title), 'aliados') || str_contains(strtolower($ep->title), 'convenios')) {
+              $rawBadge = 'CONVENIOS';
+          } elseif (in_array($ep->slug, ['q&a', 'faq', 'preguntas-frecuentes']) || str_contains(strtolower($ep->title), 'preguntas frecuentes') || str_contains(strtolower($ep->title), 'q&a')) {
+              $rawBadge = 'Q&A';
+          } else {
+              $rawBadge = $ep->filter_category ?: $ep->title ?: 'EDITORIAL';
+          }
+
+          $cleanBadge = preg_replace('/^(cat[aá]logo\s*(\/\/\s*)?|all\s*(\/\/\s*)?)/iu', '', trim($rawBadge));
+          $cleanBadge = preg_replace('/(\/\/\s*)?(cat[aá]logo|all|eventos\s*hub\s*7|hub\s*7|aeo\s*optimizado|aeo)$/iu', '', trim($cleanBadge));
+          $cleanBadge = preg_replace('/(eventos\s*hub\s*7|hub\s*7|aeo\s*optimizado|aeo)/iu', '', trim($cleanBadge));
+          $cleanBadge = trim(trim($cleanBadge), '/');
+          $badgeText = strtoupper(trim($cleanBadge) ?: 'COLECCIÓN');
         @endphp
 
         @if($hasFilters)
@@ -1366,41 +1457,26 @@
           @elseif(!empty($resolvedImages[0]))
             <img src="{{ $resolvedImages[0] }}" alt="{{ $ep->title }}" class="explore-card-bg-img" loading="lazy">
           @elseif(in_array($ep->slug, ['q&a', 'faq', 'preguntas-frecuentes']) || str_contains(strtolower($ep->title), 'preguntas frecuentes') || str_contains(strtolower($ep->title), 'q&a'))
-            <div class="explore-card-bg-img" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #09090b, #1e1b4b); color: #818cf8;">
-              <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <div class="explore-card-bg-img" style="display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(99, 102, 241, 0.3) 0%, #09090b 80%); color: #a5b4fc;">
+              <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.8" style="filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8));"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             </div>
           @else
-            <div class="explore-card-bg-img" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #18181b, #09090b); color: #71717a;">
-              <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <div class="explore-card-bg-img" style="display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(99, 102, 241, 0.22) 0%, #09090b 80%); color: #e2e8f0;">
+              <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.8" style="filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8));"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
             </div>
           @endif
 
           {{-- 2. OVERLAY CON DEGRADADO (REGLA 1.1) --}}
           <div class="explore-card-overlay" style="background: {!! $overlayCss !!};"></div>
 
-          {{-- 3. CABECERA / INSIGNIA SUPERIOR --}}
+          {{-- 3. CABECERA / INSIGNIA SUPERIOR (HOMOLOGADA EN COLOR Y TEXTO LIMPIO) --}}
           <div class="explore-card-top">
-            @if($hasFilters)
-              <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
-                {{ strtoupper($ep->filter_universe ?? 'CATÁLOGO') }} {{ !empty($effectiveCategory) ? '// ' . strtoupper($effectiveCategory) : '' }}
-              </span>
-            @elseif(in_array($ep->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($ep->title), 'aliados') || str_contains(strtolower($ep->title), 'convenios'))
-              <span style="background: rgba(79, 70, 229, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
-                CONVENIOS // EVENTOS HUB 7
-              </span>
-            @elseif(in_array($ep->slug, ['q&a', 'faq', 'preguntas-frecuentes']) || str_contains(strtolower($ep->title), 'preguntas frecuentes') || str_contains(strtolower($ep->title), 'q&a'))
-              <span style="background: rgba(79, 70, 229, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
-                Q&amp;A // AEO OPTIMIZADO
-              </span>
-            @else
-              <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
-                EDITORIAL
-              </span>
-            @endif
+            <span class="explore-card-badge">
+              {{ $badgeText }}
+            </span>
 
             @if($hasFilters)
               <span class="explore-card-corner-link" 
-                 style="background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; border-radius: 9999px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); transition: background 0.2s;"
                  title="Ver catálogo de {{ $ep->title }}"
                  aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
@@ -1408,32 +1484,29 @@
             @endif
           </div>
 
-          {{-- 4. CONTENIDO INFERIOR INTEGRADO AL BOTÓN (CONTRASTE GARANTIZADO) --}}
+          {{-- 4. CONTENIDO INFERIOR INTEGRADO AL BOTÓN (ALTO CONTRASTE GARANTIZADO) --}}
           <div class="explore-card-content">
-            <h3 style="font-family: var(--font-heading, sans-serif); font-size: 1.05rem; font-weight: 800; color: {{ $textColor }}; margin: 0 0 4px; line-height: 1.25; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">
+            <h3 class="explore-card-title">
               {{ $ep->title }}
             </h3>
             @if(!empty($ep->seo_description))
-              <p style="font-size: 0.72rem; color: {{ $textColor }}; opacity: 0.9; margin: 0 0 10px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 4px rgba(0,0,0,0.7);">
+              <p class="explore-card-desc">
                 {{ \Illuminate\Support\Str::limit($ep->seo_description, 80) }}
               </p>
             @endif
 
             <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-              <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: {{ $textColor }}; background: rgba(255,255,255,0.22); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 5px 12px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.35);">
+              <span class="explore-card-action-pill">
                 @if($hasFilters)
                   <span>Ver Catálogo</span>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 @elseif(in_array($ep->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($ep->title), 'aliados') || str_contains(strtolower($ep->title), 'convenios'))
-                  <span>Ver Convenios & Eventos</span>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                  <span>Ver Convenios</span>
                 @elseif(in_array($ep->slug, ['q&a', 'faq', 'preguntas-frecuentes']) || str_contains(strtolower($ep->title), 'preguntas frecuentes') || str_contains(strtolower($ep->title), 'q&a'))
                   <span>Ver Q&amp;A Frecuentes</span>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 @else
                   <span>Ver Página</span>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 @endif
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
               </span>
             </div>
           </div>

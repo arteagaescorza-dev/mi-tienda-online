@@ -388,26 +388,29 @@
         }
       }
       // Filtro de Categoría (Árbol y Checkboxes)
-      const matchesCatFilter = (targetCat, prodCat, prodCatName, prodName) => {
+      const matchesCatFilter = (targetCat, prodCat, prodCatName, prodName, prodSku, prodSlug) => {
         if (!targetCat || targetCat === 'all') return true;
-        const t = String(targetCat).toLowerCase().trim();
-        const c = String(prodCat || '').toLowerCase().trim();
-        const cn = String(prodCatName || '').toLowerCase().trim();
-        const pn = String(prodName || '').toLowerCase().trim();
+        const clean = str => (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        const t = clean(targetCat);
+        const c = clean(prodCat);
+        const cn = clean(prodCatName);
+        const pn = clean(prodName);
+        const psku = clean(prodSku);
+        const pslug = clean(prodSlug);
         if (t === c || t === cn) return true;
-        const norm = s => s.replace(/s$/, '').replace(/es$/, '');
+        const norm = s => s.replace(/(s|es)$/, '');
         const nt = norm(t);
-        if (nt === norm(c) || nt === norm(cn) || nt === norm(pn)) return true;
-        if (c.includes(t) || t.includes(c) || cn.includes(t) || t.includes(cn) || pn.includes(nt) || pn.includes(t)) return true;
+        if (nt === norm(c) || nt === norm(cn) || nt === norm(pn) || nt === norm(pslug)) return true;
+        if (c.includes(t) || t.includes(c) || cn.includes(t) || t.includes(cn) || pn.includes(nt) || pn.includes(t) || pslug.includes(nt) || psku.includes(nt)) return true;
         return false;
       };
 
       if (Array.isArray(storeState.activeCategories) && storeState.activeCategories.length > 0) {
-        if (!storeState.activeCategories.some(cat => matchesCatFilter(cat, prod.category, prod.categoryName, prod.name))) {
+        if (!storeState.activeCategories.some(cat => matchesCatFilter(cat, prod.category, prod.categoryName, prod.name, prod.sku, prod.slug))) {
           return false;
         }
       } else if (storeState.activeCategory && storeState.activeCategory !== 'all') {
-        if (!matchesCatFilter(storeState.activeCategory, prod.category, prod.categoryName, prod.name)) {
+        if (!matchesCatFilter(storeState.activeCategory, prod.category, prod.categoryName, prod.name, prod.sku, prod.slug)) {
           return false;
         }
       }
@@ -5337,18 +5340,23 @@
       tab.classList.toggle('active', tab.dataset.universe === targetUniverse);
     });
 
-    const norm = s => (s || '').toLowerCase().trim().replace(/s$/, '').replace(/es$/, '');
+    const cleanNorm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/(s|es)$/, '');
 
     if (category && category !== 'all') {
+      const cNorm = cleanNorm(category);
       storeState.activeCategory = category;
       storeState.activeCategories = [category];
       document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
         const pCat = p.dataset.category || '';
-        p.classList.toggle('active', pCat === category || norm(pCat) === norm(category));
+        p.classList.toggle('active', pCat === category || cleanNorm(pCat) === cNorm);
       });
       document.querySelectorAll('.filter-cat-checkbox, input[name="filter_category"]').forEach(cb => {
         const val = cb.getAttribute('data-val') || cb.value || '';
-        cb.checked = (val === category || norm(val) === norm(category));
+        const isMatch = (val === category || cleanNorm(val) === cNorm || cleanNorm(val).includes(cNorm) || cNorm.includes(cleanNorm(val)));
+        cb.checked = isMatch;
+        if (isMatch && !storeState.activeCategories.includes(val)) {
+          storeState.activeCategories.push(val);
+        }
       });
     } else {
       storeState.activeCategory = 'all';

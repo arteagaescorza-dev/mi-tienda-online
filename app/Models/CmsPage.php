@@ -151,7 +151,7 @@ class CmsPage extends Model
         $images = [];
 
         // Modo Catálogo: Extraer dinámicamente imágenes de productos del catálogo
-        if ($this->image_source_mode === 'catalog') {
+        if ($this->image_source_mode === 'catalog' || ($this->hasCatalogFilters() && empty($this->image_url) && empty($this->gallery_images))) {
             $query = Product::where('visible', true);
 
             if (!empty($this->filter_universe) && $this->filter_universe !== 'all') {
@@ -162,11 +162,23 @@ class CmsPage extends Model
                 });
             }
 
-            if (!empty($this->filter_category) && $this->filter_category !== 'all') {
-                $cat = strtolower($this->filter_category);
-                $query->where(function ($q) use ($cat) {
-                    $q->where('meta->category', 'like', "%{$cat}%")
-                      ->orWhereRaw("LOWER(title) LIKE ?", ["%{$cat}%"]);
+            $cat = !empty($this->filter_category) && $this->filter_category !== 'all'
+                ? strtolower($this->filter_category)
+                : strtolower((string)$this->getEffectiveCategory());
+
+            if (!empty($cat) && $cat !== 'all') {
+                $normCat = preg_replace('/(s|es)$/i', '', $cat);
+                $query->where(function ($q) use ($cat, $normCat) {
+                    $q->where('meta->category', 'like', "%{$normCat}%")
+                      ->orWhere('meta->category', 'like', "%{$cat}%")
+                      ->orWhereRaw("LOWER(title) LIKE ?", ["%{$normCat}%"])
+                      ->orWhereRaw("LOWER(title) LIKE ?", ["%{$cat}%"])
+                      ->orWhereHas('categories', function ($cq) use ($cat, $normCat) {
+                          $cq->where('slug', $cat)
+                             ->orWhere('slug', $normCat)
+                             ->orWhere('slug', 'like', "%{$normCat}%")
+                             ->orWhereRaw("LOWER(name) LIKE ?", ["%{$normCat}%"]);
+                      });
                 });
             }
 
@@ -176,10 +188,19 @@ class CmsPage extends Model
                 $meta = $prod->meta ?? [];
                 if (!empty($meta['image']) && is_string($meta['image'])) {
                     $images[] = $meta['image'];
-                } elseif (!empty($meta['images']) && is_array($meta['images'])) {
+                }
+                if (!empty($meta['images']) && is_array($meta['images'])) {
                     foreach ($meta['images'] as $img) {
                         if (is_string($img) && !empty($img)) {
                             $images[] = $img;
+                        }
+                    }
+                }
+                if (!empty($meta['gallery']) && is_array($meta['gallery'])) {
+                    foreach ($meta['gallery'] as $gItem) {
+                        $gUrl = is_array($gItem) ? ($gItem['url'] ?? null) : (is_string($gItem) ? $gItem : null);
+                        if (!empty($gUrl)) {
+                            $images[] = $gUrl;
                         }
                     }
                 }

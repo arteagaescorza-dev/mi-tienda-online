@@ -254,11 +254,13 @@
       .product-title,
       .nav-link-item,
       .brand-name,
-      .dock-tab-label,
       .store-heading,
       .filter-group-title,
       .universe-pill,
-      h1, h2, h3, h4 {
+      h1:not(.aeo-hero-title):not(.explore-card-title),
+      h2:not(.aeo-hero-title):not(.explore-card-title),
+      h3:not(.aeo-hero-title):not(.explore-card-title),
+      h4 {
         color: var(--brand-text) !important;
       }
     @endif
@@ -324,6 +326,49 @@
         color: var(--brand-accent) !important;
       }
     @endif
+
+    /* Alto Contraste y Visibilidad para Dock Inferior e Iconos de la App */
+    .bottom-app-dock {
+      background: rgba(10, 11, 16, 0.96) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
+    }
+    .dock-tab-btn {
+      color: rgba(255, 255, 255, 0.65) !important;
+      transition: color 0.2s ease, transform 0.2s ease !important;
+    }
+    .dock-tab-btn svg {
+      stroke: currentColor !important;
+      stroke-width: 1.85 !important;
+    }
+    .dock-tab-btn .dock-tab-label {
+      color: rgba(255, 255, 255, 0.65) !important;
+      font-size: 0.65rem !important;
+      font-weight: 600 !important;
+    }
+    .dock-tab-btn:hover {
+      color: #ffffff !important;
+    }
+    .dock-tab-btn:hover .dock-tab-label {
+      color: #ffffff !important;
+    }
+    .dock-tab-btn.active {
+      color: #ffffff !important;
+    }
+    .dock-tab-btn.active svg {
+      stroke: #ffffff !important;
+      stroke-width: 2.3 !important;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.45)) !important;
+    }
+    .dock-tab-btn.active .dock-tab-label {
+      color: #ffffff !important;
+      font-weight: 800 !important;
+    }
+    .btn-nav-action {
+      color: var(--text-primary, #ffffff) !important;
+    }
 
     /* Corrección Ergonómica de Logo y Encabezado */
     .brand-logo-box {
