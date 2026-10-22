@@ -720,16 +720,15 @@
                       @endif
                     </div>
                     <div>
-                      <div class="product-sizes-selector">
-                        @foreach(($prod['sizes'] ?? ['CH', 'M', 'G']) as $sz)
-                          <button type="button" class="size-pill-btn {{ $loop->first ? 'selected' : '' }}" data-action="select-size" data-product-id="{{ $prod['id'] }}" data-size="{{ $sz }}">{{ $sz }}</button>
-                        @endforeach
+                      <div class="product-sizes-summary">
+                        <span class="sizes-label">Tallas:</span>
+                        <span class="sizes-tags">{{ implode(' · ', ($prod['sizes'] ?? ['CH', 'M', 'G'])) }}</span>
                       </div>
                       <div style="display: flex; gap: 6px; margin-top: 8px;">
                         <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica completa">
                           DETALLES
                         </a>
-                        <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
+                        <button type="button" class="btn-add-cart" data-action="quick-add" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                           <span>AGREGAR</span>
                         </button>
@@ -1017,12 +1016,30 @@
               }
               
               if (shouldShow) {
-                var delay = (parseInt(m.dataset.delay, 10) || 3) * 1000;
-                setTimeout(function() {
+                var popupTriggered = false;
+                var triggerPopup = function() {
+                  if (popupTriggered) return;
+                  popupTriggered = true;
                   m.style.display = 'flex';
                   if (freq === 'once_per_session') sessionStorage.setItem(modalKey, '1');
                   if (freq === 'once_per_day') localStorage.setItem(modalKey, Date.now().toString());
-                }, delay);
+                  window.removeEventListener('scroll', handlePopupScroll);
+                };
+
+                // Trigger no intrusivo: 20 segundos de navegación o scroll > 45% de la página
+                var popupTimer = setTimeout(triggerPopup, 20000);
+
+                var handlePopupScroll = function() {
+                  var totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+                  if (totalHeight > 0) {
+                    var currentScroll = window.scrollY || window.pageYOffset;
+                    if ((currentScroll / totalHeight) >= 0.45) {
+                      clearTimeout(popupTimer);
+                      triggerPopup();
+                    }
+                  }
+                };
+                window.addEventListener('scroll', handlePopupScroll, { passive: true });
               }
               
               var closeBehavior = m.dataset.closeBehavior || 'outside';
@@ -1198,16 +1215,15 @@
                   @endif
                 </div>
                 <div>
-                  <div class="product-sizes-selector">
-                    @foreach($prod['sizes'] as $sz)
-                      <button type="button" class="size-pill-btn {{ $loop->first ? 'selected' : '' }}" data-action="select-size" data-product-id="{{ $prod['id'] }}" data-size="{{ $sz }}">{{ $sz }}</button>
-                    @endforeach
+                  <div class="product-sizes-summary">
+                    <span class="sizes-label">Tallas:</span>
+                    <span class="sizes-tags">{{ implode(' · ', ($prod['sizes'] ?? ['CH', 'M', 'G'])) }}</span>
                   </div>
                   <div style="display: flex; gap: 6px; margin-top: 8px;">
                     <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica completa">
                       DETALLES
                     </a>
-                    <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
+                    <button type="button" class="btn-add-cart" data-action="quick-add" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                       <span>AGREGAR</span>
                     </button>
@@ -1635,16 +1651,15 @@
               @endif
             </div>
             <div>
-              <div class="product-sizes-selector">
-                @foreach($prod['sizes'] as $sz)
-                  <button type="button" class="size-pill-btn {{ $loop->first ? 'selected' : '' }}" data-action="select-size" data-product-id="{{ $prod['id'] }}" data-size="{{ $sz }}">{{ $sz }}</button>
-                @endforeach
+              <div class="product-sizes-summary">
+                <span class="sizes-label">Tallas:</span>
+                <span class="sizes-tags">{{ implode(' · ', ($prod['sizes'] ?? ['CH', 'M', 'G'])) }}</span>
               </div>
               <div style="display: flex; gap: 6px; margin-top: 8px;">
                 <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica completa">
                   DETALLES
                 </a>
-                <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
+                <button type="button" class="btn-add-cart" data-action="quick-add" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   <span>AGREGAR</span>
                 </button>

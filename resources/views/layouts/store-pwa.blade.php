@@ -1961,6 +1961,20 @@
     </div>
   </aside>
 
+  <!-- K. Bottom Sheet Quick Add para Selección Táctil de Tallas (Apple HIG & Material Design 48x48px) -->
+  <aside id="quickAddSheet" class="bottom-sheet-drawer quick-add-sheet" aria-label="Selección rápida de talla" role="dialog" aria-modal="true">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <span class="sheet-title">Seleccionar Talla</span>
+      <button type="button" class="sheet-close-btn" data-action="close-drawer" aria-label="Cerrar selector">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="quick-add-content" id="quickAddContent">
+      <!-- Inyectado dinámicamente con imagen, título, precio, botones de tallas táctiles 48x48 y CTA -->
+    </div>
+  </aside>
+
   <!-- G. Modal Checkout en 4 Pasos D2C (Envío, Pagos Múltiples, Confirmación & WhatsApp) -->
   <div id="checkoutModalBackdrop" class="checkout-modal-backdrop"></div>
   <aside id="checkoutModal" class="checkout-modal-sheet" aria-label="Proceso de compra seguro" role="dialog" aria-modal="true">
@@ -1995,14 +2009,14 @@
       </div>
     </div>
 
-    <!-- Barra de Urgencia: Reserva de Stock Sincronizada (5 Minutos) -->
+    <!-- Barra de Urgencia: Reserva de Stock Sincronizada (15 Minutos) -->
     <div class="checkout-timer-bar" id="checkoutTimerBanner">
       <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; font-weight: 700;">
         <div style="display: flex; align-items: center; gap: 6px;">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#e11d48" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span class="checkout-timer-label" style="color: #9f1239; text-transform: uppercase; letter-spacing: 0.04em;">Stock Apartado Exclusivo</span>
+          <span class="checkout-timer-label" style="color: #9f1239; text-transform: uppercase; letter-spacing: 0.04em;">Stock Apartado Activo</span>
         </div>
-        <span id="checkoutStockTimerRemaining" style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #e11d48;">05:00</span>
+        <span id="checkoutStockTimerRemaining" style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #e11d48;">15:00</span>
       </div>
       <div class="checkout-timer-progress-track" style="width: 100%; height: 3px; background: #ffe4e6; border-radius: 2px; overflow: hidden; margin-top: 5px;">
         <div id="checkoutStockProgressBar" style="width: 100%; height: 100%; background: #e11d48; transition: width 1s linear;"></div>

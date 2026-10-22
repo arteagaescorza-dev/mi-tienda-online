@@ -173,8 +173,8 @@
   const FREE_SHIPPING_THRESHOLD = 999;
   const SHIPPING_COST = 149;
 
-  // Reserva Temporal de Stock en Carrito (Urgencia de Compra: 5 Minutos / 300s)
-  const CART_STOCK_LOCK_SECONDS = 300;
+  // Reserva Temporal de Stock en Carrito (Urgencia de Compra: 15 Minutos / 900s - Amigable UX)
+  const CART_STOCK_LOCK_SECONDS = 900;
   let stockLockTimerRemaining = CART_STOCK_LOCK_SECONDS;
   let stockLockInterval = null;
 
@@ -660,21 +660,18 @@
           </div>
 
           <div>
-            <!-- Selector Rápido de Talla -->
-            <div class="product-sizes-selector">
-              ${sizesList.map(sz => `
-                <button type="button" class="size-pill-btn ${sz === selectedSize ? 'selected' : ''}" data-action="select-size" data-product-id="${prod.id}" data-size="${sz}">
-                  ${sz}
-                </button>
-              `).join('')}
+            <!-- Resumen Elegante de Tallas (Apple HIG Ergonomics) -->
+            <div class="product-sizes-summary">
+              <span class="sizes-label">Tallas:</span>
+              <span class="sizes-tags">${sizesList.join(' · ')}</span>
             </div>
 
-            <!-- Botonera: Ficha PDP + Agregar al Carrito -->
+            <!-- Botonera: Ficha PDP + Quick Add Táctil 48x48 -->
             <div style="display: flex; gap: 6px; margin-top: 8px;">
               <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica">
                 DETALLES
               </a>
-              <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="${prod.id}" style="flex: 1;">
+              <button type="button" class="btn-add-cart" data-action="quick-add" data-product-id="${prod.id}" style="flex: 1;">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>AGREGAR</span>
               </button>
@@ -1658,7 +1655,7 @@
       storeState.cart = [];
       saveCart();
     },
-    renewLock: (minutes = 5) => {
+    renewLock: (minutes = 15) => {
       const expiresAt = Date.now() + (minutes * 60 * 1000);
       localStorage.setItem('multiverse_stock_lock_expires_at', expiresAt.toString());
       stockLockTimerRemaining = minutes * 60;
@@ -2262,6 +2259,68 @@
     if (backdrop) backdrop.classList.remove('open');
     document.body.style.overflow = '';
     storeState.activeModalProductId = null;
+  }
+
+  // ============================================================================
+  // QUICK ADD BOTTOM SHEET (Apple HIG & Material Design 48x48px Touch Targets)
+  // ============================================================================
+  let activeQuickAddProduct = null;
+  let activeQuickAddSize = null;
+
+  function openQuickAddSheet(productId) {
+    if (!productId) return;
+    const product = (typeof STORE_PRODUCTS !== 'undefined' && Array.isArray(STORE_PRODUCTS))
+      ? STORE_PRODUCTS.find(p => String(p.id) === String(productId) || String(p.sku) === String(productId))
+      : null;
+    if (!product) return;
+
+    const sizesList = (Array.isArray(product.sizes) && product.sizes.length > 0)
+      ? product.sizes
+      : ['CH', 'M', 'G'];
+
+    // Si tiene talla única, añadir directamente sin fricción
+    if (sizesList.length <= 1) {
+      addToCart(product.id, sizesList[0] || 'M');
+      openDrawer('cartSheet');
+      return;
+    }
+
+    activeQuickAddProduct = product;
+    activeQuickAddSize = storeState.selectedSizes[product.id] || sizesList[0];
+
+    const contentEl = document.getElementById('quickAddContent');
+    if (!contentEl) return;
+
+    contentEl.innerHTML = `
+      <div class="quick-add-product-header">
+        <img src="${product.image || '/user-avatar.png'}" alt="${product.name}" class="quick-add-thumb">
+        <div class="quick-add-meta">
+          <div style="font-size: 0.68rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">${product.categoryName || 'Prenda Anatómica'}</div>
+          <h3 class="quick-add-title">${product.name}</h3>
+          <div class="quick-add-price">MXN $${Number(product.price || 0).toFixed(2)}</div>
+        </div>
+      </div>
+
+      <div class="quick-add-sizes-title">
+        <span>Selecciona tu talla</span>
+        <span style="font-size: 0.68rem; color: var(--brand-primary); cursor: pointer;" onclick="openDrawer('sizeGuideSheet')">Guía de tallas</span>
+      </div>
+
+      <div class="quick-add-sizes-grid" id="quickAddSizesGrid">
+        ${sizesList.map(sz => `
+          <button type="button" class="quick-add-size-pill ${sz === activeQuickAddSize ? 'selected' : ''}" data-size="${sz}">
+            ${sz}
+          </button>
+        `).join('')}
+      </div>
+
+      <button type="button" class="quick-add-cta-btn" id="quickAddCtaBtn">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>AÑADIR AL CARRITO (${activeQuickAddSize})</span>
+      </button>
+    `;
+
+    openDrawer('quickAddSheet');
   }
 
   // ============================================================================
@@ -2914,7 +2973,110 @@
     }
   }
 
+  // Helper de validación inline (borde rojo/verde + mensaje de error contextual)
+  function setFieldValidation(fieldId, isValid, errorMsg = '') {
+    const el = document.getElementById(fieldId);
+    if (!el) return;
+
+    const parent = el.closest('.checkout-form-group') || el.parentElement;
+    let errEl = parent ? parent.querySelector('.checkout-field-error') : null;
+
+    if (isValid) {
+      el.classList.remove('is-invalid');
+      el.classList.add('is-valid');
+      if (errEl) errEl.remove();
+    } else {
+      el.classList.remove('is-valid');
+      el.classList.add('is-invalid');
+      if (!errEl && parent) {
+        errEl = document.createElement('span');
+        errEl.className = 'checkout-field-error';
+        parent.appendChild(errEl);
+      }
+      if (errEl) errEl.textContent = errorMsg;
+    }
+  }
+
+  function validateSingleCheckoutField(id) {
+    const el = document.getElementById(id);
+    if (!el) return true;
+    const val = (el.value || '').trim();
+
+    switch(id) {
+      case 'checkoutCustomerName':
+        if (!val) { setFieldValidation(id, false, 'Ingresa tu nombre completo.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutCustomerPhone':
+        const cleanPhone = val.replace(/\D/g, '');
+        if (cleanPhone.length !== 10) { setFieldValidation(id, false, 'Ingresa un celular válido de 10 dígitos.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutCustomerEmail':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(val)) { setFieldValidation(id, false, 'Ingresa un correo electrónico válido.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutShippingZip':
+        const cleanZip = val.replace(/\D/g, '');
+        if (cleanZip.length !== 5) { setFieldValidation(id, false, 'Código postal requerido (5 dígitos).'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutShippingState':
+        if (!val) { setFieldValidation(id, false, 'Ingresa el estado de destino.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutShippingCity':
+        if (!val) { setFieldValidation(id, false, 'Ingresa el municipio o alcaldía.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutShippingColony':
+        if (!val) { setFieldValidation(id, false, 'Ingresa la colonia.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutShippingStreet':
+        if (!val) { setFieldValidation(id, false, 'Ingresa calle y número de entrega.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutCardNumber':
+        const cleanCard = val.replace(/\D/g, '');
+        if (cleanCard.length < 15 || cleanCard.length > 19) { setFieldValidation(id, false, 'Número de tarjeta inválido (15-16 dígitos).'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutCardExpiry':
+        if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(val)) { setFieldValidation(id, false, 'Expiración MM/AA inválida.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutCardCvv':
+        if (val.length < 3 || val.length > 4) { setFieldValidation(id, false, 'CVV de 3 o 4 dígitos.'); return false; }
+        setFieldValidation(id, true); return true;
+      case 'checkoutCardHolder':
+        if (!val) { setFieldValidation(id, false, 'Ingresa el nombre como aparece en la tarjeta.'); return false; }
+        setFieldValidation(id, true); return true;
+      default:
+        return true;
+    }
+  }
+
   function validateCheckoutStep1() {
+    const fields = [
+      'checkoutCustomerName',
+      'checkoutCustomerPhone',
+      'checkoutCustomerEmail',
+      'checkoutShippingZip',
+      'checkoutShippingState',
+      'checkoutShippingCity',
+      'checkoutShippingColony',
+      'checkoutShippingStreet'
+    ];
+
+    let allValid = true;
+    let firstInvalid = null;
+
+    fields.forEach(fieldId => {
+      const isValid = validateSingleCheckoutField(fieldId);
+      if (!isValid) {
+        allValid = false;
+        if (!firstInvalid) firstInvalid = fieldId;
+      }
+    });
+
+    if (!allValid) {
+      showToastNotification('Por favor completa los campos requeridos en rojo.');
+      if (firstInvalid) focusCheckoutField(firstInvalid);
+      return false;
+    }
+
     const name = (document.getElementById('checkoutCustomerName')?.value || '').trim();
     let rawPhone = (document.getElementById('checkoutCustomerPhone')?.value || '').replace(/\D/g, '');
     if (rawPhone.length > 10 && rawPhone.startsWith('52')) {
@@ -2928,48 +3090,6 @@
     const street = (document.getElementById('checkoutShippingStreet')?.value || '').trim();
     const refs = (document.getElementById('checkoutShippingRefs')?.value || '').trim();
     const createAcc = document.getElementById('checkoutCreateAccount')?.checked ?? true;
-
-    if (!name) {
-      showToastNotification('Ingresa tu nombre completo.');
-      focusCheckoutField('checkoutCustomerName');
-      return false;
-    }
-    if (rawPhone.length !== 10) {
-      showToastNotification('Ingresa un teléfono celular válido de 10 dígitos.');
-      focusCheckoutField('checkoutCustomerPhone');
-      return false;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      showToastNotification('Ingresa un correo electrónico válido.');
-      focusCheckoutField('checkoutCustomerEmail');
-      return false;
-    }
-    if (rawZip.length !== 5) {
-      showToastNotification('Ingresa un código postal de 5 dígitos.');
-      focusCheckoutField('checkoutShippingZip');
-      return false;
-    }
-    if (!state) {
-      showToastNotification('Ingresa el estado de tu dirección.');
-      focusCheckoutField('checkoutShippingState');
-      return false;
-    }
-    if (!city) {
-      showToastNotification('Ingresa el municipio o alcaldía de tu dirección.');
-      focusCheckoutField('checkoutShippingCity');
-      return false;
-    }
-    if (!colony) {
-      showToastNotification('Ingresa la colonia de tu dirección.');
-      focusCheckoutField('checkoutShippingColony');
-      return false;
-    }
-    if (!street) {
-      showToastNotification('Ingresa la calle y número de tu dirección.');
-      focusCheckoutField('checkoutShippingStreet');
-      return false;
-    }
 
     checkoutState.customer = { name, phone: rawPhone, email };
     checkoutState.shipping = { postalCode: rawZip, state, city, colony, street, references: refs };
@@ -2999,31 +3119,34 @@
 
   function validateCheckoutStep2() {
     if (checkoutState.paymentMethod === 'credit_debit_card') {
+      const cardFields = [
+        'checkoutCardNumber',
+        'checkoutCardExpiry',
+        'checkoutCardCvv',
+        'checkoutCardHolder'
+      ];
+
+      let allValid = true;
+      let firstInvalid = null;
+
+      cardFields.forEach(fieldId => {
+        const isValid = validateSingleCheckoutField(fieldId);
+        if (!isValid) {
+          allValid = false;
+          if (!firstInvalid) firstInvalid = fieldId;
+        }
+      });
+
+      if (!allValid) {
+        showToastNotification('Por favor verifica los datos de tu tarjeta.');
+        if (firstInvalid) focusCheckoutField(firstInvalid);
+        return false;
+      }
+
       const cardNum = (document.getElementById('checkoutCardNumber')?.value || '').replace(/\D/g, '');
       const expiry = (document.getElementById('checkoutCardExpiry')?.value || '').trim();
       const cvv = (document.getElementById('checkoutCardCvv')?.value || '').trim();
       const holder = (document.getElementById('checkoutCardHolder')?.value || '').trim();
-
-      if (cardNum.length < 15 || cardNum.length > 19) {
-        showToastNotification('Ingresa un número de tarjeta válido.');
-        focusCheckoutField('checkoutCardNumber');
-        return false;
-      }
-      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) {
-        showToastNotification('Ingresa una fecha de vencimiento válida (MM/AA).');
-        focusCheckoutField('checkoutCardExpiry');
-        return false;
-      }
-      if (cvv.length < 3 || cvv.length > 4) {
-        showToastNotification('Ingresa un código de seguridad (CVV) válido.');
-        focusCheckoutField('checkoutCardCvv');
-        return false;
-      }
-      if (!holder) {
-        showToastNotification('Ingresa el nombre del titular como aparece en la tarjeta.');
-        focusCheckoutField('checkoutCardHolder');
-        return false;
-      }
 
       checkoutState.card = { number: cardNum, expiry, cvv, holder };
     }
@@ -5304,11 +5427,49 @@
       return;
     }
 
-    // 2. Agregar al Carrito desde Vitrina
+    // 2. Quick Add & Agregar al Carrito desde Vitrina (Apple HIG 48x48)
+    const quickAddBtn = e.target.closest('[data-action="quick-add"]');
+    if (quickAddBtn) {
+      e.preventDefault();
+      openQuickAddSheet(quickAddBtn.dataset.productId);
+      return;
+    }
+
+    const quickSizeBtn = e.target.closest('.quick-add-size-pill');
+    if (quickSizeBtn) {
+      e.preventDefault();
+      const sz = quickSizeBtn.dataset.size;
+      activeQuickAddSize = sz;
+      document.querySelectorAll('.quick-add-size-pill').forEach(b => b.classList.toggle('selected', b.dataset.size === sz));
+      const cta = document.getElementById('quickAddCtaBtn');
+      if (cta) {
+        cta.innerHTML = `
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>AÑADIR AL CARRITO (${sz})</span>
+        `;
+      }
+      return;
+    }
+
+    const quickCtaBtn = e.target.closest('#quickAddCtaBtn');
+    if (quickCtaBtn && activeQuickAddProduct) {
+      e.preventDefault();
+      addToCart(activeQuickAddProduct.id, activeQuickAddSize);
+      closeAllDrawers();
+      openDrawer('cartSheet');
+      return;
+    }
+
     const addBtn = e.target.closest('[data-action="add-to-cart"]');
     if (addBtn) {
       e.preventDefault();
-      addToCart(addBtn.dataset.productId);
+      const prodId = addBtn.dataset.productId;
+      const prod = Array.isArray(STORE_PRODUCTS) ? STORE_PRODUCTS.find(p => String(p.id) === String(prodId)) : null;
+      if (prod && Array.isArray(prod.sizes) && prod.sizes.length > 1) {
+        openQuickAddSheet(prodId);
+      } else {
+        addToCart(prodId);
+      }
       return;
     }
 
@@ -6384,8 +6545,19 @@
     }
   });
 
-  // Formateo Reactivo en Inputs de Checkout y Búsqueda en Vivo (Regla 5)
+  // Formateo Reactivo y Validación en Inputs de Checkout y Búsqueda en Vivo (Regla 5)
+  document.addEventListener('focusout', function(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('checkout-input')) {
+      validateSingleCheckoutField(e.target.id);
+    }
+  });
+
   document.addEventListener('input', function(e) {
+    // Si el campo estaba marcado como inválido, revalidar en vivo mientras escribe
+    if (e.target && e.target.classList && e.target.classList.contains('checkout-input') && e.target.classList.contains('is-invalid')) {
+      validateSingleCheckoutField(e.target.id);
+    }
+
     if (e.target.id === 'storeLiveSearchInput') {
       handleLiveSearch(e.target.value);
       return;

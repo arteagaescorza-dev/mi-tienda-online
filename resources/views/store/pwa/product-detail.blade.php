@@ -1598,11 +1598,52 @@
 </div>
 @endif
 
+{{-- Sticky Purchase Bar en Mobile PDP (Fase 2 UX Ergonomía) --}}
+<div id="pdpStickyBar" class="pdp-sticky-bar" aria-hidden="true">
+  <div class="pdp-sticky-product-info">
+    <img src="{{ $product['image'] }}" alt="{{ $product['name'] ?? $product['title'] ?? 'Prenda' }}" class="pdp-sticky-thumb">
+    <div class="pdp-sticky-text">
+      <span class="pdp-sticky-title">{{ Str::limit($product['name'] ?? $product['title'] ?? 'Prenda', 24) }}</span>
+      <span class="pdp-sticky-price">{{ $product['price_formatted'] ?? ('MXN $' . number_format($product['price'] ?? 0, 2)) }}</span>
+    </div>
+  </div>
+  <button type="button" class="pdp-sticky-add-btn" onclick="submitPdpToCart()" aria-label="Agregar al carrito">
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>AGREGAR</span>
+  </button>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
   window.CURRENT_PDP_PRODUCT = @json($product);
+
+  // Sticky Purchase Bar en Mobile PDP
+  document.addEventListener('DOMContentLoaded', () => {
+    const mainAddBtn = document.getElementById('pdpAddBtn');
+    const stickyBar = document.getElementById('pdpStickyBar');
+    if (!mainAddBtn || !stickyBar) return;
+
+    function checkStickyVisibility() {
+      const rect = mainAddBtn.getBoundingClientRect();
+      if (rect.bottom < 180 || (window.scrollY > 850 && rect.bottom < 350)) {
+        stickyBar.classList.add('visible');
+        stickyBar.setAttribute('aria-hidden', 'false');
+      } else {
+        stickyBar.classList.remove('visible');
+        stickyBar.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    window.addEventListener('scroll', checkStickyVisibility, { passive: true });
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(() => {
+        checkStickyVisibility();
+      }, { threshold: [0, 0.5, 1] });
+      observer.observe(mainAddBtn);
+    }
+  });
   let currentSelectedSize = @json($product['sizes'][0] ?? 'M');
   let currentSelectedColor = @json($product['colors'][0]['name'] ?? 'Único');
   const pdpImagesByColor = @json($product['images_by_color'] ?? []);
