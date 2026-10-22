@@ -115,13 +115,42 @@
   /* Estilos AEO Q&A */
   .aeo-hero-box {
     text-align: center;
-    padding: 32px 20px;
+    padding: 44px 20px;
     background: linear-gradient(135deg, #09090b 0%, #1e1b4b 60%, #0f172a 100%);
+    background-size: cover;
+    background-position: center;
     border-radius: 20px;
     color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
     margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .aeo-hero-box.is-fullwidth {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 60px 24px;
+    box-sizing: border-box;
+  }
+  .aeo-hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .aeo-hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 860px;
+    margin: 0 auto;
   }
   .aeo-kicker-pill {
     display: inline-block;
@@ -535,16 +564,25 @@
     </script>
   @elseif($isFaqPage ?? false)
     {{-- CENTRO Q&A OPTIMIZADO PARA AEO (ANSWER ENGINE OPTIMIZATION) --}}
-    <div class="aeo-hero-box">
-      <span class="aeo-kicker-pill">
-        AEO // CENTRO OFICIAL DE RESPUESTAS DIRECTAS &amp; IA SEARCH
-      </span>
-      <h1 style="font-family: var(--font-heading, 'Outfit', sans-serif); font-size: 1.95rem; font-weight: 900; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.02em;">
-        {{ $page->title }}
-      </h1>
-      <p style="font-size: 0.9rem; color: #cbd5e1; max-width: 680px; margin: 0 auto; line-height: 1.6;">
-        Respuestas factuales estructuradas para compradores y motores de búsqueda generativa con IA (Perplexity, Google SGE, Gemini, ChatGPT). Información transparente y verificada.
-      </p>
+    @php
+      $isHeroFullwidth = $page->is_fullwidth ?? true;
+      $overlayGradientCss = $page->getOverlayGradientCss();
+      $heroBgImage = !empty($page->image_url) ? asset($page->image_url) : null;
+      $heroTextColor = $page->getTextColor();
+    @endphp
+    <div class="aeo-hero-box {{ $isHeroFullwidth ? 'is-fullwidth' : '' }}" style="{{ $heroBgImage ? "background-image: url('{$heroBgImage}');" : '' }}">
+      <div class="aeo-hero-overlay" style="background: {{ $overlayGradientCss }};"></div>
+      <div class="aeo-hero-inner" style="color: {{ $heroTextColor }};">
+        <span class="aeo-kicker-pill" style="border-color: rgba(255,255,255,0.3); background: rgba(0,0,0,0.3); color: {{ $heroTextColor }}; backdrop-filter: blur(4px);">
+          AEO // CENTRO OFICIAL DE RESPUESTAS DIRECTAS &amp; IA SEARCH
+        </span>
+        <h1 style="font-family: var(--font-heading, 'Outfit', sans-serif); font-size: 2.1rem; font-weight: 900; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.02em; color: {{ $heroTextColor }}; text-shadow: 0 2px 10px rgba(0,0,0,0.65);">
+          {{ $page->title ?: 'Q&A Preguntas Frecuentes' }}
+        </h1>
+        <p style="font-size: 0.95rem; max-width: 720px; margin: 0 auto; line-height: 1.6; color: {{ $heroTextColor }}; opacity: 0.94; text-shadow: 0 1px 6px rgba(0,0,0,0.7);">
+          {{ $page->seo_description ?: 'Respuestas factuales estructuradas para compradores y motores de búsqueda generativa con IA (Perplexity, Google SGE, Gemini, ChatGPT). Información transparente y verificada.' }}
+        </p>
+      </div>
     </div>
 
     <!-- Barra de Búsqueda Interactiva AEO -->

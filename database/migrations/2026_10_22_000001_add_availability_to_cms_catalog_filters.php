@@ -29,3 +29,4 @@ return new class extends Migration
         CmsCatalogFilter::where('filter_key', 'availability')->delete();
     }
 };
+

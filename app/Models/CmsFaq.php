@@ -90,6 +90,7 @@ class CmsFaq extends Model
                 'seo_keywords' => 'preguntas frecuentes, q&a, envios mexico, formas de pago, guia de tallas, compras por pedido',
                 'status' => 'active',
                 'text_color' => '#ffffff',
+                'is_fullwidth' => true,
             ]);
         }
 

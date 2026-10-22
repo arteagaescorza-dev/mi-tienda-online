@@ -203,6 +203,8 @@
     activePrices: [],
     activeDiscounts: [],
     activeAvailability: [],
+    activeMaxPrice: null,
+    catalogMaxPrice: 2500,
     searchQuery: '',         // Búsqueda en tiempo real (Regla 5)
     cart: [],
     savedForLater: [],       // Array de prendas guardadas para después
@@ -532,7 +534,11 @@
         if (!matchesTag) return false;
       }
 
-      // Filtro de Rango de Precio
+      // Filtro de Rango de Precio (Ajustador en una línea)
+      if (typeof storeState.activeMaxPrice === 'number' && storeState.activeMaxPrice < storeState.catalogMaxPrice) {
+        const pPrice = typeof prod.price === 'number' ? prod.price : parseFloat(prod.price || 0);
+        if (pPrice > storeState.activeMaxPrice) return false;
+      }
       if (Array.isArray(storeState.activePrices) && storeState.activePrices.length > 0) {
         const price = typeof prod.price === 'number' ? prod.price : parseFloat(prod.price || 0);
         const matchesPrice = storeState.activePrices.some(r => {
@@ -5147,6 +5153,7 @@
         activePrices: storeState.activePrices,
         activeDiscounts: storeState.activeDiscounts,
         activeAvailability: storeState.activeAvailability,
+        activeMaxPrice: storeState.activeMaxPrice,
       };
       try {
         sessionStorage.setItem('multiverse_active_facets', JSON.stringify(pendingFacets));
@@ -5185,6 +5192,15 @@
       storeState.activePrices = [];
       storeState.activeDiscounts = [];
       storeState.activeAvailability = [];
+      storeState.activeMaxPrice = storeState.catalogMaxPrice;
+      const priceSlider = document.getElementById('storefrontPriceSlider');
+      const priceDisplay = document.getElementById('priceSliderValueDisplay');
+      if (priceSlider) {
+        priceSlider.value = storeState.catalogMaxPrice;
+      }
+      if (priceDisplay) {
+        priceDisplay.textContent = '$' + Number(storeState.catalogMaxPrice).toLocaleString();
+      }
       storeState.activeCategory = 'all';
       storeState.activeBrand = 'all';
       storeState.activeSupplier = 'all';
@@ -6101,6 +6117,13 @@
         if (Array.isArray(f.activePrices)) storeState.activePrices = f.activePrices;
         if (Array.isArray(f.activeDiscounts)) storeState.activeDiscounts = f.activeDiscounts;
         if (Array.isArray(f.activeAvailability)) storeState.activeAvailability = f.activeAvailability;
+        if (typeof f.activeMaxPrice === 'number') {
+          storeState.activeMaxPrice = f.activeMaxPrice;
+          const pSlider = document.getElementById('storefrontPriceSlider');
+          const pDisplay = document.getElementById('priceSliderValueDisplay');
+          if (pSlider) pSlider.value = f.activeMaxPrice;
+          if (pDisplay) pDisplay.textContent = '$' + Number(f.activeMaxPrice).toLocaleString();
+        }
 
         document.querySelectorAll('.filter-facet-checkbox').forEach(cb => {
           const type = cb.dataset.facetType;
@@ -6152,6 +6175,33 @@
         }
       }
     });
+
+    // Regla: Ajustador de precio interactivo en tiempo real
+    const priceRangeInput = document.getElementById('storefrontPriceSlider');
+    const priceDisplayEl = document.getElementById('priceSliderValueDisplay');
+    if (priceRangeInput) {
+      const maxLimit = parseFloat(priceRangeInput.getAttribute('data-max-limit') || priceRangeInput.max || 2500);
+      storeState.catalogMaxPrice = maxLimit;
+      if (storeState.activeMaxPrice === null || storeState.activeMaxPrice === undefined) {
+        storeState.activeMaxPrice = maxLimit;
+      }
+      priceRangeInput.value = storeState.activeMaxPrice;
+      if (priceDisplayEl) {
+        priceDisplayEl.textContent = '$' + Number(storeState.activeMaxPrice).toLocaleString();
+      }
+
+      priceRangeInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        storeState.activeMaxPrice = val;
+        if (priceDisplayEl) {
+          priceDisplayEl.textContent = '$' + Number(val).toLocaleString();
+        }
+        if (document.getElementById('catalogProductsGrid')) {
+          renderProductsGrid('catalogProductsGrid');
+          renderProductsGrid('homeProductsGrid');
+        }
+      });
+    }
 
     try {
       const urlParams = new URLSearchParams(window.location.search);

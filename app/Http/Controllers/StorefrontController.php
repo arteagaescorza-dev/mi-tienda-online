@@ -314,6 +314,7 @@ class StorefrontController extends Controller
             'catalogFabrics' => $catalogFabrics,
             'catalogSizes' => $catalogSizes,
             'catalogGarmentTypes' => $catalogGarmentTypes,
+            'maxCatalogPrice' => (int) (ceil(max(1000, (float) \App\Models\Product::where('visible', true)->max('price')) / 100) * 100),
         ]);
     }
 

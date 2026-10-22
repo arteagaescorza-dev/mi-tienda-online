@@ -123,4 +123,50 @@ class CmsFaqAeoAndQnaPageTest extends TestCase
             ])
             ->assertForbidden();
     }
+
+    public function test_admin_can_configure_qna_hero_with_gradient_fullwidth_and_custom_styling()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // Crear una pregunta y sincronizar página
+        CmsFaq::create([
+            'question' => '¿Cuál es el horario de atención?',
+            'answer' => 'Atención digital 24/7 y soporte humano de 9am a 6pm.',
+            'category' => 'General',
+            'is_active' => true,
+        ]);
+        CmsFaq::syncToQnaPage();
+
+        // Actualizar el hero de Q&A
+        $response = $this->actingAs($admin)->post(route('portal.store.qna-hero.update'), [
+            'title' => 'Centro Oficial Q&A Torzo',
+            'seo_description' => 'Respuestas instantáneas verificadas para inteligencia artificial.',
+            'overlay_color_start' => '#0f172a',
+            'overlay_color_end' => '#1e1b4b',
+            'overlay_opacity_start' => 45,
+            'overlay_opacity_end' => 90,
+            'text_color' => '#ffffff',
+            'is_fullwidth' => 1,
+            'image_url' => 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('cms_pages', [
+            'slug' => 'q&a',
+            'title' => 'Centro Oficial Q&A Torzo',
+            'is_fullwidth' => true,
+            'overlay_color_start' => '#0f172a',
+            'overlay_color_end' => '#1e1b4b',
+            'text_color' => '#ffffff',
+        ]);
+
+        // Verificar vista Storefront
+        $viewResp = $this->get('/pagina/q&a');
+        $viewResp->assertStatus(200);
+        $viewResp->assertSee('Centro Oficial Q&A Torzo');
+        $viewResp->assertSee('aeo-hero-box is-fullwidth', false);
+        $viewResp->assertSee('aeo-hero-overlay', false);
+    }
 }

@@ -1185,25 +1185,31 @@
           </div>
 
         @elseif($cmsFilter->filter_key === 'price')
-          <!-- Rango de Precio (Checkbox) -->
+          <!-- Rango de Precio (Ajustador en una línea) -->
           <div class="filter-accordion-block {{ $isFirstVisibleAccordion ? '' : 'is-collapsed' }}">
             <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar {{ $cmsFilter->label }}">
               <span>{{ $cmsFilter->label }}</span>
               <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <div class="filter-accordion-content">
-              <div class="filter-checkbox-grid">
-                @foreach([
-                  'under_300' => 'Hasta $299 MXN',
-                  '300_599' => '$300 a $599 MXN',
-                  '600_999' => '$600 a $999 MXN',
-                  'over_1000' => 'Más de $1,000 MXN'
-                ] as $prKey => $prLabel)
-                  <label class="filter-checkbox-label">
-                    <input type="checkbox" name="filter_price" value="{{ $prKey }}" class="filter-facet-checkbox filter-price-checkbox" data-action="filter-facet" data-facet-type="price" data-val="{{ $prKey }}">
-                    <span>{{ $prLabel }}</span>
-                  </label>
-                @endforeach
+              @php
+                $maxPrice = $maxCatalogPrice ?? 2500;
+              @endphp
+              <div class="filter-price-slider-line" style="display: flex; align-items: center; gap: 8px; padding: 6px 0;">
+                <span style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted);">$0</span>
+                <input type="range" 
+                       id="storefrontPriceSlider" 
+                       min="0" 
+                       max="{{ $maxPrice }}" 
+                       step="25" 
+                       value="{{ $maxPrice }}" 
+                       class="filter-price-slider-input" 
+                       data-action="filter-price-slider"
+                       data-max-limit="{{ $maxPrice }}"
+                       style="flex: 1; height: 6px; accent-color: var(--brand-accent, #6366f1); cursor: pointer; border-radius: 9999px;">
+                <span id="priceSliderValueDisplay" style="font-size: 0.74rem; font-weight: 800; color: var(--brand-accent, #6366f1); white-space: nowrap; font-family: var(--font-heading); min-width: 65px; text-align: right;">
+                  ${{ number_format($maxPrice, 0) }}
+                </span>
               </div>
             </div>
           </div>

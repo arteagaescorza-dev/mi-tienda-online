@@ -115,6 +115,7 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/tienda-cms/faqs/{faq}/toggle-status', [PortalStoreController::class, 'toggleFaqStatus'])->name('portal.store.faqs.toggle-status');
 	Route::delete('/admin/tienda-cms/faqs/{faq}', [PortalStoreController::class, 'destroyFaq'])->name('portal.store.faqs.destroy');
 	Route::post('/admin/tienda-cms/faqs/sync-page', [PortalStoreController::class, 'syncQnaPage'])->name('portal.store.faqs.sync-page');
+	Route::post('/admin/tienda-cms/faqs/hero', [PortalStoreController::class, 'updateQnaHero'])->name('portal.store.qna-hero.update');
 	Route::post('/admin/tienda-cms/anuncios/actualizar', [PortalStoreController::class, 'updateAnnouncements'])->name('portal.store.announcements.update');
 	Route::post('/admin/tienda-cms/blog', [PortalStoreController::class, 'storeBlogPost'])->name('portal.store.blog.store');
 	Route::put('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'updateBlogPost'])->name('portal.store.blog.update');

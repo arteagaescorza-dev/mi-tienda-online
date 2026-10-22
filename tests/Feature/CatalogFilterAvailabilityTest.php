@@ -91,4 +91,23 @@ class CatalogFilterAvailabilityTest extends TestCase
         // Verificar acordeones: el primer bloque visible no debe tener is-collapsed, los siguientes sí
         $this->assertStringContainsString('is-collapsed', $content);
     }
+
+    public function test_price_filter_renders_as_single_line_range_slider()
+    {
+        CmsCatalogFilter::updateOrCreate(['filter_key' => 'price'], [
+            'label' => 'Rango de Precio',
+            'display_type' => 'checkbox',
+            'sort_order' => 1,
+            'is_visible' => true,
+        ]);
+
+        $response = $this->get('/');
+        $response->assertStatus(200);
+
+        // Verificar el ajustador deslizador en una sola línea
+        $response->assertSee('filter-price-slider-line', false);
+        $response->assertSee('id="storefrontPriceSlider"', false);
+        $response->assertSee('id="priceSliderValueDisplay"', false);
+        $response->assertSee('$0', false);
+    }
 }

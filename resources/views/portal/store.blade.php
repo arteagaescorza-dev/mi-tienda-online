@@ -1685,6 +1685,182 @@ $curatedGoogleFonts = [
                 </button>
             </div>
 
+            <!-- CONFIGURACIÓN HERO DE LA PÁGINA Q&A (DEGRADADO, FULLWIDTH & CARGA DE IMAGEN) -->
+            <div class="mb-6 p-5 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 text-white rounded-2xl border border-indigo-900/60 shadow-lg">
+                <div class="flex items-center justify-between border-b border-indigo-900/50 pb-3 mb-4 flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-200">
+                            Personalización Visual del Hero Q&amp;A (Fullwidth, Degradado &amp; Fondo)
+                        </h4>
+                    </div>
+                    <span id="qna_hero_width_badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+                        {{ ($qnaPage->is_fullwidth ?? true) ? 'Ancho Completo (100vw Fullwidth)' : 'Ancho Contenido (Boxed)' }}
+                    </span>
+                </div>
+
+                <form id="qnaHeroForm" method="POST" action="{{ route('portal.store.qna-hero.update') }}" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        <!-- Columna Izquierda: Parámetros del Hero -->
+                        <div class="lg:col-span-7 space-y-4 text-xs">
+                            <!-- Fila 1: Título y Color de Texto -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-300 mb-1">Título Principal del Hero</label>
+                                    <input type="text" name="title" id="qna_hero_title" value="{{ $qnaPage->title ?? 'Q&A Preguntas Frecuentes' }}" oninput="window.updateQnaHeroLivePreview()" class="w-full text-xs bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 mb-1">Color del Texto</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" name="text_color" id="qna_hero_text_color" value="{{ $qnaPage->text_color ?: '#ffffff' }}" onchange="document.getElementById('qna_hero_text_color_txt').value=this.value; window.updateQnaHeroLivePreview()" class="w-8 h-8 rounded border border-slate-700 cursor-pointer p-0.5 bg-slate-800">
+                                        <input type="text" id="qna_hero_text_color_txt" value="{{ $qnaPage->text_color ?: '#ffffff' }}" oninput="document.getElementById('qna_hero_text_color').value=this.value; window.updateQnaHeroLivePreview()" class="w-20 px-2 py-1.5 text-xs font-mono bg-slate-900/90 border border-slate-700 rounded text-slate-200">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fila 2: Subtítulo / Descripción AEO -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-300 mb-1">Subtítulo / Descripción Explicativa AEO</label>
+                                <textarea name="seo_description" id="qna_hero_desc" rows="2" oninput="window.updateQnaHeroLivePreview()" class="w-full text-xs bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none">{{ $qnaPage->seo_description ?: 'Respuestas factuales estructuradas para compradores y motores de búsqueda generativa con IA (Perplexity, Google SGE, Gemini, ChatGPT). Información transparente y verificada.' }}</textarea>
+                            </div>
+
+                            <!-- Fila 3: Opción Fullwidth Viewport -->
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" name="is_fullwidth" id="qna_hero_is_fullwidth" value="1" {{ ($qnaPage->is_fullwidth ?? true) ? 'checked' : '' }} onchange="window.updateQnaHeroLivePreview()" class="w-4 h-4 rounded text-indigo-600 focus:ring-0">
+                                    <div class="flex-1">
+                                        <span class="text-xs font-bold text-white block">Hero a Ancho Completo (100vw Fullwidth Viewport)</span>
+                                        <span class="text-[11px] text-slate-300 block">Rompe el contenedor para extender la imagen y degradado al 100% de la pantalla sin franjas blancas en desktop y móvil.</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Fila 4: Imagen de Fondo (Carga o URL) -->
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-xl space-y-2.5">
+                                <span class="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">Imagen de Fondo del Hero</span>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-300 mb-1 font-semibold">Subir archivo de imagen (JPG, PNG, WebP)</label>
+                                        <input type="file" name="image_file" id="qna_hero_image_file" accept="image/*" class="w-full text-[11px] text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 file:cursor-pointer">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-300 mb-1 font-semibold">O pegar URL directa de imagen</label>
+                                        <input type="text" name="image_url" id="qna_hero_image_url" value="{{ $qnaPage->image_url }}" oninput="window.updateQnaHeroLivePreview()" placeholder="https://... o /uploads/..." class="w-full text-xs bg-slate-900/90 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-500">
+                                    </div>
+                                </div>
+                                @if(!empty($qnaPage->image_url))
+                                    <div class="flex items-center justify-between pt-1 border-t border-white/10 flex-wrap gap-2">
+                                        <div class="flex items-center gap-2">
+                                            <img src="{{ asset($qnaPage->image_url) }}" alt="Preview" class="w-8 h-8 rounded object-cover border border-white/20">
+                                            <span class="text-[11px] text-slate-300 font-mono truncate max-w-[200px]">{{ basename($qnaPage->image_url) }}</span>
+                                        </div>
+                                        <label class="flex items-center gap-1.5 text-[11px] text-rose-300 hover:text-rose-200 cursor-pointer">
+                                            <input type="checkbox" name="clear_image" id="qna_hero_clear_image" value="1" onchange="window.updateQnaHeroLivePreview()" class="rounded text-rose-500">
+                                            <span>Eliminar imagen (usar solo degradado)</span>
+                                        </label>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Fila 5: Capa de Degradado & Opacidades -->
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-xl space-y-3">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <span class="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">Capa de Degradado Superpuesta</span>
+                                    <!-- Presets rápidos -->
+                                    <div class="flex items-center gap-1 flex-wrap">
+                                        <span class="text-[10px] text-slate-400 mr-1">Presets:</span>
+                                        <button type="button" onclick="window.applyQnaGradientPreset('indigo')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-900/80 hover:bg-indigo-800 text-indigo-200 border border-indigo-700/60 transition cursor-pointer">Índigo</button>
+                                        <button type="button" onclick="window.applyQnaGradientPreset('deep')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/60 transition cursor-pointer">Profundo</button>
+                                        <button type="button" onclick="window.applyQnaGradientPreset('wine')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-800/60 transition cursor-pointer">Vino</button>
+                                        <button type="button" onclick="window.applyQnaGradientPreset('emerald')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/80 hover:bg-emerald-900 text-emerald-200 border border-emerald-800/60 transition cursor-pointer">Esmeralda</button>
+                                        <button type="button" onclick="window.applyQnaGradientPreset('carbon')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/60 transition cursor-pointer">Carbón</button>
+                                        <button type="button" onclick="window.applyQnaGradientPreset('contrast')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-black/80 hover:bg-black text-amber-200 border border-amber-900/60 transition cursor-pointer">Contraste</button>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <!-- Color Superior Inicio -->
+                                    <div class="p-2.5 rounded-lg bg-black/30 border border-white/5 space-y-2">
+                                        <span class="text-[10px] font-bold text-slate-300 block">Color Superior (Inicio)</span>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" name="overlay_color_start" id="qna_overlay_color_start" value="{{ $qnaPage->overlay_color_start ?: '#0f172a' }}" onchange="document.getElementById('qna_overlay_color_start_txt').value=this.value; window.updateQnaHeroLivePreview()" class="w-7 h-7 rounded border border-slate-700 cursor-pointer p-0.5 bg-slate-800">
+                                            <input type="text" id="qna_overlay_color_start_txt" value="{{ $qnaPage->overlay_color_start ?: '#0f172a' }}" oninput="document.getElementById('qna_overlay_color_start').value=this.value; window.updateQnaHeroLivePreview()" class="w-20 px-2 py-1 text-xs font-mono bg-slate-900 border border-slate-700 rounded text-slate-200">
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                                                <span>Opacidad Superior:</span>
+                                                <strong id="qna_overlay_opacity_start_val">{{ $qnaPage->overlay_opacity_start !== null ? $qnaPage->overlay_opacity_start : 40 }}%</strong>
+                                            </div>
+                                            <input type="range" name="overlay_opacity_start" id="qna_overlay_opacity_start" min="0" max="100" value="{{ $qnaPage->overlay_opacity_start !== null ? $qnaPage->overlay_opacity_start : 40 }}" oninput="document.getElementById('qna_overlay_opacity_start_val').textContent=this.value+'%'; window.updateQnaHeroLivePreview()" class="w-full accent-indigo-500">
+                                        </div>
+                                    </div>
+
+                                    <!-- Color Inferior Fin -->
+                                    <div class="p-2.5 rounded-lg bg-black/30 border border-white/5 space-y-2">
+                                        <span class="text-[10px] font-bold text-slate-300 block">Color Inferior (Fin)</span>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" name="overlay_color_end" id="qna_overlay_color_end" value="{{ $qnaPage->overlay_color_end ?: '#1e1b4b' }}" onchange="document.getElementById('qna_overlay_color_end_txt').value=this.value; window.updateQnaHeroLivePreview()" class="w-7 h-7 rounded border border-slate-700 cursor-pointer p-0.5 bg-slate-800">
+                                            <input type="text" id="qna_overlay_color_end_txt" value="{{ $qnaPage->overlay_color_end ?: '#1e1b4b' }}" oninput="document.getElementById('qna_overlay_color_end').value=this.value; window.updateQnaHeroLivePreview()" class="w-20 px-2 py-1 text-xs font-mono bg-slate-900 border border-slate-700 rounded text-slate-200">
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                                                <span>Opacidad Inferior:</span>
+                                                <strong id="qna_overlay_opacity_end_val">{{ $qnaPage->overlay_opacity_end !== null ? $qnaPage->overlay_opacity_end : 90 }}%</strong>
+                                            </div>
+                                            <input type="range" name="overlay_opacity_end" id="qna_overlay_opacity_end" min="0" max="100" value="{{ $qnaPage->overlay_opacity_end !== null ? $qnaPage->overlay_opacity_end : 90 }}" oninput="document.getElementById('qna_overlay_opacity_end_val').textContent=this.value+'%'; window.updateQnaHeroLivePreview()" class="w-full accent-indigo-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón Guardar -->
+                            <div class="pt-1">
+                                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-md flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Guardar Configuración del Hero Q&amp;A</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Columna Derecha: Vista Previa en Vivo -->
+                        <div class="lg:col-span-5 flex flex-col justify-start">
+                            <div class="sticky top-4 space-y-2">
+                                <div class="flex items-center justify-between text-[11px] text-slate-300 px-1">
+                                    <span class="font-bold flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        Vista Previa en Vivo
+                                    </span>
+                                    <span class="text-[10px] text-indigo-300">Simulación Storefront</span>
+                                </div>
+
+                                <!-- Marco del Preview que simula el Viewport -->
+                                <div class="p-3 bg-slate-950/80 rounded-xl border border-white/10 flex items-center justify-center min-h-[280px]">
+                                    <div id="qna_hero_preview_card" class="relative rounded-xl overflow-hidden shadow-2xl transition-all duration-300 text-center w-full min-h-[220px] flex items-center justify-center p-6 border border-white/15">
+                                        <!-- Fondo de Imagen -->
+                                        <div id="qna_hero_preview_bg" class="absolute inset-0 bg-cover bg-center transition-all duration-300" data-initial-bg="{{ !empty($qnaPage->image_url) ? asset($qnaPage->image_url) : '' }}" style="{{ !empty($qnaPage->image_url) ? "background-image: url('" . asset($qnaPage->image_url) . "');" : '' }}"></div>
+                                        <!-- Overlay de Degradado -->
+                                        <div id="qna_hero_preview_overlay" class="absolute inset-0 transition-all duration-300"></div>
+                                        <!-- Contenido Tipográfico -->
+                                        <div class="relative z-10 max-w-sm mx-auto space-y-2">
+                                            <span id="qna_hero_preview_pill" class="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase border border-white/30 bg-black/40 backdrop-blur-xs">
+                                                AEO // CENTRO OFICIAL &amp; IA SEARCH
+                                            </span>
+                                            <h5 id="qna_hero_preview_title" class="text-base font-black uppercase tracking-tight drop-shadow-md leading-tight">
+                                                {{ $qnaPage->title ?? 'Q&A Preguntas Frecuentes' }}
+                                            </h5>
+                                            <p id="qna_hero_preview_desc" class="text-[10px] leading-relaxed drop-shadow-sm opacity-90">
+                                                {{ $qnaPage->seo_description ?: 'Respuestas factuales estructuradas para compradores y motores de búsqueda generativa con IA.' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             <!-- Formulario de Creación / Edición de FAQ -->
             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 mb-6">
                 <div class="flex items-center justify-between mb-3">
@@ -6656,6 +6832,147 @@ $curatedGoogleFonts = [
             }
         });
     });
+
+    window.applyQnaGradientPreset = function(preset) {
+        const presets = {
+            indigo: { start: '#0f172a', end: '#1e1b4b', opStart: 40, opEnd: 90, text: '#ffffff' },
+            deep: { start: '#020617', end: '#09090b', opStart: 50, opEnd: 95, text: '#ffffff' },
+            wine: { start: '#4a0404', end: '#0f0505', opStart: 35, opEnd: 92, text: '#ffffff' },
+            emerald: { start: '#064e3b', end: '#022c22', opStart: 35, opEnd: 90, text: '#ffffff' },
+            carbon: { start: '#18181b', end: '#09090b', opStart: 30, opEnd: 88, text: '#ffffff' },
+            contrast: { start: '#000000', end: '#000000', opStart: 65, opEnd: 95, text: '#ffffff' }
+        };
+        const cfg = presets[preset] || presets.indigo;
+        const cStart = document.getElementById('qna_overlay_color_start');
+        const cStartTxt = document.getElementById('qna_overlay_color_start_txt');
+        const cEnd = document.getElementById('qna_overlay_color_end');
+        const cEndTxt = document.getElementById('qna_overlay_color_end_txt');
+        const opStart = document.getElementById('qna_overlay_opacity_start');
+        const opStartVal = document.getElementById('qna_overlay_opacity_start_val');
+        const opEnd = document.getElementById('qna_overlay_opacity_end');
+        const opEndVal = document.getElementById('qna_overlay_opacity_end_val');
+        const txtColor = document.getElementById('qna_hero_text_color');
+        const txtColorTxt = document.getElementById('qna_hero_text_color_txt');
+
+        if (cStart) cStart.value = cfg.start;
+        if (cStartTxt) cStartTxt.value = cfg.start;
+        if (cEnd) cEnd.value = cfg.end;
+        if (cEndTxt) cEndTxt.value = cfg.end;
+        if (opStart) opStart.value = cfg.opStart;
+        if (opStartVal) opStartVal.textContent = cfg.opStart + '%';
+        if (opEnd) opEnd.value = cfg.opEnd;
+        if (opEndVal) opEndVal.textContent = cfg.opEnd + '%';
+        if (txtColor) txtColor.value = cfg.text;
+        if (txtColorTxt) txtColorTxt.value = cfg.text;
+
+        window.updateQnaHeroLivePreview();
+    };
+
+    window._qnaUploadedPreviewUrl = null;
+
+    window.updateQnaHeroLivePreview = function() {
+        const titleInput = document.getElementById('qna_hero_title');
+        const descInput = document.getElementById('qna_hero_desc');
+        const urlInput = document.getElementById('qna_hero_image_url');
+        const isFullwidth = document.getElementById('qna_hero_is_fullwidth')?.checked;
+        const clearImage = document.getElementById('qna_hero_clear_image')?.checked;
+
+        const cStart = document.getElementById('qna_overlay_color_start')?.value || '#0f172a';
+        const cEnd = document.getElementById('qna_overlay_color_end')?.value || '#1e1b4b';
+        const opStart = (parseInt(document.getElementById('qna_overlay_opacity_start')?.value || '40', 10) / 100);
+        const opEnd = (parseInt(document.getElementById('qna_overlay_opacity_end')?.value || '90', 10) / 100);
+        const txtColor = document.getElementById('qna_hero_text_color')?.value || '#ffffff';
+
+        const previewContainer = document.getElementById('qna_hero_preview_card');
+        const previewBg = document.getElementById('qna_hero_preview_bg');
+        const previewOverlay = document.getElementById('qna_hero_preview_overlay');
+        const previewTitle = document.getElementById('qna_hero_preview_title');
+        const previewDesc = document.getElementById('qna_hero_preview_desc');
+        const previewPill = document.getElementById('qna_hero_preview_pill');
+        const previewBadge = document.getElementById('qna_hero_width_badge');
+
+        function hexToRgba(hex, alpha) {
+            let c = (hex || '#000000').replace('#', '');
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16);
+            return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+        }
+
+        if (previewBadge) {
+            previewBadge.textContent = isFullwidth ? 'Ancho Completo (100vw Fullwidth)' : 'Ancho Contenido (Boxed)';
+            previewBadge.className = isFullwidth
+                ? 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30'
+                : 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30';
+        }
+
+        if (previewContainer) {
+            if (isFullwidth) {
+                previewContainer.style.width = '100%';
+                previewContainer.style.maxWidth = '100%';
+            } else {
+                previewContainer.style.width = '88%';
+                previewContainer.style.margin = '0 auto';
+            }
+        }
+
+        if (previewBg) {
+            let activeUrl = null;
+            if (!clearImage) {
+                if (window._qnaUploadedPreviewUrl) {
+                    activeUrl = window._qnaUploadedPreviewUrl;
+                } else if (urlInput && urlInput.value.trim()) {
+                    activeUrl = urlInput.value.trim();
+                } else {
+                    activeUrl = previewBg.getAttribute('data-initial-bg');
+                }
+            }
+            if (activeUrl) {
+                previewBg.style.backgroundImage = `url("${activeUrl}")`;
+                previewBg.style.backgroundSize = 'cover';
+                previewBg.style.backgroundPosition = 'center';
+            } else {
+                previewBg.style.backgroundImage = 'none';
+            }
+        }
+
+        if (previewOverlay) {
+            previewOverlay.style.background = `linear-gradient(180deg, ${hexToRgba(cStart, opStart)} 0%, ${hexToRgba(cEnd, opEnd)} 100%)`;
+        }
+
+        if (previewTitle) {
+            previewTitle.textContent = titleInput && titleInput.value.trim() ? titleInput.value.trim() : 'Q&A Preguntas Frecuentes';
+            previewTitle.style.color = txtColor;
+        }
+
+        if (previewDesc) {
+            previewDesc.textContent = descInput && descInput.value.trim() ? descInput.value.trim() : 'Respuestas factuales estructuradas para compradores y motores de búsqueda generativa con IA.';
+            previewDesc.style.color = txtColor;
+        }
+
+        if (previewPill) {
+            previewPill.style.color = txtColor;
+            previewPill.style.borderColor = 'rgba(255,255,255,0.3)';
+        }
+    };
+
+    const qnaFileIn = document.getElementById('qna_hero_image_file');
+    if (qnaFileIn) {
+        qnaFileIn.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    window._qnaUploadedPreviewUrl = e.target.result;
+                    window.updateQnaHeroLivePreview();
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+    setTimeout(function() {
+        if (typeof window.updateQnaHeroLivePreview === 'function') {
+            window.updateQnaHeroLivePreview();
+        }
+    }, 100);
 
     window.toggleHeroModeCreate = function(mode) {
         const isCustom = mode === 'custom';

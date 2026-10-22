@@ -369,6 +369,9 @@ class PortalStoreController extends Controller
         $tracking = CmsTrackingSetting::current();
         $faqs = CmsFaq::orderBy('sort_order')->orderBy('id')->get();
         $qnaPage = CmsPage::where('slug', 'q&a')->first();
+        if (!$qnaPage) {
+            $qnaPage = CmsFaq::syncToQnaPage();
+        }
 
         // 9.1. Categorías Oficiales y Páginas de Información y Legal para el Footer Editor
         $dbOfficialCategories = Category::orderBy('name')->get();
@@ -1365,6 +1368,73 @@ class PortalStoreController extends Controller
         }
 
         return back()->with('success', 'Página de Explorar Q&A sincronizada nativamente con todas las preguntas frecuentes y microformato AEO.');
+    }
+
+    /**
+     * Actualizar configuración visual del Hero de la página Q&A (imagen, degradado, fullwidth, tipografía).
+     */
+    public function updateQnaHero(Request $request)
+    {
+        Gate::authorize('manage-cms');
+
+        $request->validate([
+            'title' => 'nullable|string|max:200',
+            'image_url' => 'nullable|string|max:500',
+            'image_file' => 'nullable|image|max:10240',
+            'overlay_color_start' => 'nullable|string|max:30',
+            'overlay_color_end' => 'nullable|string|max:30',
+            'overlay_opacity_start' => 'nullable|integer|min:0|max:100',
+            'overlay_opacity_end' => 'nullable|integer|min:0|max:100',
+            'text_color' => 'nullable|string|max:30',
+            'seo_description' => 'nullable|string|max:1000',
+            'overlay_gradient' => 'nullable|string|max:100',
+        ]);
+
+        $qnaPage = CmsPage::where('slug', 'q&a')->first();
+        if (!$qnaPage) {
+            $qnaPage = CmsFaq::syncToQnaPage();
+        }
+
+        $imageUrl = $request->input('image_url', $qnaPage->image_url);
+        if ($request->has('clear_image') && $request->boolean('clear_image')) {
+            $imageUrl = null;
+        }
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $uploadDir = public_path('uploads/pages');
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $filename = 'qna_hero_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $imageUrl = '/uploads/pages/' . $filename;
+        }
+
+        $isFullwidth = $request->has('is_fullwidth');
+
+        $qnaPage->update([
+            'title' => $request->input('title', $qnaPage->title) ?: 'Q&A Preguntas Frecuentes',
+            'image_url' => $imageUrl,
+            'overlay_gradient' => $request->input('overlay_gradient', $qnaPage->overlay_gradient),
+            'overlay_color_start' => $request->input('overlay_color_start', $qnaPage->overlay_color_start ?: '#0f172a'),
+            'overlay_color_end' => $request->input('overlay_color_end', $qnaPage->overlay_color_end ?: '#1e1b4b'),
+            'overlay_opacity_start' => $request->filled('overlay_opacity_start') ? (int)$request->input('overlay_opacity_start') : 40,
+            'overlay_opacity_end' => $request->filled('overlay_opacity_end') ? (int)$request->input('overlay_opacity_end') : 90,
+            'text_color' => $request->input('text_color', $qnaPage->text_color ?: '#ffffff'),
+            'is_fullwidth' => $isFullwidth,
+            'seo_description' => $request->input('seo_description', $qnaPage->seo_description),
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'page' => $qnaPage,
+                'message' => 'Hero de la página Q&A actualizado con éxito.',
+            ]);
+        }
+
+        return back()->with('success', 'Hero de la página Q&A actualizado con éxito.');
     }
 
     /**
