@@ -554,16 +554,16 @@
     </div>
 
     @php
-      $categories = $faqs->pluck('category')->unique()->filter()->values();
+      $faqCategories = $faqs->pluck('category')->unique()->filter()->values();
     @endphp
 
-    @if(count($categories) > 1)
+    @if(count($faqCategories) > 1)
       <!-- Píldoras de Categorías -->
       <div class="aeo-categories-bar" id="aeoCategoriesBar">
         <button type="button" class="aeo-category-btn active" data-category="all">
           Todas las preguntas ({{ $faqs->count() }})
         </button>
-        @foreach($categories as $cat)
+        @foreach($faqCategories as $cat)
           <button type="button" class="aeo-category-btn" data-category="{{ $cat }}">
             {{ $cat }} ({{ $faqs->where('category', $cat)->count() }})
           </button>

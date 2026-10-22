@@ -964,12 +964,18 @@
                       @endif
                     </div>
                   @endforeach
-                @elseif(!empty($categories) && $categories->isNotEmpty())
+                @elseif(!empty($categories) && (is_object($categories) && method_exists($categories, 'isNotEmpty') ? $categories->isNotEmpty() : !empty($categories)))
                   @foreach($categories as $cat)
-                    <label class="filter-checkbox-label">
-                      <input type="checkbox" name="filter_category" value="{{ $cat->slug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $cat->slug }}">
-                      <span>{{ $cat->name }}</span>
-                    </label>
+                    @php
+                      $cSlug = is_object($cat) ? ($cat->slug ?? '') : (is_array($cat) ? ($cat['slug'] ?? '') : (string)$cat);
+                      $cName = is_object($cat) ? ($cat->name ?? $cSlug) : (is_array($cat) ? ($cat['name'] ?? $cSlug) : (string)$cat);
+                    @endphp
+                    @if(!empty($cSlug))
+                      <label class="filter-checkbox-label">
+                        <input type="checkbox" name="filter_category" value="{{ $cSlug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $cSlug }}">
+                        <span>{{ $cName }}</span>
+                      </label>
+                    @endif
                   @endforeach
                 @else
                   @foreach(['jocks' => 'Jockstraps', 'boxers' => 'Boxers', 'tangas' => 'Tangas', 'bikinis' => 'Bikinis', 'tanktops' => 'Tank Tops', 'swimwear' => 'Trajes de Baño'] as $cSlug => $cName)
