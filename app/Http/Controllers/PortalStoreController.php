@@ -1383,8 +1383,10 @@ class PortalStoreController extends Controller
             'image_file' => 'nullable|image|max:10240',
             'overlay_color_start' => 'nullable|string|max:30',
             'overlay_color_end' => 'nullable|string|max:30',
+            'gradient_direction' => 'nullable|string|max:50',
             'overlay_opacity_start' => 'nullable|integer|min:0|max:100',
             'overlay_opacity_end' => 'nullable|integer|min:0|max:100',
+            'title_color' => 'nullable|string|max:30',
             'text_color' => 'nullable|string|max:30',
             'seo_description' => 'nullable|string|max:1000',
             'overlay_gradient' => 'nullable|string|max:100',
@@ -1407,6 +1409,18 @@ class PortalStoreController extends Controller
             $filename = 'qna_hero_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $file->move($uploadDir, $filename);
             $imageUrl = '/uploads/pages/' . $filename;
+
+            // Registrar automáticamente en la biblioteca multimedia (Hub 2 Gestor de Medios)
+            try {
+                \App\Models\CmsMedia::create([
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $imageUrl,
+                    'mime_type' => $file->getClientMimeType() ?: 'image/jpeg',
+                    'size' => @filesize(public_path('uploads/pages/' . $filename)) ?: 0,
+                ]);
+            } catch (\Throwable $e) {
+                // Silencioso para no interrumpir el guardado
+            }
         } elseif ($request->filled('image_url')) {
             $imageUrl = trim($request->input('image_url'));
         }
@@ -1427,8 +1441,10 @@ class PortalStoreController extends Controller
             'overlay_gradient' => $request->input('overlay_gradient', 'custom'),
             'overlay_color_start' => $request->input('overlay_color_start', $qnaPage->overlay_color_start ?: '#0f172a'),
             'overlay_color_end' => $request->input('overlay_color_end', $qnaPage->overlay_color_end ?: '#1e1b4b'),
+            'gradient_direction' => $request->input('gradient_direction', $qnaPage->gradient_direction ?: 'to bottom'),
             'overlay_opacity_start' => $opacityStart,
             'overlay_opacity_end' => $opacityEnd,
+            'title_color' => $request->input('title_color', $qnaPage->title_color ?: '#ffffff'),
             'text_color' => $request->input('text_color', $qnaPage->text_color ?: '#ffffff'),
             'is_fullwidth' => $isFullwidth,
             'seo_description' => $request->input('seo_description', $qnaPage->seo_description),

@@ -144,9 +144,11 @@ class CmsFaqAeoAndQnaPageTest extends TestCase
             'seo_description' => 'Respuestas instantáneas verificadas para inteligencia artificial.',
             'overlay_color_start' => '#0f172a',
             'overlay_color_end' => '#1e1b4b',
+            'gradient_direction' => 'to right',
             'overlay_opacity_start' => 45,
             'overlay_opacity_end' => 90,
-            'text_color' => '#ffffff',
+            'title_color' => '#f8fafc',
+            'text_color' => '#e2e8f0',
             'is_fullwidth' => 1,
             'image_file' => $fakeFile,
         ]);
@@ -160,7 +162,14 @@ class CmsFaqAeoAndQnaPageTest extends TestCase
             'is_fullwidth' => true,
             'overlay_color_start' => '#0f172a',
             'overlay_color_end' => '#1e1b4b',
-            'text_color' => '#ffffff',
+            'gradient_direction' => 'to right',
+            'title_color' => '#f8fafc',
+            'text_color' => '#e2e8f0',
+        ]);
+
+        // Verificar que la imagen subida se registró en el Gestor de Medios (cms_media)
+        $this->assertDatabaseHas('cms_media', [
+            'file_name' => 'my_qna_hero.jpg',
         ]);
 
         // Verificar vista Storefront

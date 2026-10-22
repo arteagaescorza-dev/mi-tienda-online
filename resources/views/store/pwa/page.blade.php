@@ -153,6 +153,22 @@
     max-width: 860px;
     margin: 0 auto;
   }
+  .aeo-hero-title,
+  .aeo-hero-box h1 {
+    color: var(--hero-title-color, #ffffff) !important;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9), 0 1px 3px rgba(0, 0, 0, 0.95) !important;
+    font-family: var(--font-heading, 'Outfit', sans-serif);
+    font-size: 2.1rem;
+    font-weight: 900;
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .aeo-hero-desc,
+  .aeo-hero-box p {
+    color: var(--hero-text-color, #f1f5f9) !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85) !important;
+  }
   .aeo-kicker-pill {
     display: inline-block;
     padding: 4px 14px;
@@ -569,18 +585,19 @@
       $isHeroFullwidth = $page->is_fullwidth ?? true;
       $overlayGradientCss = $page->getOverlayGradientCss();
       $heroBgImage = !empty($page->image_url) ? asset($page->image_url) : null;
+      $heroTitleColor = $page->getTitleColor();
       $heroTextColor = $page->getTextColor();
     @endphp
-    <div class="aeo-hero-box {{ $isHeroFullwidth ? 'is-fullwidth' : '' }}" style="{!! $heroBgImage ? "background-image: url('{$heroBgImage}');" : '' !!}">
+    <div class="aeo-hero-box {{ $isHeroFullwidth ? 'is-fullwidth' : '' }}" style="{!! $heroBgImage ? "background-image: url('{$heroBgImage}');" : '' !!} --hero-title-color: {{ $heroTitleColor }}; --hero-text-color: {{ $heroTextColor }};">
       <div class="aeo-hero-overlay" style="background: {!! $overlayGradientCss !!};"></div>
-      <div class="aeo-hero-inner" style="color: {{ $heroTextColor }};">
-        <span class="aeo-kicker-pill" style="border-color: rgba(255,255,255,0.3); background: rgba(0,0,0,0.3); color: {{ $heroTextColor }}; backdrop-filter: blur(4px);">
+      <div class="aeo-hero-inner">
+        <span class="aeo-kicker-pill" style="border-color: rgba(255,255,255,0.4); background: rgba(0,0,0,0.45); color: {{ $heroTitleColor }} !important; backdrop-filter: blur(4px);">
           AEO // CENTRO OFICIAL DE RESPUESTAS DIRECTAS &amp; IA SEARCH
         </span>
-        <h1 style="font-family: var(--font-heading, 'Outfit', sans-serif); font-size: 2.1rem; font-weight: 900; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.02em; color: {{ $heroTextColor }}; text-shadow: 0 2px 10px rgba(0,0,0,0.65);">
+        <h1 class="aeo-hero-title" style="color: {{ $heroTitleColor }} !important;">
           {{ $page->title ?: 'Q&A Preguntas Frecuentes' }}
         </h1>
-        <p style="font-size: 0.95rem; max-width: 720px; margin: 0 auto; line-height: 1.6; color: {{ $heroTextColor }}; opacity: 0.94; text-shadow: 0 1px 6px rgba(0,0,0,0.7);">
+        <p class="aeo-hero-desc" style="color: {{ $heroTextColor }} !important;">
           {{ $page->seo_description ?: 'Respuestas factuales estructuradas para compradores y motores de búsqueda generativa con IA (Perplexity, Google SGE, Gemini, ChatGPT). Información transparente y verificada.' }}
         </p>
       </div>

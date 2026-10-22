@@ -18,11 +18,13 @@ class CmsPage extends Model
         'image_url',
         'overlay_gradient',
         'text_color',
+        'title_color',
         'image_source_mode',
         'is_fullwidth',
         'gallery_images',
         'overlay_color_start',
         'overlay_color_end',
+        'gradient_direction',
         'overlay_opacity_start',
         'overlay_opacity_end',
         'content_html',
@@ -102,13 +104,23 @@ class CmsPage extends Model
         return !empty($this->text_color) ? $this->text_color : '#ffffff';
     }
 
+    public function getTitleColor(): string
+    {
+        return !empty($this->title_color) ? $this->title_color : '#ffffff';
+    }
+
     public function getOverlayGradientCss(): string
     {
         // Si el usuario configuró colores y opacidades custom directamente, tienen prioridad
         if (!empty($this->overlay_color_start) && !empty($this->overlay_color_end)) {
+            $dir = trim($this->gradient_direction ?? 'to bottom');
+            if ($dir === '180deg') $dir = 'to bottom';
             $rgbaStart = static::hexToRgba($this->overlay_color_start, $this->overlay_opacity_start ?? 25);
-            $rgbaEnd = static::hexToRgba($this->overlay_color_end, $this->overlay_opacity_end ?? 85);
-            return "linear-gradient(180deg, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
+            $rgbaEnd = static::hexToRgba($this->overlay_color_end, $this->overlay_opacity_end ?? 75);
+            if ($dir === 'radial') {
+                return "radial-gradient(circle at center, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
+            }
+            return "linear-gradient({$dir}, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
         }
 
         $val = trim($this->overlay_gradient ?? '');

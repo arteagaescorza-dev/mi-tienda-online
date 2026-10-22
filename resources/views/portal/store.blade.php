@@ -1704,17 +1704,24 @@ $curatedGoogleFonts = [
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                         <!-- Columna Izquierda: Parámetros del Hero -->
                         <div class="lg:col-span-7 space-y-4 text-xs">
-                            <!-- Fila 1: Título y Color de Texto -->
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div class="sm:col-span-2">
+                            <!-- Fila 1: Título y Colores de Tipografía -->
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                                <div class="sm:col-span-6">
                                     <label class="block text-[11px] font-bold text-slate-300 mb-1">Título Principal del Hero</label>
                                     <input type="text" name="title" id="qna_hero_title" value="{{ $qnaPage->title ?? 'Q&A Preguntas Frecuentes' }}" oninput="window.updateQnaHeroLivePreview()" class="w-full text-xs bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none">
                                 </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-300 mb-1">Color del Texto</label>
-                                    <div class="flex items-center gap-2">
+                                <div class="sm:col-span-3">
+                                    <label class="block text-[11px] font-bold text-slate-300 mb-1">Color del Título</label>
+                                    <div class="flex items-center gap-1.5">
+                                        <input type="color" name="title_color" id="qna_hero_title_color" value="{{ $qnaPage->title_color ?: '#ffffff' }}" onchange="document.getElementById('qna_hero_title_color_txt').value=this.value; window.updateQnaHeroLivePreview()" class="w-8 h-8 rounded border border-slate-700 cursor-pointer p-0.5 bg-slate-800">
+                                        <input type="text" id="qna_hero_title_color_txt" value="{{ $qnaPage->title_color ?: '#ffffff' }}" oninput="document.getElementById('qna_hero_title_color').value=this.value; window.updateQnaHeroLivePreview()" class="w-16 px-1.5 py-1.5 text-[11px] font-mono bg-slate-900/90 border border-slate-700 rounded text-slate-200">
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-3">
+                                    <label class="block text-[11px] font-bold text-slate-300 mb-1">Color Subtítulo/Texto</label>
+                                    <div class="flex items-center gap-1.5">
                                         <input type="color" name="text_color" id="qna_hero_text_color" value="{{ $qnaPage->text_color ?: '#ffffff' }}" onchange="document.getElementById('qna_hero_text_color_txt').value=this.value; window.updateQnaHeroLivePreview()" class="w-8 h-8 rounded border border-slate-700 cursor-pointer p-0.5 bg-slate-800">
-                                        <input type="text" id="qna_hero_text_color_txt" value="{{ $qnaPage->text_color ?: '#ffffff' }}" oninput="document.getElementById('qna_hero_text_color').value=this.value; window.updateQnaHeroLivePreview()" class="w-20 px-2 py-1.5 text-xs font-mono bg-slate-900/90 border border-slate-700 rounded text-slate-200">
+                                        <input type="text" id="qna_hero_text_color_txt" value="{{ $qnaPage->text_color ?: '#ffffff' }}" oninput="document.getElementById('qna_hero_text_color').value=this.value; window.updateQnaHeroLivePreview()" class="w-16 px-1.5 py-1.5 text-[11px] font-mono bg-slate-900/90 border border-slate-700 rounded text-slate-200">
                                     </div>
                                 </div>
                             </div>
@@ -1736,19 +1743,22 @@ $curatedGoogleFonts = [
                                 </label>
                             </div>
 
-                            <!-- Fila 4: Imagen de Fondo (Carga o URL) -->
+                            <!-- Fila 4: Imagen de Fondo (Carga o Biblioteca de Medios) -->
                             <div class="p-3 bg-white/5 border border-white/10 rounded-xl space-y-2.5">
-                                <span class="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">Imagen de Fondo del Hero</span>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">Imagen de Fondo del Hero</span>
+                                    <button type="button" class="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition flex items-center gap-1 cursor-pointer shadow-xs" onclick="window.openCmsMediaModal('qna_hero_image_url')">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span>Biblioteca / Gestor de Medios</span>
+                                    </button>
+                                </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                     <div>
-                                        <label class="block text-[10px] text-slate-300 mb-1 font-semibold">Subir archivo de imagen (JPG, PNG, WebP)</label>
+                                        <label class="block text-[10px] text-slate-300 mb-1 font-semibold">Subir archivo nuevo (se guarda en biblioteca)</label>
                                         <input type="file" name="image_file" id="qna_hero_image_file" accept="image/*" class="w-full text-[11px] text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 file:cursor-pointer">
                                     </div>
                                     <div>
-                                        <div class="flex items-center justify-between mb-1">
-                                            <label class="block text-[10px] text-slate-300 font-semibold">O seleccionar / pegar URL directa</label>
-                                            <button type="button" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold underline cursor-pointer" onclick="window.openCmsMediaModal('qna_hero_image_url')">Gestor de Medios</button>
-                                        </div>
+                                        <label class="block text-[10px] text-slate-300 mb-1 font-semibold">O pegar URL / ruta de imagen</label>
                                         <input type="text" name="image_url" id="qna_hero_image_url" value="{{ $qnaPage->image_url }}" oninput="if(this.value.trim()){window._qnaUploadedPreviewUrl=null; const fi=document.getElementById('qna_hero_image_file'); if(fi) fi.value='';} window.updateQnaHeroLivePreview()" placeholder="https://... o /uploads/..." class="w-full text-xs bg-slate-900/90 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-500">
                                     </div>
                                 </div>
@@ -1766,7 +1776,7 @@ $curatedGoogleFonts = [
                                 @endif
                             </div>
 
-                            <!-- Fila 5: Capa de Degradado & Opacidades -->
+                            <!-- Fila 5: Capa de Degradado, Dirección & Opacidades -->
                             <div class="p-3 bg-white/5 border border-white/10 rounded-xl space-y-3">
                                 <div class="flex items-center justify-between flex-wrap gap-2">
                                     <span class="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">Capa de Degradado Superpuesta</span>
@@ -1783,35 +1793,52 @@ $curatedGoogleFonts = [
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <!-- Selector de Dirección del Degradado -->
+                                    <div class="sm:col-span-2 p-2.5 rounded-lg bg-black/30 border border-white/5 space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-slate-300 block">Sentido / Dirección del Degradado</span>
+                                            <span class="text-[10px] text-indigo-300">Ángulo de fusión</span>
+                                        </div>
+                                        <select name="gradient_direction" id="qna_gradient_direction" onchange="window.updateQnaHeroLivePreview()" class="w-full text-xs bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+                                            <option value="to bottom" {{ ($qnaPage->gradient_direction ?? 'to bottom') === 'to bottom' ? 'selected' : '' }}>De Arriba hacia Abajo (Vertical estándar)</option>
+                                            <option value="to top" {{ ($qnaPage->gradient_direction ?? '') === 'to top' ? 'selected' : '' }}>De Abajo hacia Arriba (Invertido)</option>
+                                            <option value="to right" {{ ($qnaPage->gradient_direction ?? '') === 'to right' ? 'selected' : '' }}>De Izquierda a Derecha</option>
+                                            <option value="to left" {{ ($qnaPage->gradient_direction ?? '') === 'to left' ? 'selected' : '' }}>De Derecha a Izquierda</option>
+                                            <option value="135deg" {{ ($qnaPage->gradient_direction ?? '') === '135deg' ? 'selected' : '' }}>Diagonal (Superior Izq a Inferior Der)</option>
+                                            <option value="45deg" {{ ($qnaPage->gradient_direction ?? '') === '45deg' ? 'selected' : '' }}>Diagonal (Inferior Izq a Superior Der)</option>
+                                            <option value="radial" {{ ($qnaPage->gradient_direction ?? '') === 'radial' ? 'selected' : '' }}>Radial Concéntrico (Desde el Centro)</option>
+                                        </select>
+                                    </div>
+
                                     <!-- Color Superior Inicio -->
                                     <div class="p-2.5 rounded-lg bg-black/30 border border-white/5 space-y-2">
-                                        <span class="text-[10px] font-bold text-slate-300 block">Color Superior (Inicio)</span>
+                                        <span class="text-[10px] font-bold text-slate-300 block">Color Inicial</span>
                                         <div class="flex items-center gap-2">
                                             <input type="color" name="overlay_color_start" id="qna_overlay_color_start" value="{{ $qnaPage->overlay_color_start ?: '#0f172a' }}" onchange="document.getElementById('qna_overlay_color_start_txt').value=this.value; window.updateQnaHeroLivePreview()" class="w-7 h-7 rounded border border-slate-700 cursor-pointer p-0.5 bg-slate-800">
                                             <input type="text" id="qna_overlay_color_start_txt" value="{{ $qnaPage->overlay_color_start ?: '#0f172a' }}" oninput="document.getElementById('qna_overlay_color_start').value=this.value; window.updateQnaHeroLivePreview()" class="w-20 px-2 py-1 text-xs font-mono bg-slate-900 border border-slate-700 rounded text-slate-200">
                                         </div>
                                         <div>
                                             <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                                                <span>Opacidad Superior:</span>
-                                                <strong id="qna_overlay_opacity_start_val">{{ $qnaPage->overlay_opacity_start !== null ? $qnaPage->overlay_opacity_start : 40 }}%</strong>
+                                                <span>Opacidad Inicial:</span>
+                                                <strong id="qna_overlay_opacity_start_val">{{ $qnaPage->overlay_opacity_start !== null ? $qnaPage->overlay_opacity_start : 30 }}%</strong>
                                             </div>
-                                            <input type="range" name="overlay_opacity_start" id="qna_overlay_opacity_start" min="0" max="100" value="{{ $qnaPage->overlay_opacity_start !== null ? $qnaPage->overlay_opacity_start : 40 }}" oninput="document.getElementById('qna_overlay_opacity_start_val').textContent=this.value+'%'; window.updateQnaHeroLivePreview()" class="w-full accent-indigo-500">
+                                            <input type="range" name="overlay_opacity_start" id="qna_overlay_opacity_start" min="0" max="100" value="{{ $qnaPage->overlay_opacity_start !== null ? $qnaPage->overlay_opacity_start : 30 }}" oninput="document.getElementById('qna_overlay_opacity_start_val').textContent=this.value+'%'; window.updateQnaHeroLivePreview()" class="w-full accent-indigo-500">
                                         </div>
                                     </div>
 
                                     <!-- Color Inferior Fin -->
                                     <div class="p-2.5 rounded-lg bg-black/30 border border-white/5 space-y-2">
-                                        <span class="text-[10px] font-bold text-slate-300 block">Color Inferior (Fin)</span>
+                                        <span class="text-[10px] font-bold text-slate-300 block">Color Final</span>
                                         <div class="flex items-center gap-2">
                                             <input type="color" name="overlay_color_end" id="qna_overlay_color_end" value="{{ $qnaPage->overlay_color_end ?: '#1e1b4b' }}" onchange="document.getElementById('qna_overlay_color_end_txt').value=this.value; window.updateQnaHeroLivePreview()" class="w-7 h-7 rounded border border-slate-700 cursor-pointer p-0.5 bg-slate-800">
                                             <input type="text" id="qna_overlay_color_end_txt" value="{{ $qnaPage->overlay_color_end ?: '#1e1b4b' }}" oninput="document.getElementById('qna_overlay_color_end').value=this.value; window.updateQnaHeroLivePreview()" class="w-20 px-2 py-1 text-xs font-mono bg-slate-900 border border-slate-700 rounded text-slate-200">
                                         </div>
                                         <div>
                                             <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                                                <span>Opacidad Inferior:</span>
-                                                <strong id="qna_overlay_opacity_end_val">{{ $qnaPage->overlay_opacity_end !== null ? $qnaPage->overlay_opacity_end : 90 }}%</strong>
+                                                <span>Opacidad Final:</span>
+                                                <strong id="qna_overlay_opacity_end_val">{{ $qnaPage->overlay_opacity_end !== null ? $qnaPage->overlay_opacity_end : 75 }}%</strong>
                                             </div>
-                                            <input type="range" name="overlay_opacity_end" id="qna_overlay_opacity_end" min="0" max="100" value="{{ $qnaPage->overlay_opacity_end !== null ? $qnaPage->overlay_opacity_end : 90 }}" oninput="document.getElementById('qna_overlay_opacity_end_val').textContent=this.value+'%'; window.updateQnaHeroLivePreview()" class="w-full accent-indigo-500">
+                                            <input type="range" name="overlay_opacity_end" id="qna_overlay_opacity_end" min="0" max="100" value="{{ $qnaPage->overlay_opacity_end !== null ? $qnaPage->overlay_opacity_end : 75 }}" oninput="document.getElementById('qna_overlay_opacity_end_val').textContent=this.value+'%'; window.updateQnaHeroLivePreview()" class="w-full accent-indigo-500">
                                         </div>
                                     </div>
                                 </div>
@@ -6838,12 +6865,12 @@ $curatedGoogleFonts = [
 
     window.applyQnaGradientPreset = function(preset) {
         const presets = {
-            indigo: { start: '#0f172a', end: '#1e1b4b', opStart: 25, opEnd: 70, text: '#ffffff' },
-            deep: { start: '#020617', end: '#09090b', opStart: 30, opEnd: 75, text: '#ffffff' },
-            wine: { start: '#4a0404', end: '#0f0505', opStart: 25, opEnd: 70, text: '#ffffff' },
-            emerald: { start: '#064e3b', end: '#022c22', opStart: 25, opEnd: 70, text: '#ffffff' },
-            carbon: { start: '#18181b', end: '#09090b', opStart: 20, opEnd: 65, text: '#ffffff' },
-            contrast: { start: '#000000', end: '#000000', opStart: 35, opEnd: 75, text: '#ffffff' }
+            indigo: { start: '#0f172a', end: '#1e1b4b', opStart: 25, opEnd: 70, text: '#ffffff', title: '#ffffff', dir: 'to bottom' },
+            deep: { start: '#020617', end: '#09090b', opStart: 30, opEnd: 75, text: '#ffffff', title: '#ffffff', dir: 'to bottom' },
+            wine: { start: '#4a0404', end: '#0f0505', opStart: 25, opEnd: 70, text: '#ffffff', title: '#ffffff', dir: 'to bottom' },
+            emerald: { start: '#064e3b', end: '#022c22', opStart: 25, opEnd: 70, text: '#ffffff', title: '#ffffff', dir: 'to bottom' },
+            carbon: { start: '#18181b', end: '#09090b', opStart: 20, opEnd: 65, text: '#ffffff', title: '#ffffff', dir: 'to bottom' },
+            contrast: { start: '#000000', end: '#000000', opStart: 35, opEnd: 75, text: '#ffffff', title: '#ffffff', dir: 'to bottom' }
         };
         const cfg = presets[preset] || presets.indigo;
         const cStart = document.getElementById('qna_overlay_color_start');
@@ -6854,8 +6881,11 @@ $curatedGoogleFonts = [
         const opStartVal = document.getElementById('qna_overlay_opacity_start_val');
         const opEnd = document.getElementById('qna_overlay_opacity_end');
         const opEndVal = document.getElementById('qna_overlay_opacity_end_val');
+        const titleColor = document.getElementById('qna_hero_title_color');
+        const titleColorTxt = document.getElementById('qna_hero_title_color_txt');
         const txtColor = document.getElementById('qna_hero_text_color');
         const txtColorTxt = document.getElementById('qna_hero_text_color_txt');
+        const dirEl = document.getElementById('qna_gradient_direction');
 
         if (cStart) cStart.value = cfg.start;
         if (cStartTxt) cStartTxt.value = cfg.start;
@@ -6865,8 +6895,11 @@ $curatedGoogleFonts = [
         if (opStartVal) opStartVal.textContent = cfg.opStart + '%';
         if (opEnd) opEnd.value = cfg.opEnd;
         if (opEndVal) opEndVal.textContent = cfg.opEnd + '%';
+        if (titleColor) titleColor.value = cfg.title;
+        if (titleColorTxt) titleColorTxt.value = cfg.title;
         if (txtColor) txtColor.value = cfg.text;
         if (txtColorTxt) txtColorTxt.value = cfg.text;
+        if (dirEl && cfg.dir) dirEl.value = cfg.dir;
 
         window.updateQnaHeroLivePreview();
     };
@@ -6884,7 +6917,9 @@ $curatedGoogleFonts = [
         const cEnd = document.getElementById('qna_overlay_color_end')?.value || '#1e1b4b';
         const opStart = (parseInt(document.getElementById('qna_overlay_opacity_start')?.value || '40', 10) / 100);
         const opEnd = (parseInt(document.getElementById('qna_overlay_opacity_end')?.value || '90', 10) / 100);
+        const titleColor = document.getElementById('qna_hero_title_color')?.value || '#ffffff';
         const txtColor = document.getElementById('qna_hero_text_color')?.value || '#ffffff';
+        const dir = document.getElementById('qna_gradient_direction')?.value || 'to bottom';
 
         const previewContainer = document.getElementById('qna_hero_preview_card');
         const previewBg = document.getElementById('qna_hero_preview_bg');
@@ -6939,12 +6974,16 @@ $curatedGoogleFonts = [
         }
 
         if (previewOverlay) {
-            previewOverlay.style.background = `linear-gradient(180deg, ${hexToRgba(cStart, opStart)} 0%, ${hexToRgba(cEnd, opEnd)} 100%)`;
+            if (dir === 'radial') {
+                previewOverlay.style.background = `radial-gradient(circle at center, ${hexToRgba(cStart, opStart)} 0%, ${hexToRgba(cEnd, opEnd)} 100%)`;
+            } else {
+                previewOverlay.style.background = `linear-gradient(${dir}, ${hexToRgba(cStart, opStart)} 0%, ${hexToRgba(cEnd, opEnd)} 100%)`;
+            }
         }
 
         if (previewTitle) {
             previewTitle.textContent = titleInput && titleInput.value.trim() ? titleInput.value.trim() : 'Q&A Preguntas Frecuentes';
-            previewTitle.style.color = txtColor;
+            previewTitle.style.color = titleColor;
         }
 
         if (previewDesc) {
