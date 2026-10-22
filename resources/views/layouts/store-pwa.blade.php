@@ -2091,7 +2091,8 @@
             </div>
             <div class="checkout-form-group" style="flex: 1;">
               <label for="checkoutShippingColony" class="checkout-label">Colonia *</label>
-              <input type="text" id="checkoutShippingColony" class="checkout-input" placeholder="Ej: Centro" required>
+              <input type="text" id="checkoutShippingColony" class="checkout-input" placeholder="Ej: Centro" list="checkoutColoniesList" required autocomplete="address-level3">
+              <datalist id="checkoutColoniesList"></datalist>
             </div>
           </div>
 

@@ -29,7 +29,7 @@ class OrderProcessingService
     }
 
     /**
-     * Valida codigo postal y calcula costos y tiempos de flete Sepomex.
+     * Valida codigo postal y calcula costos, tiempos de flete y autocompletado Sepomex.
      */
     public function validatePostalCode(string $postalCode, float $subtotal = 0.0): array
     {
@@ -40,10 +40,31 @@ class OrderProcessingService
         $isFree = $subtotal >= $freeThreshold;
         $cost = $isFree ? 0.00 : 149.00;
 
+        $directory = [
+            '06000' => ['state' => 'Ciudad de México', 'city' => 'Cuauhtémoc', 'colonias' => ['Centro']],
+            '06600' => ['state' => 'Ciudad de México', 'city' => 'Cuauhtémoc', 'colonias' => ['Juárez', 'Cuauhtémoc', 'Roma Norte']],
+            '01000' => ['state' => 'Ciudad de México', 'city' => 'Álvaro Obregón', 'colonias' => ['San Ángel', 'Campestre']],
+            '03100' => ['state' => 'Ciudad de México', 'city' => 'Benito Juárez', 'colonias' => ['Del Valle Centro', 'Insurgentes San Borja', 'Tlacoquemecatl']],
+            '11000' => ['state' => 'Ciudad de México', 'city' => 'Miguel Hidalgo', 'colonias' => ['Lomas de Chapultepec', 'Polanco']],
+            '44100' => ['state' => 'Jalisco', 'city' => 'Guadalajara', 'colonias' => ['Americana', 'Centro', 'Ladrón de Guevara', 'Moderna', 'Vallarta']],
+            '45050' => ['state' => 'Jalisco', 'city' => 'Zapopan', 'colonias' => ['Ciudad del Sol', 'La Calma']],
+            '64000' => ['state' => 'Nuevo León', 'city' => 'Monterrey', 'colonias' => ['Centro', 'Obrera', 'Industrial', 'Bella Vista']],
+            '66220' => ['state' => 'Nuevo León', 'city' => 'San Pedro Garza García', 'colonias' => ['Del Valle', 'Santa Engracia']],
+            '72000' => ['state' => 'Puebla', 'city' => 'Puebla', 'colonias' => ['Centro', 'Amor']],
+            '76000' => ['state' => 'Querétaro', 'city' => 'Querétaro', 'colonias' => ['Centro', 'Carretas', 'Alamos 1ra Sección']],
+            '77500' => ['state' => 'Quintana Roo', 'city' => 'Cancún', 'colonias' => ['Cancún Centro', 'Zona Hotelera']],
+            '22000' => ['state' => 'Baja California', 'city' => 'Tijuana', 'colonias' => ['Zona Urbana Río Tijuana', 'Centro']],
+        ];
+
+        $location = $directory[$cleanZip] ?? null;
+
         return [
             'success' => $isValid,
             'postal_code' => $cleanZip,
             'is_valid' => $isValid,
+            'state' => $location['state'] ?? null,
+            'city' => $location['city'] ?? null,
+            'colonias' => $location['colonias'] ?? [],
             'shipping_fee' => $cost,
             'shipping_fee_formatted' => $cost === 0.00 ? 'GRATIS ($0.00 MXN)' : 'MXN $' . number_format($cost, 2),
             'free_shipping_threshold' => $freeThreshold,

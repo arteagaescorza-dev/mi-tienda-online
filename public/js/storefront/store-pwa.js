@@ -3410,33 +3410,93 @@
     }
   }
 
-  function lookupPostalCode(zip) {
+  async function lookupPostalCode(zip) {
     const cleanZip = (zip || '').replace(/\D/g, '');
     if (cleanZip.length !== 5) {
       showToastNotification('Ingresa un código postal válido de 5 dígitos.');
       return;
     }
 
+    const stateInput = document.getElementById('checkoutShippingState');
+    const cityInput = document.getElementById('checkoutShippingCity');
+    const colInput = document.getElementById('checkoutShippingColony');
+    const datalist = document.getElementById('checkoutColoniesList');
+
     const knownCodes = {
-      '06000': { state: 'Ciudad de México', city: 'Cuauhtémoc', colony: 'Centro' },
-      '01000': { state: 'Ciudad de México', city: 'Álvaro Obregón', colony: 'San Ángel' },
-      '03100': { state: 'Ciudad de México', city: 'Benito Juárez', colony: 'Del Valle' },
-      '11000': { state: 'Ciudad de México', city: 'Miguel Hidalgo', colony: 'Lomas de Chapultepec' },
-      '44100': { state: 'Jalisco', city: 'Guadalajara', colony: 'Americana' },
-      '64000': { state: 'Nuevo León', city: 'Monterrey', colony: 'Centro' },
-      '72000': { state: 'Puebla', city: 'Puebla', colony: 'Centro' },
-      '76000': { state: 'Querétaro', city: 'Querétaro', colony: 'Centro' }
+      '06000': { state: 'Ciudad de México', city: 'Cuauhtémoc', colonias: ['Centro'] },
+      '06600': { state: 'Ciudad de México', city: 'Cuauhtémoc', colonias: ['Juárez', 'Cuauhtémoc', 'Roma Norte'] },
+      '01000': { state: 'Ciudad de México', city: 'Álvaro Obregón', colonias: ['San Ángel', 'Campestre'] },
+      '03100': { state: 'Ciudad de México', city: 'Benito Juárez', colonias: ['Del Valle Centro', 'Insurgentes San Borja', 'Tlacoquemecatl'] },
+      '11000': { state: 'Ciudad de México', city: 'Miguel Hidalgo', colonias: ['Lomas de Chapultepec', 'Polanco'] },
+      '44100': { state: 'Jalisco', city: 'Guadalajara', colonias: ['Americana', 'Centro', 'Ladrón de Guevara', 'Moderna', 'Vallarta'] },
+      '45050': { state: 'Jalisco', city: 'Zapopan', colonias: ['Ciudad del Sol', 'La Calma'] },
+      '64000': { state: 'Nuevo León', city: 'Monterrey', colonias: ['Centro', 'Obrera', 'Industrial', 'Bella Vista'] },
+      '66220': { state: 'Nuevo León', city: 'San Pedro Garza García', colonias: ['Del Valle', 'Santa Engracia'] },
+      '72000': { state: 'Puebla', city: 'Puebla', colonias: ['Centro', 'Amor'] },
+      '76000': { state: 'Querétaro', city: 'Querétaro', colonias: ['Centro', 'Carretas', 'Alamos 1ra Sección'] },
+      '77500': { state: 'Quintana Roo', city: 'Cancún', colonias: ['Cancún Centro', 'Zona Hotelera'] },
+      '22000': { state: 'Baja California', city: 'Tijuana', colonias: ['Zona Urbana Río Tijuana', 'Centro'] }
     };
 
-    const match = knownCodes[cleanZip];
-    if (match) {
-      const stateInput = document.getElementById('checkoutShippingState');
-      const cityInput = document.getElementById('checkoutShippingCity');
-      const colInput = document.getElementById('checkoutShippingColony');
-      if (stateInput) stateInput.value = match.state;
-      if (cityInput) cityInput.value = match.city;
-      if (colInput) colInput.value = match.colony;
-      showToastNotification(`CP ${cleanZip}: Cobertura Express Verificada`);
+    let resolvedState = null;
+    let resolvedCity = null;
+    let resolvedColonias = [];
+
+    // 1. Consulta a API SEPOMEX de backend
+    try {
+      const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+      const resp = await fetch('/api/v1/postal-code/lookup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+        },
+        body: JSON.stringify({ postal_code: cleanZip })
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.state) resolvedState = data.state;
+        if (data.city) resolvedCity = data.city;
+        if (Array.isArray(data.colonias) && data.colonias.length > 0) {
+          resolvedColonias = data.colonias;
+        }
+      }
+    } catch (e) {}
+
+    // 2. Fallback local si la API no estuviera disponible
+    if (!resolvedState && knownCodes[cleanZip]) {
+      const match = knownCodes[cleanZip];
+      resolvedState = match.state;
+      resolvedCity = match.city;
+      resolvedColonias = match.colonias || [match.colony];
+    }
+
+    // 3. Aplicar datos autocompletados al formulario
+    if (resolvedState && stateInput) {
+      stateInput.value = resolvedState;
+      setFieldValidation('checkoutShippingState', true);
+    }
+    if (resolvedCity && cityInput) {
+      cityInput.value = resolvedCity;
+      setFieldValidation('checkoutShippingCity', true);
+    }
+
+    if (resolvedColonias.length > 0) {
+      if (datalist) {
+        datalist.innerHTML = resolvedColonias.map(c => `<option value="${c}">`).join('');
+      }
+      if (colInput) {
+        colInput.value = resolvedColonias[0];
+        setFieldValidation('checkoutShippingColony', true);
+      }
+    }
+
+    setFieldValidation('checkoutShippingZip', true);
+
+    if (resolvedState && resolvedCity) {
+      showToastNotification(`CP ${cleanZip}: ${resolvedCity}, ${resolvedState} (Cobertura Verificada)`);
     } else {
       showToastNotification(`CP ${cleanZip}: Cobertura Courier Nacional Confirmada`);
     }
@@ -6961,6 +7021,18 @@
           }
         }
       }
+
+      // Apertura reactiva desde URL canónica (?open=cart / ?open=checkout / ?open=account)
+      const openParam = urlParams.get('open') || urlParams.get('action');
+      if (openParam === 'cart' || openParam === 'carrito') {
+        setTimeout(() => openDrawer('cartSheet'), 250);
+      } else if (openParam === 'checkout') {
+        setTimeout(() => {
+          if (typeof openCheckoutModal === 'function') openCheckoutModal();
+        }, 250);
+      } else if (openParam === 'account' || openParam === 'cuenta') {
+        setTimeout(() => openDrawer('accountSheet'), 250);
+      }
     } catch (e) {}
 
     // Registro de Service Worker PWA
@@ -7037,7 +7109,7 @@
     window.lookupOrderByFolio = lookupOrderByFolio;
     window.renderAccountAnatomy = renderAccountAnatomy;
     window.saveAnatomicalProfile = saveAnatomicalProfile;
-    window.renderAccountAddress = renderAccountAddress;
+    window.renderAccountPersonalAndAddresses = renderAccountPersonalAndAddresses;
     window.saveCustomerAddress = saveCustomerAddress;
     window.renderAccountSubscription = renderAccountSubscription;
     window.togglePushNotifications = togglePushNotifications;
