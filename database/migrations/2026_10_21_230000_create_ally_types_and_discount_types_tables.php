@@ -261,3 +261,4 @@ return new class extends Migration
         Schema::dropIfExists('ally_types');
     }
 };
+

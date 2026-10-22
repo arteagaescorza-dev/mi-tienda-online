@@ -1642,6 +1642,176 @@ $curatedGoogleFonts = [
                 </table>
             </div>
         </div>
+
+        <!-- 3. GESTOR DE PREGUNTAS FRECUENTES (Q&A) & OPTIMIZACIÓN AEO -->
+        <div id="faqAeoManagerCard" class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>Página de Preguntas Frecuentes (Q&amp;A) // AEO (Answer Engine Optimization)</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Gestor de preguntas y respuestas estructuradas para citación directa en motores de búsqueda de IA (Google SGE, Perplexity, ChatGPT y Gemini). Sincronizado automáticamente con la página de explorar Q&amp;A.</p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono">
+                        AEO Schema.org FAQPage Activo
+                    </span>
+                    <a href="{{ url('/pagina/q&a') }}" target="_blank" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5" title="Ver página Q&A en Storefront">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        <span>Ver en Storefront (/pagina/q&amp;a)</span>
+                    </a>
+                    <form method="POST" action="{{ route('portal.store.faqs.sync-page') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200 transition cursor-pointer flex items-center gap-1" title="Forzar sincronización nativa inmediata con la página Q&A">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span>Sincronizar Q&amp;A</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Banner Informativo AEO & Sincronización -->
+            <div class="mb-5 p-3.5 bg-gradient-to-r from-indigo-50/70 via-slate-50 to-purple-50/60 border border-indigo-100 rounded-xl flex items-center justify-between text-xs text-slate-700 flex-wrap gap-2">
+                <div class="space-y-1">
+                    <div class="font-bold text-indigo-950 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Sincronización Nativa con Tarjeta de Explorar #{{ $qnaPage->navbar_order ?? 5 }} ({{ $qnaPage->title ?? 'Q&A Preguntas Frecuentes' }})</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600">Cada cambio realizado aquí actualiza en tiempo real el microformato semántico JSON-LD y el render interactivo en <code>/pagina/q&amp;a</code>.</p>
+                </div>
+                <button type="button" onclick="window.resetFaqForm()" class="px-3 py-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer">
+                    + Nueva Pregunta
+                </button>
+            </div>
+
+            <!-- Formulario de Creación / Edición de FAQ -->
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <span id="faqFormModeBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800">
+                        Modo: Agregar Nueva Pregunta Frecuente
+                    </span>
+                    <button type="button" onclick="window.resetFaqForm()" class="text-[11px] text-slate-500 hover:text-slate-700">Limpiar Formulario</button>
+                </div>
+
+                <form id="faqMasterForm" method="POST" action="{{ route('portal.store.faqs.store') }}" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="_method" id="faqFormMethod" value="POST">
+                    <input type="hidden" id="faqEditId" value="">
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Pregunta Frecuente (Formato Intención de Usuario) *</label>
+                            <input type="text" name="question" id="faqFormQuestion" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Ej: ¿Cuáles son los tiempos de entrega y cobertura de envíos?">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Categoría Temática *</label>
+                            <input type="text" name="category" id="faqFormCategory" required list="faqCategorySuggestions" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Ej: Envíos &amp; Entregas">
+                            <datalist id="faqCategorySuggestions">
+                                <option value="Envíos &amp; Entregas">
+                                <option value="Stock &amp; Pedidos por Encargo">
+                                <option value="Pagos &amp; Seguridad">
+                                <option value="Tallas &amp; Ajuste">
+                                <option value="Convenios &amp; Alianzas">
+                                <option value="Garantías &amp; Devoluciones">
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold text-slate-700">Respuesta Factual Optimizada para IA (AEO) *</label>
+                            <span class="text-[10px] text-slate-400">Redacción directa, clara y verificable</span>
+                        </div>
+                        <textarea name="answer" id="faqFormAnswer" rows="3" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Redacta la respuesta de manera directa y libre de ambigüedades para que los motores de IA la extraigan como respuesta factual destacada..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Palabras Clave de Búsqueda &amp; Entidades IA (Opcional)</label>
+                            <input type="text" name="ai_keywords" id="faqFormAiKeywords" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-mono" placeholder="Ej: rastreo de pedidos, fedex, costo flete mexico">
+                        </div>
+                        <div class="flex items-center gap-4 pt-3 md:pt-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="is_active" id="faqFormIsActive" value="1" class="rounded text-indigo-600 focus:ring-0" checked>
+                                <span class="text-xs font-bold text-slate-700">Activa en Q&amp;A</span>
+                            </label>
+                            <button type="submit" id="faqFormSubmitBtn" class="ml-auto px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-xs">
+                                <span id="faqFormSubmitBtnLabel">Guardar Pregunta Frecuente</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabla de Preguntas Frecuentes Registradas -->
+            <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                <table class="w-full text-xs text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/70">
+                            <th class="p-3 font-semibold w-12 text-center">#</th>
+                            <th class="p-3 font-semibold">Pregunta &amp; Categoría</th>
+                            <th class="p-3 font-semibold">Respuesta Optimizada (AEO)</th>
+                            <th class="p-3 font-semibold">Intenciones IA</th>
+                            <th class="p-3 font-semibold text-center">Estado</th>
+                            <th class="p-3 font-semibold text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($faqs as $f)
+                            <tr class="hover:bg-slate-50/60 transition-colors {{ !$f->is_active ? 'opacity-60 bg-slate-50' : '' }}">
+                                <td class="p-3 text-center font-mono font-bold text-slate-400">
+                                    {{ $loop->iteration }}
+                                </td>
+                                <td class="p-3">
+                                    <strong class="text-slate-900 block font-semibold">{{ $f->question }}</strong>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 inline-block mt-1">{{ $f->category }}</span>
+                                </td>
+                                <td class="p-3 text-slate-600 max-w-sm truncate" title="{{ $f->answer }}">
+                                    {{ Str::limit($f->answer, 110) }}
+                                </td>
+                                <td class="p-3 font-mono text-[10px] text-slate-500 max-w-xs truncate">
+                                    {{ $f->ai_keywords ?: 'General' }}
+                                </td>
+                                <td class="p-3 text-center">
+                                    @if($f->is_active)
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">ACTIVA</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">PAUSADA</span>
+                                    @endif
+                                </td>
+                                <td class="p-3 text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <button type="button" class="px-2 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg cursor-pointer" data-action="edit-faq-btn" data-faq="{{ json_encode($f) }}">
+                                            Editar
+                                        </button>
+                                        <form action="{{ route('portal.store.faqs.toggle-status', $f->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="px-2 py-1 text-xs font-semibold {{ $f->is_active ? 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200' }} rounded-lg cursor-pointer">
+                                                {{ $f->is_active ? 'Pausar' : 'Activar' }}
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('portal.store.faqs.destroy', $f->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar esta pregunta frecuente?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-2 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg cursor-pointer">
+                                                Eliminar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="p-6 text-center text-slate-500 text-xs">
+                                    No hay preguntas frecuentes registradas aún. Utiliza el formulario superior para redactar la primera.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <!-- FIN SUBMÓDULO 4: GESTOR DE PÁGINAS CMS & NAVBAR -->
 
@@ -6446,7 +6616,47 @@ $curatedGoogleFonts = [
         window.openStoreModal('editPageModal');
     };
 
-    
+    window.populateFaqFormForEdit = function(faq) {
+        const form = document.getElementById('faqMasterForm');
+        if (!form) return;
+        form.action = `/admin/tienda-cms/faqs/${faq.id}`;
+        document.getElementById('faqFormMethod').value = 'PUT';
+        document.getElementById('faqEditId').value = faq.id;
+        document.getElementById('faqFormQuestion').value = faq.question || '';
+        document.getElementById('faqFormCategory').value = faq.category || '';
+        document.getElementById('faqFormAnswer').value = faq.answer || '';
+        document.getElementById('faqFormAiKeywords').value = faq.ai_keywords || '';
+        document.getElementById('faqFormIsActive').checked = (faq.is_active !== false && faq.is_active !== 0 && faq.is_active !== '0');
+        document.getElementById('faqFormModeBadge').textContent = 'Modo: Editando Pregunta #' + faq.id;
+        document.getElementById('faqFormSubmitBtnLabel').textContent = 'Actualizar Pregunta Frecuente';
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.resetFaqForm = function() {
+        const form = document.getElementById('faqMasterForm');
+        if (!form) return;
+        form.action = '{{ route("portal.store.faqs.store") }}';
+        document.getElementById('faqFormMethod').value = 'POST';
+        document.getElementById('faqEditId').value = '';
+        form.reset();
+        document.getElementById('faqFormIsActive').checked = true;
+        document.getElementById('faqFormModeBadge').textContent = 'Modo: Agregar Nueva Pregunta Frecuente';
+        document.getElementById('faqFormSubmitBtnLabel').textContent = 'Guardar Pregunta Frecuente';
+    };
+
+    document.querySelectorAll('[data-action="edit-faq-btn"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const raw = this.getAttribute('data-faq');
+            if (!raw) return;
+            try {
+                const faq = JSON.parse(raw);
+                window.populateFaqFormForEdit(faq);
+            } catch(e) {
+                console.error('Error parsing faq json', e);
+            }
+        });
+    });
+
     window.toggleHeroModeCreate = function(mode) {
         const isCustom = mode === 'custom';
         const lblStruct = document.getElementById('createHeroModeStructuredLbl');

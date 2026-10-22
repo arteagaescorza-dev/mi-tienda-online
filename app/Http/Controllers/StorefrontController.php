@@ -830,6 +830,14 @@ class StorefrontController extends Controller
                 ->get();
         }
 
+        $isFaqPage = in_array($page->slug, ['q&a', 'faq', 'preguntas-frecuentes']) || str_contains(strtolower($page->title), 'preguntas frecuentes') || str_contains(strtolower($page->title), 'q&a');
+        $faqs = collect();
+        $faqJsonLd = null;
+        if ($isFaqPage) {
+            $faqs = \App\Models\CmsFaq::active()->get();
+            $faqJsonLd = \App\Models\CmsFaq::buildFaqPageSchema($faqs);
+        }
+
         $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
         $currentStorefront = [
             'brandName' => $storefrontConfig->brand_name ?? 'TORZO',
@@ -863,6 +871,9 @@ class StorefrontController extends Controller
             'page' => $page,
             'isAlliesPage' => $isAlliesPage,
             'allyCampaigns' => $allyCampaigns,
+            'isFaqPage' => $isFaqPage,
+            'faqs' => $faqs,
+            'faqJsonLd' => $faqJsonLd,
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
             'navbarPages' => $navbarPages,

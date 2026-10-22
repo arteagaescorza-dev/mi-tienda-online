@@ -108,6 +108,13 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/tienda-cms/paginas/{page}/toggle-status', [PortalStoreController::class, 'togglePageStatus'])->name('portal.store.pages.toggle-status');
 	Route::post('/admin/tienda-cms/paginas/{page}/archivar', [PortalStoreController::class, 'archivePage'])->name('portal.store.pages.archive');
 	Route::delete('/admin/tienda-cms/paginas/{page}', [PortalStoreController::class, 'destroyPage'])->name('portal.store.pages.destroy');
+
+	// Hub 2: Gestor de Preguntas Frecuentes & Q&A (AEO)
+	Route::post('/admin/tienda-cms/faqs', [PortalStoreController::class, 'storeFaq'])->name('portal.store.faqs.store');
+	Route::put('/admin/tienda-cms/faqs/{faq}', [PortalStoreController::class, 'updateFaq'])->name('portal.store.faqs.update');
+	Route::post('/admin/tienda-cms/faqs/{faq}/toggle-status', [PortalStoreController::class, 'toggleFaqStatus'])->name('portal.store.faqs.toggle-status');
+	Route::delete('/admin/tienda-cms/faqs/{faq}', [PortalStoreController::class, 'destroyFaq'])->name('portal.store.faqs.destroy');
+	Route::post('/admin/tienda-cms/faqs/sync-page', [PortalStoreController::class, 'syncQnaPage'])->name('portal.store.faqs.sync-page');
 	Route::post('/admin/tienda-cms/anuncios/actualizar', [PortalStoreController::class, 'updateAnnouncements'])->name('portal.store.announcements.update');
 	Route::post('/admin/tienda-cms/blog', [PortalStoreController::class, 'storeBlogPost'])->name('portal.store.blog.store');
 	Route::put('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'updateBlogPost'])->name('portal.store.blog.update');

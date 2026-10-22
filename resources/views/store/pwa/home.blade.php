@@ -1365,6 +1365,10 @@
             </div>
           @elseif(!empty($resolvedImages[0]))
             <img src="{{ $resolvedImages[0] }}" alt="{{ $ep->title }}" class="explore-card-bg-img" loading="lazy">
+          @elseif(in_array($ep->slug, ['q&a', 'faq', 'preguntas-frecuentes']) || str_contains(strtolower($ep->title), 'preguntas frecuentes') || str_contains(strtolower($ep->title), 'q&a'))
+            <div class="explore-card-bg-img" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #09090b, #1e1b4b); color: #818cf8;">
+              <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
           @else
             <div class="explore-card-bg-img" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #18181b, #09090b); color: #71717a;">
               <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
@@ -1383,6 +1387,10 @@
             @elseif(in_array($ep->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($ep->title), 'aliados') || str_contains(strtolower($ep->title), 'convenios'))
               <span style="background: rgba(79, 70, 229, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
                 CONVENIOS // EVENTOS HUB 7
+              </span>
+            @elseif(in_array($ep->slug, ['q&a', 'faq', 'preguntas-frecuentes']) || str_contains(strtolower($ep->title), 'preguntas frecuentes') || str_contains(strtolower($ep->title), 'q&a'))
+              <span style="background: rgba(79, 70, 229, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
+                Q&amp;A // AEO OPTIMIZADO
               </span>
             @else
               <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
@@ -1418,6 +1426,9 @@
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 @elseif(in_array($ep->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($ep->title), 'aliados') || str_contains(strtolower($ep->title), 'convenios'))
                   <span>Ver Convenios & Eventos</span>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                @elseif(in_array($ep->slug, ['q&a', 'faq', 'preguntas-frecuentes']) || str_contains(strtolower($ep->title), 'preguntas frecuentes') || str_contains(strtolower($ep->title), 'q&a'))
+                  <span>Ver Q&amp;A Frecuentes</span>
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 @else
                   <span>Ver Página</span>

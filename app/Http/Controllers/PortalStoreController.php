@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\CmsBlogPost;
 use App\Models\CmsCatalogFilter;
+use App\Models\CmsFaq;
 use App\Models\CmsOfficialDocument;
 use App\Models\CmsPage;
 use App\Models\CmsSection;
@@ -366,6 +367,8 @@ class PortalStoreController extends Controller
         $pages = CmsPage::orderBy('navbar_order')->get();
         $blogPosts = CmsBlogPost::orderByDesc('created_at')->get();
         $tracking = CmsTrackingSetting::current();
+        $faqs = CmsFaq::orderBy('sort_order')->orderBy('id')->get();
+        $qnaPage = CmsPage::where('slug', 'q&a')->first();
 
         // 9.1. Categorías Oficiales y Páginas de Información y Legal para el Footer Editor
         $dbOfficialCategories = Category::orderBy('name')->get();
@@ -453,6 +456,8 @@ class PortalStoreController extends Controller
             'fabrics' => \App\Models\ApparelFabric::where('is_active', true)->orderBy('name')->get(),
             'profecoNotice' => $profecoNotice,
             'pages' => $pages,
+            'faqs' => $faqs,
+            'qnaPage' => $qnaPage,
             'blogPosts' => $blogPosts,
             'tracking' => $tracking,
             'catalogFilters' => $catalogFilters,
@@ -1238,6 +1243,127 @@ class PortalStoreController extends Controller
         }
 
         return back()->with('success', 'Página CMS eliminada.');
+    }
+
+    /**
+     * Crear una nueva pregunta frecuente (FAQ) optimizada para AEO.
+     */
+    public function storeFaq(Request $request)
+    {
+        Gate::authorize('manage-cms');
+
+        $validated = $request->validate([
+            'question' => 'required|string|max:255',
+            'answer' => 'required|string',
+            'category' => 'required|string|max:100',
+            'sort_order' => 'nullable|integer',
+            'is_active' => 'nullable|boolean',
+            'ai_keywords' => 'nullable|string|max:255',
+        ]);
+
+        $maxOrder = CmsFaq::max('sort_order') ?? 0;
+        $faq = CmsFaq::create([
+            'question' => trim($validated['question']),
+            'answer' => trim($validated['answer']),
+            'category' => trim($validated['category']),
+            'sort_order' => isset($validated['sort_order']) ? (int)$validated['sort_order'] : $maxOrder + 1,
+            'is_active' => $request->boolean('is_active', true),
+            'ai_keywords' => !empty($validated['ai_keywords']) ? trim($validated['ai_keywords']) : null,
+        ]);
+
+        CmsFaq::syncToQnaPage();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'faq' => $faq]);
+        }
+
+        return back()->with('success', 'Pregunta frecuente creada y sincronizada con la página Q&A.');
+    }
+
+    /**
+     * Actualizar una pregunta frecuente (FAQ) existente.
+     */
+    public function updateFaq(Request $request, CmsFaq $faq)
+    {
+        Gate::authorize('manage-cms');
+
+        $validated = $request->validate([
+            'question' => 'required|string|max:255',
+            'answer' => 'required|string',
+            'category' => 'required|string|max:100',
+            'sort_order' => 'nullable|integer',
+            'is_active' => 'nullable|boolean',
+            'ai_keywords' => 'nullable|string|max:255',
+        ]);
+
+        $faq->update([
+            'question' => trim($validated['question']),
+            'answer' => trim($validated['answer']),
+            'category' => trim($validated['category']),
+            'sort_order' => isset($validated['sort_order']) ? (int)$validated['sort_order'] : $faq->sort_order,
+            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : $faq->is_active,
+            'ai_keywords' => !empty($validated['ai_keywords']) ? trim($validated['ai_keywords']) : null,
+        ]);
+
+        CmsFaq::syncToQnaPage();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'faq' => $faq]);
+        }
+
+        return back()->with('success', 'Pregunta frecuente actualizada y sincronizada con la página Q&A.');
+    }
+
+    /**
+     * Alternar estado activo / pausado de una pregunta frecuente.
+     */
+    public function toggleFaqStatus(CmsFaq $faq)
+    {
+        Gate::authorize('manage-cms');
+
+        $faq->update(['is_active' => !$faq->is_active]);
+        CmsFaq::syncToQnaPage();
+
+        $statusStr = $faq->is_active ? 'ACTIVADA' : 'PAUSADA';
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'is_active' => $faq->is_active]);
+        }
+
+        return back()->with('success', "Pregunta frecuente marcada como {$statusStr} y sincronizada con Q&A.");
+    }
+
+    /**
+     * Eliminar una pregunta frecuente.
+     */
+    public function destroyFaq(CmsFaq $faq)
+    {
+        Gate::authorize('manage-cms');
+
+        $faq->delete();
+        CmsFaq::syncToQnaPage();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Pregunta frecuente eliminada y catálogo Q&A sincronizado.');
+    }
+
+    /**
+     * Forzar sincronización nativa con la página de explorar Q&A.
+     */
+    public function syncQnaPage(Request $request)
+    {
+        Gate::authorize('manage-cms');
+
+        $page = CmsFaq::syncToQnaPage();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'page' => $page]);
+        }
+
+        return back()->with('success', 'Página de Explorar Q&A sincronizada nativamente con todas las preguntas frecuentes y microformato AEO.');
     }
 
     /**

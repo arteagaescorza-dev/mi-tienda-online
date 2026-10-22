@@ -42,3 +42,4 @@ class AllyType extends Model
         return $query->where('status', 'archived');
     }
 }
+

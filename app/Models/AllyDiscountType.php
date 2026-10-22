@@ -68,3 +68,4 @@ class AllyDiscountType extends Model
         return $query->whereIn('direction', ['dir_b', 'both']);
     }
 }
+
