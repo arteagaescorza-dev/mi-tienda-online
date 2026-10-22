@@ -72,6 +72,8 @@ html {
   scroll-behavior: smooth;
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body.store-body {
@@ -83,10 +85,12 @@ body.store-body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  padding-bottom: 76px; /* Espacio para el Bottom App Dock en movil */
+  padding-bottom: 76px; /* Espacio para el Bottom App Dock en movil y tablet */
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   body.store-body {
     padding-bottom: 0;
   }
@@ -158,7 +162,7 @@ body.store-body {
   justify-content: space-between;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .sticky-header-wrapper {
     position: sticky !important;
     top: 0 !important;
@@ -914,7 +918,7 @@ body.store-body {
   box-shadow: var(--shadow-dock);
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .bottom-app-dock {
     display: none !important;
   }
@@ -5468,6 +5472,551 @@ html.dark .discount-filter-btn.active {
   color: #f8fafc !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
 }
+
+/* ============================================================================
+   TABLET APP MODE (<= 1024px) & ANTI-OVERFLOW NAVBAR
+   ============================================================================ */
+.tablet-only-brand-titles {
+  display: none;
+}
+
+@media (min-width: 600px) and (max-width: 1024px) {
+  .tablet-only-brand-titles {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  .navbar-mobile {
+    height: 62px;
+    padding: 0 24px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .bottom-app-dock {
+    height: 68px;
+    padding: 0 32px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .dock-tab-btn {
+    flex-direction: row;
+    gap: 8px;
+    border-radius: 12px;
+    height: 48px;
+    max-width: 160px;
+  }
+  .dock-tab-label {
+    font-size: 0.76rem;
+  }
+  .dock-cart-badge {
+    top: 6px;
+    right: 16px;
+  }
+  .product-feed-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1260px) {
+  .nav-links-desktop {
+    gap: 14px;
+  }
+  .nav-link-item {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+  .nav-actions-desktop {
+    gap: 8px;
+  }
+  .btn-pill-action {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+  }
+}
+
+/* ============================================================================
+   HERO PARALLAX LAYER (MOBILE, TABLET & DESKTOP HARDWARE ACCELERATED)
+   ============================================================================ */
+.hero-card-parallax-enabled {
+  position: relative;
+  overflow: hidden !important;
+  isolation: isolate;
+}
+
+.hero-parallax-bg-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -22%;
+  width: 100%;
+  height: 144%;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+  transform: translate3d(0, 0, 0) scale(1.06);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+}
+
+/* ============================================================================
+   DARK MODE CONTRAST OVERRIDES (CARDS, TITLES, BUTTONS, CART & CHECKOUT)
+   ============================================================================ */
+html.dark .section-headline,
+html.dark .explore-title,
+html.dark .product-title,
+html.dark .product-title a,
+html.dark .product-price-val,
+html.dark .sheet-title,
+html.dark .brand-name {
+  color: #f8fafc !important;
+}
+
+html.dark .product-category-label {
+  color: #a5b4fc !important;
+  font-weight: 800 !important;
+}
+
+html.dark .product-card {
+  background: #151720 !important;
+  border-color: #272b3a !important;
+}
+
+html.dark .product-info-body {
+  background: #151720 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .size-chip {
+  background: #1e212d !important;
+  border-color: #32374a !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .size-chip.active {
+  background: #6366f1 !important;
+  border-color: #818cf8 !important;
+  color: #ffffff !important;
+}
+
+html.dark .btn-quick-add {
+  background: #f8fafc !important;
+  color: #09090b !important;
+  border-color: #f8fafc !important;
+}
+
+html.dark .btn-quick-add:hover {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  border-color: #6366f1 !important;
+}
+
+/* Boton Filtros y Botones de Accion en Modo Oscuro */
+html.dark .section-action-btn,
+html.dark #mobileFilterToggleBtn {
+  background: #1e212d !important;
+  color: #f8fafc !important;
+  border: 1px solid #383e54 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .section-action-btn svg,
+html.dark .section-action-btn span {
+  color: #f8fafc !important;
+  stroke: currentColor;
+}
+
+html.dark .section-action-btn:hover {
+  background: #282c3d !important;
+  border-color: #6366f1 !important;
+}
+
+/* Boton Panel RevOps con alto contraste en Modo Oscuro */
+html.dark .btn-goto-revops {
+  background: #1e212d !important;
+  color: #f8fafc !important;
+  border: 1px solid #4f46e5 !important;
+}
+
+html.dark .btn-goto-revops:hover {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+/* Carrito (#cartSheet), Wishlist y Modales sin zonas blancas en Modo Oscuro */
+html.dark .bottom-sheet-drawer,
+html.dark #cartSheet,
+html.dark #wishlistSheet,
+html.dark #accountSheet,
+html.dark #filterDrawer,
+html.dark #pwaInstallTutorialSheet {
+  background: #12141c !important;
+  color: #f8fafc !important;
+  border-color: #272b3a !important;
+}
+
+html.dark .sheet-header {
+  background: #12141c !important;
+  border-bottom-color: #272b3a !important;
+}
+
+html.dark .sheet-body {
+  background: #12141c !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .sheet-footer-actions {
+  background: #161923 !important;
+  border-top-color: #272b3a !important;
+  color: #f8fafc !important;
+}
+
+html.dark .btn-sheet-clear {
+  background: #1e2230 !important;
+  color: #f8fafc !important;
+  border-color: #363c52 !important;
+}
+
+html.dark .btn-sheet-apply {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  border-color: #6366f1 !important;
+}
+
+html.dark .cart-saved-card,
+html.dark .cart-wishlist-card,
+html.dark .wishlist-item-card {
+  background: #191c26 !important;
+  border-color: #2b3042 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .cart-empty-icon-circle {
+  background: #1e2230 !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .cart-shipping-progress-track {
+  background: #272b3a !important;
+}
+
+html.dark .cart-shipping-progress-fill {
+  background: #6366f1 !important;
+}
+
+html.dark .cart-Urgency-banner {
+  background: rgba(225, 29, 72, 0.14) !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+}
+
+html.dark .mixed-shipping-strategy-card,
+html.dark .mixed-option-card,
+html.dark .mixed-line-group,
+html.dark .review-summary-card,
+html.dark .payment-method-card,
+html.dark .spei-bank-details-box {
+  background: #181b26 !important;
+  border-color: #2b3042 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .mixed-option-card.active,
+html.dark .payment-method-card.active {
+  background: rgba(99, 102, 241, 0.14) !important;
+  border-color: #6366f1 !important;
+}
+
+/* ============================================================================
+   PWA INSTALL BANNER & OS-DETECTING TUTORIAL SHEET (iOS / ANDROID)
+   ============================================================================ */
+.btn-pwa-app-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--text-primary, #09090b);
+  color: var(--bg-primary, #ffffff);
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 5px 10px;
+  font-family: var(--font-heading);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+html.dark .btn-pwa-app-header {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #818cf8;
+}
+
+@media (max-width: 375px) {
+  .btn-pwa-app-header-text {
+    display: none;
+  }
+  .btn-pwa-app-header {
+    padding: 6px 8px;
+  }
+}
+
+.pwa-smart-install-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  background: linear-gradient(90deg, #09090b 0%, #1e1b4b 100%);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 1025px) {
+  .pwa-smart-install-banner,
+  .btn-pwa-app-header {
+    display: none !important;
+  }
+}
+
+.pwa-smart-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pwa-smart-app-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 0.9rem;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.pwa-smart-banner-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pwa-smart-banner-copy strong {
+  font-family: var(--font-heading);
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pwa-smart-banner-copy span {
+  font-size: 0.66rem;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pwa-smart-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-pwa-smart-open {
+  background: #ffffff;
+  color: #09090b;
+  border: none;
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-family: var(--font-heading);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.btn-pwa-smart-close {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Modal / Drawer Tutorial PWA */
+.pwa-detected-os-row {
+  margin-bottom: 12px;
+}
+
+.pwa-detected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(79, 70, 229, 0.12);
+  color: #4f46e5;
+  border: 1px solid rgba(79, 70, 229, 0.25);
+}
+
+html.dark .pwa-detected-badge {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  border-color: rgba(129, 140, 248, 0.35);
+}
+
+.pwa-tutorial-intro {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  line-height: 1.45;
+}
+
+.pwa-os-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--bg-tertiary, #f1f1f4);
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+html.dark .pwa-os-tabs {
+  background: #1b1e2b;
+}
+
+.pwa-os-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pwa-os-tab-btn.active {
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #09090b);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+html.dark .pwa-os-tab-btn.active {
+  background: #282d40;
+  color: #ffffff;
+}
+
+.pwa-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pwa-step-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--bg-secondary, #f8f8fa);
+  border: 1px solid var(--border-subtle, #e4e4e7);
+}
+
+html.dark .pwa-step-card {
+  background: #181b26;
+  border-color: #2b3042;
+}
+
+.pwa-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--text-primary, #09090b);
+  color: var(--bg-primary, #ffffff);
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+html.dark .pwa-step-num {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.pwa-step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-step-content strong {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.pwa-step-content p {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.pwa-step-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, #e4e4e7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+html.dark .pwa-step-icon-box {
+  background: #222636;
+  border-color: #353b52;
+  color: #a5b4fc;
+}
+
 
 
 

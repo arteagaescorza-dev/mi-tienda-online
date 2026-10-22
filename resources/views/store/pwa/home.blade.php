@@ -71,14 +71,27 @@
                 $cssDeclarations[] = "background-size: cover !important";
                 $cssDeclarations[] = "background-position: center !important";
             }
-            if (!empty($settings['parallax_scrolling']) && !$isCarousel) {
+            $isHeroParallax = !empty($settings['parallax_scrolling']) && !$isCarousel;
+            $parallaxLayerCss = '';
+            if ($isHeroParallax && !empty($bgImageUrl)) {
+                if ($enableGradient) {
+                    $rgbaStart = $hexToRgba($gradStart, $gradOpacityStart);
+                    $rgbaEnd = $hexToRgba($gradEnd, $gradOpacityEnd);
+                    $parallaxLayerCss = "background-image: linear-gradient({$gradDir}, {$rgbaStart}, {$rgbaEnd}), url('{$bgImageUrl}'); background-size: cover, cover; background-position: center, {$imageFocalPoint}; background-repeat: no-repeat, no-repeat;";
+                } else {
+                    $parallaxLayerCss = "background-image: url('{$bgImageUrl}'); background-size: cover; background-position: {$imageFocalPoint}; background-repeat: no-repeat;";
+                }
+            }
+            if ($isHeroParallax) {
                 $cssDeclarations[] = "background-attachment: fixed !important";
             }
-            if (!empty($settings['hero_height_value'])) {
+            if (!empty($settings['hero_height_value']) && (float)$settings['hero_height_value'] > 0) {
                 $hHeightVal = trim($settings['hero_height_value']);
                 $hHeightUnit = trim($settings['hero_height_unit'] ?? 'px');
                 $cssDeclarations[] = "min-height: {$hHeightVal}{$hHeightUnit} !important";
                 $cssDeclarations[] = "height: {$hHeightVal}{$hHeightUnit} !important";
+            } elseif (!$isFullWidth && !$isCarousel) {
+                $cssDeclarations[] = "min-height: 360px";
             }
             $heroBgStyle = !empty($cssDeclarations) ? implode('; ', $cssDeclarations) . ';' : '';
 
@@ -89,26 +102,34 @@
           @endphp
 
           <!-- Hero Carousel / Editorial Banner -->
-          <section id="section-{{ $sec->id }}" class="hero-editorial-section {{ $isFullWidth ? 'hero-fullpage-v' : '' }} {{ $isFullWidthH ? 'hero-full-width-h' : '' }} {{ ($isFullWidth && $isFullWidthH) ? 'hero-full-width' : '' }}" style="{{ $secSpacingStyle }} padding-top: 0 !important; padding-bottom: 0 !important;" data-section-id="{{ $sec->id }}">
+          <section id="section-{{ $sec->id }}" class="hero-editorial-section {{ $isFullWidth ? 'hero-fullpage-v' : '' }} {{ $isFullWidthH ? 'hero-full-width-h' : '' }} {{ ($isFullWidth && $isFullWidthH) ? 'hero-full-width' : '' }} {{ $isHeroParallax ? 'has-hero-parallax' : '' }}" style="{{ $secSpacingStyle }} padding-top: 0 !important; padding-bottom: 0 !important;" data-section-id="{{ $sec->id }}">
             @if($heroMode === 'custom')
               {{-- MODO CÓDIGO PERSONALIZADO (AISLADO, NO DUPLICA EL HERO) --}}
-              <div class="hero-custom-container" style="{!! $heroBgStyle !!} {{ (!$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" @if(!$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
+              <div class="hero-custom-container" style="position: relative; overflow: hidden; {!! $heroBgStyle !!} {{ (!$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" @if(!$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
+                @if($isHeroParallax && !empty($parallaxLayerCss))
+                  <div class="hero-parallax-bg-layer" data-hero-parallax-layer="1" style="position: absolute; top: -24%; left: 0; width: 100%; height: 148%; z-index: 0; pointer-events: none; will-change: transform; {!! $parallaxLayerCss !!} transform: translate3d(0, 0, 0) scale(1.08);"></div>
+                @endif
                 @if(!$heroHasButtons && !empty($heroClickUrl))
                   <a href="{{ $heroClickUrl }}" class="hero-full-click-link" style="position: absolute; inset: 0; z-index: 15; width: 100%; height: 100%; text-decoration: none;" aria-label="{{ $sec->title ?? 'Hero' }}"></a>
                 @endif
-                @if(!empty($sec->custom_css))
-                  <style>{!! $sec->custom_css !!}</style>
-                @endif
-                @if(!empty($sec->custom_html))
-                  {!! $sec->custom_html !!}
-                @endif
-                @if(!empty($sec->custom_js))
-                  <script>{!! $sec->custom_js !!}</script>
-                @endif
+                <div style="position: relative; z-index: 5; width: 100%;">
+                  @if(!empty($sec->custom_css))
+                    <style>{!! $sec->custom_css !!}</style>
+                  @endif
+                  @if(!empty($sec->custom_html))
+                    {!! $sec->custom_html !!}
+                  @endif
+                  @if(!empty($sec->custom_js))
+                    <script>{!! $sec->custom_js !!}</script>
+                  @endif
+                </div>
               </div>
             @else
               {{-- MODO VISUAL ESTRUCTURADO (FORMULARIO DINÁMICO) --}}
-              <div class="hero-banner-card" style="{!! $heroBgStyle !!} {{ $isCarousel ? 'position: relative !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important;' : '' }} {{ ($isCarousel && empty($settings['hero_height_value']) && !$isFullWidth) ? 'min-height: 440px;' : '' }} {{ ($isCarousel && $isFullWidth) ? 'min-height: calc(100vh - 56px) !important; height: calc(100vh - 56px) !important;' : '' }} {{ (!$isCarousel && !$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" aria-label="{{ $settings['background_image_alt'] ?? '' }}" @if(!$isCarousel && !$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
+              <div class="hero-banner-card {{ $isHeroParallax ? 'hero-card-parallax-enabled' : '' }}" style="{!! $heroBgStyle !!} {{ $isCarousel ? 'position: relative !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important;' : '' }} {{ ($isCarousel && (empty($settings['hero_height_value']) || (float)$settings['hero_height_value'] <= 0) && !$isFullWidth) ? 'min-height: 440px;' : '' }} {{ ($isCarousel && $isFullWidth) ? 'min-height: calc(100vh - 56px) !important; height: calc(100vh - 56px) !important;' : '' }} {{ (!$isCarousel && !$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" aria-label="{{ $settings['background_image_alt'] ?? '' }}" @if(!$isCarousel && !$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
+                @if($isHeroParallax && !empty($parallaxLayerCss))
+                  <div class="hero-parallax-bg-layer" data-hero-parallax-layer="1" style="position: absolute; top: -24%; left: 0; width: 100%; height: 148%; z-index: 0; pointer-events: none; will-change: transform; {!! $parallaxLayerCss !!} transform: translate3d(0, 0, 0) scale(1.08);"></div>
+                @endif
                 @if(!$isCarousel && !$heroHasButtons && !empty($heroClickUrl))
                   <a href="{{ $heroClickUrl }}" class="hero-full-click-link" style="position: absolute; inset: 0; z-index: 15; width: 100%; height: 100%; text-decoration: none;" aria-label="{{ $sec->title ?? 'Hero' }}"></a>
                 @endif
@@ -190,7 +211,7 @@
                               @endphp
                               <div class="carousel-slide" data-slide-index="{{ $sIdx }}" style="{{ $isCarouselParallax ? 'position: absolute; inset: 0; width: 100%; height: 100%; z-index: ' . ($sIdx === 0 ? '2' : '0') . '; visibility: ' . ($sIdx === 0 ? 'visible' : 'hidden') . '; will-change: clip-path;' : 'flex: 0 0 100%; min-width: 100%; width: 100%; height: 100%; position: relative;' }} overflow: hidden; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 36px max(24px, calc((100vw - 1280px) / 2 + 24px));">
                                   @if(!empty($slideImgSrc))
-                                      <img src="{{ $slideImgSrc }}" class="carousel-slide-bg-img" alt="{{ $slide['alt_text'] ?? ($slide['title'] ?? 'Slide ' . ($sIdx + 1)) }}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: {{ $slideFocal }}; z-index: 0; pointer-events: none; display: block;" loading="{{ $sIdx === 0 ? 'eager' : 'lazy' }}">
+                                      <img src="{{ $slideImgSrc }}" class="carousel-slide-bg-img" @if($isCarouselParallax) data-hero-parallax-layer="1" @endif alt="{{ $slide['alt_text'] ?? ($slide['title'] ?? 'Slide ' . ($sIdx + 1)) }}" style="position: absolute; {{ $isCarouselParallax ? 'top: -18%; left: 0; width: 100%; height: 136%; will-change: transform;' : 'inset: 0; width: 100%; height: 100%;' }} object-fit: cover; object-position: {{ $slideFocal }}; z-index: 0; pointer-events: none; display: block;" loading="{{ $sIdx === 0 ? 'eager' : 'lazy' }}">
                                   @else
                                       <div style="position: absolute; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #09090b 100%); z-index: 0;"></div>
                                   @endif

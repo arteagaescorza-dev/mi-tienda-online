@@ -230,68 +230,88 @@
       font-family: var(--font-accent) !important;
     }
 
-    /* Mapeo Concreto y Forzado de los 8 Tokens al Storefront */
+    /* Override Semántico Automático para Modo Oscuro en Tokens de Marca */
+    html.dark,
+    html[data-theme="dark"],
+    body.dark {
+      --brand-bg: #0c0d12 !important;
+      --brand-surface: #151720 !important;
+      --brand-text: #f8fafc !important;
+      --brand-muted: #94a3b8 !important;
+      --brand-border: #272b3a !important;
+      --bg-primary: #0c0d12 !important;
+      --bg-surface: #151720 !important;
+      --bg-secondary: #1d202c !important;
+      --bg-tertiary: #262a3a !important;
+      --text-primary: #f8fafc !important;
+      --text-secondary: #cbd5e1 !important;
+      --text-muted: #94a3b8 !important;
+      --border-subtle: #252938 !important;
+      --border-medium: #373d52 !important;
+    }
+
+    /* Mapeo Concreto y Forzado de los 8 Tokens al Storefront (Modo Claro) */
     @if(!empty($currentStorefront['backgroundColor']))
-      body.store-body {
+      html:not(.dark) body.store-body {
         background-color: var(--brand-bg) !important;
       }
     @endif
 
     @if(!empty($currentStorefront['surfaceColor']))
-      .product-card,
-      .sticky-header-wrapper,
-      .navbar-desktop,
-      .navbar-mobile,
-      .bottom-sheet-content,
-      .modal-card,
-      .dock-tab {
+      html:not(.dark) .product-card,
+      html:not(.dark) .sticky-header-wrapper,
+      html:not(.dark) .navbar-desktop,
+      html:not(.dark) .navbar-mobile,
+      html:not(.dark) .bottom-sheet-content,
+      html:not(.dark) .modal-card,
+      html:not(.dark) .dock-tab {
         background-color: var(--brand-surface) !important;
       }
     @endif
 
     @if(!empty($currentStorefront['textColor']))
-      body.store-body,
-      .product-title,
-      .nav-link-item,
-      .brand-name,
-      .store-heading,
-      .filter-group-title,
-      .universe-pill,
-      h1:not(.aeo-hero-title):not(.explore-card-title),
-      h2:not(.aeo-hero-title):not(.explore-card-title),
-      h3:not(.aeo-hero-title):not(.explore-card-title),
-      h4 {
+      html:not(.dark) body.store-body,
+      html:not(.dark) .product-title,
+      html:not(.dark) .nav-link-item,
+      html:not(.dark) .brand-name,
+      html:not(.dark) .store-heading,
+      html:not(.dark) .filter-group-title,
+      html:not(.dark) .universe-pill,
+      html:not(.dark) h1:not(.aeo-hero-title):not(.explore-card-title):not(.hero-title),
+      html:not(.dark) h2:not(.aeo-hero-title):not(.explore-card-title):not(.hero-title),
+      html:not(.dark) h3:not(.aeo-hero-title):not(.explore-card-title):not(.hero-title),
+      html:not(.dark) h4 {
         color: var(--brand-text) !important;
       }
     @endif
 
     @if(!empty($currentStorefront['mutedTextColor']))
-      .product-category-label,
-      .brand-sub,
-      .marquee-sep,
-      .text-muted,
-      .product-desc,
-      .product-sku-code {
+      html:not(.dark) .product-category-label,
+      html:not(.dark) .brand-sub,
+      html:not(.dark) .marquee-sep,
+      html:not(.dark) .text-muted,
+      html:not(.dark) .product-desc,
+      html:not(.dark) .product-sku-code {
         color: var(--brand-muted) !important;
       }
     @endif
 
     @if(!empty($currentStorefront['borderColor']))
-      .product-card,
-      .sticky-header-wrapper,
-      .size-pill-btn,
-      .btn-pill-action,
-      .navbar-desktop,
-      .universe-pill,
-      .minimal-marquee-bar,
-      .brand-border {
+      html:not(.dark) .product-card,
+      html:not(.dark) .sticky-header-wrapper,
+      html:not(.dark) .size-pill-btn,
+      html:not(.dark) .btn-pill-action,
+      html:not(.dark) .navbar-desktop,
+      html:not(.dark) .universe-pill,
+      html:not(.dark) .minimal-marquee-bar,
+      html:not(.dark) .brand-border {
         border-color: var(--brand-border) !important;
       }
     @endif
 
     @if(!empty($currentStorefront['secondaryColor']))
-      .product-stock-badge,
-      .product-stock-badge.ready {
+      html:not(.dark) .product-stock-badge,
+      html:not(.dark) .product-stock-badge.ready {
         color: var(--brand-secondary) !important;
         border-color: var(--brand-secondary) !important;
         background-color: rgba(255, 255, 255, 0.95) !important;
@@ -299,16 +319,16 @@
     @endif
 
     @if(!empty($currentStorefront['accentColor']))
-      .product-price,
-      .price-highlight,
-      .accent-price {
+      html:not(.dark) .product-price,
+      html:not(.dark) .price-highlight,
+      html:not(.dark) .accent-price {
         color: var(--brand-accent) !important;
       }
       .btn-add-cart,
       .btn-primary,
       .btn-checkout,
       .hero-cta-btn,
-      .size-pill-btn.selected,
+      html:not(.dark) .size-pill-btn.selected,
       .universe-tab-btn.active {
         background-color: var(--brand-accent) !important;
         border-color: var(--brand-accent) !important;
@@ -321,8 +341,8 @@
       .nav-link-item.active::after {
         background-color: var(--brand-accent) !important;
       }
-      .nav-link-item:hover,
-      .nav-link-item.active {
+      html:not(.dark) .nav-link-item:hover,
+      html:not(.dark) .nav-link-item.active {
         color: var(--brand-accent) !important;
       }
     @endif
@@ -725,25 +745,35 @@
       </div>
     </header>
 
-    <!-- 2. Header Móvil App (Compacto & Táctil) -->
+    <!-- 2. Header Móvil & Tablet App (Compacto, Táctil y Sin Desbordamiento) -->
     <header class="navbar-mobile">
-      <button type="button" class="mobile-icon-btn" id="mobileFilterToggleBtn" data-action="open-filter-drawer" aria-label="Abrir filtros" style="display: none;">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-      </button>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <button type="button" class="mobile-icon-btn" id="mobileFilterToggleBtn" data-action="open-filter-drawer" aria-label="Abrir filtros" style="display: none;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+        </button>
 
-      <!-- Logo de Marca (Sin Slogan ni Subtítulo según Regla 2) -->
-      <a href="{{ route('store.home') }}" class="nav-brand-group">
-        <div class="brand-logo-box">
-          @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
-            <img src="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}">
-          @else
-            <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="var(--text-primary, #050505)"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          @endif
-        </div>
-      </a>
+        <!-- Logo de Marca Adaptativo para Formato App (Móvil & Tablet) -->
+        <a href="{{ route('store.home') }}" class="nav-brand-group">
+          <div class="brand-logo-box">
+            @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
+              <img src="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}">
+            @else
+              <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="var(--text-primary, #050505)"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            @endif
+          </div>
+          <div class="brand-titles tablet-only-brand-titles">
+            <span class="brand-name">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
+            <span class="brand-sub">{{ $currentStorefront['kicker'] ?? $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
+          </div>
+        </a>
+      </div>
 
-      <!-- Iconos de Acción Móvil: Búsqueda, Wishlist y Tema (Reglas 1, 2 y 5) -->
+      <!-- Iconos de Acción App (Móvil & Tablet): Acceso Directo PWA, Tema, Búsqueda y Wishlist -->
       <div style="display: flex; align-items: center; gap: 4px;">
+        <button type="button" class="btn-pwa-app-header" data-action="open-pwa-tutorial" aria-label="Instalar Acceso Directo App" title="Crear acceso directo PWA en inicio">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 7v6"/><path d="M9.5 10.5L12 13l2.5-2.5"/></svg>
+          <span class="pwa-btn-text">INSTALAR APP</span>
+        </button>
         <button type="button" class="mobile-icon-btn" data-action="toggle-app-theme-quick" aria-label="Cambiar tema" title="Modo Claro / Oscuro">
           <svg class="theme-icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           <svg class="theme-icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -757,6 +787,27 @@
         </button>
       </div>
     </header>
+
+    <!-- Banner Inteligente de Instalación PWA / Acceso Directo para Móvil y Tablet (Auto-detecta iOS vs Android) -->
+    <div id="pwaInstallBanner" class="pwa-smart-install-banner" style="display: none;">
+      <div class="pwa-banner-left">
+        <div class="pwa-banner-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 7v6"/><path d="M9.5 10.5L12 13l2.5-2.5"/></svg>
+        </div>
+        <div class="pwa-banner-copy">
+          <strong class="pwa-banner-title">Convierte la tienda en App de Inicio</strong>
+          <span id="pwaBannerOsSubtitle" class="pwa-banner-sub">Tutorial rápido para crear acceso directo en tu dispositivo</span>
+        </div>
+      </div>
+      <div class="pwa-banner-actions">
+        <button type="button" class="btn-pwa-banner-open" data-action="open-pwa-tutorial">
+          VER TUTORIAL
+        </button>
+        <button type="button" class="btn-pwa-banner-close" data-action="dismiss-pwa-banner" aria-label="Cerrar aviso de instalación PWA">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
 
     <!-- Barra Desplegable de Búsqueda Conmutable (Regla 5) -->
     <div id="storeSearchBar" class="store-search-bar" style="display: none; padding: 10px 16px; background: var(--bg-primary, #ffffff); border-bottom: 1px solid var(--border-subtle, #e4e4e7); transition: all 0.2s ease;">
@@ -2347,6 +2398,152 @@
       <div id="leadMagnetVoucherCard" class="voucher-ticket-box" style="display: none;">
         <!-- Inyectado dinámicamente desde store-pwa.js -->
       </div>
+    </div>
+  </aside>
+
+  <!-- J. Bottom Sheet / Modal Tutorial de Instalación PWA (Acceso Directo iOS / iPadOS y Android) -->
+  <aside id="pwaInstallTutorialSheet" class="bottom-sheet-drawer pwa-tutorial-sheet" aria-label="Tutorial para instalar acceso directo PWA">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="pwa-sheet-icon-badge">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 7v6"/><path d="M9.5 10.5L12 13l2.5-2.5"/></svg>
+        </div>
+        <div>
+          <span class="sheet-title" style="display: block; line-height: 1.15;">Acceso Directo App (PWA)</span>
+          <span id="pwaDetectedOsBadge" class="pwa-detected-os-pill">Sistema detectado automáticamente</span>
+        </div>
+      </div>
+      <button type="button" class="sheet-close-btn" data-action="close-drawer" aria-label="Cerrar tutorial PWA">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="sheet-content-scroll">
+      <p class="pwa-tutorial-intro">
+        Agrega <strong>{{ $currentStorefront['brandName'] ?? 'MARTE' }}</strong> a la pantalla de inicio de tu teléfono o tablet para abrir la tienda a pantalla completa como aplicación nativa, con carga instantánea y seguimiento de pedidos.
+      </p>
+
+      <!-- Selector de Sistema Operativo (Auto-seleccionado según detección de dispositivo) -->
+      <div class="pwa-os-tabs" role="tablist">
+        <button type="button" id="pwaTabBtnIos" class="pwa-os-tab-btn active" data-action="switch-pwa-os-tab" data-os="ios" role="tab">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <span>iOS / iPadOS (iPhone &amp; iPad)</span>
+        </button>
+        <button type="button" id="pwaTabBtnAndroid" class="pwa-os-tab-btn" data-action="switch-pwa-os-tab" data-os="android" role="tab">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+          <span>Android (Móvil &amp; Tablet)</span>
+        </button>
+      </div>
+
+      <!-- Panel 1: Tutorial iOS / iPadOS (Safari / Chrome en iPhone e iPad) -->
+      <div id="pwaTutorialPanelIos" class="pwa-tutorial-panel" style="display: block;">
+        <div class="pwa-steps-list">
+          <div class="pwa-step-card">
+            <div class="pwa-step-num">1</div>
+            <div class="pwa-step-body">
+              <strong class="pwa-step-title">Toca el botón "Compartir" en Safari</strong>
+              <p class="pwa-step-desc">
+                Ubica el icono de compartir en la barra inferior (iPhone) o superior derecha (iPad) de tu navegador Safari.
+              </p>
+              <div class="pwa-step-visual-pill">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                <span>Icono Compartir de Safari</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pwa-step-card">
+            <div class="pwa-step-num">2</div>
+            <div class="pwa-step-body">
+              <strong class="pwa-step-title">Selecciona "Agregar a inicio"</strong>
+              <p class="pwa-step-desc">
+                Desliza hacia abajo la lista de acciones del menú y toca la opción <strong>"Agregar a inicio"</strong> (<em>Add to Home Screen</em>).
+              </p>
+              <div class="pwa-step-visual-pill">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                <span>Agregar a inicio</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pwa-step-card">
+            <div class="pwa-step-num">3</div>
+            <div class="pwa-step-body">
+              <strong class="pwa-step-title">Confirma tocando "Agregar"</strong>
+              <p class="pwa-step-desc">
+                Pulsa <strong>"Agregar"</strong> en la esquina superior derecha. Verás el icono oficial de la tienda directamente entre tus aplicaciones.
+              </p>
+              <div class="pwa-step-visual-pill success">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Acceso directo listo en tu inicio</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Tutorial Android (Chrome / Samsung Internet / Edge en Smartphone y Tablet) -->
+      <div id="pwaTutorialPanelAndroid" class="pwa-tutorial-panel" style="display: none;">
+        <!-- Botón de instalación directa en 1 toque si el navegador expone beforeinstallprompt -->
+        <div id="pwaNativeInstallBox" class="pwa-native-install-box" style="display: none;">
+          <button type="button" id="btnTriggerNativePwaInstall" class="btn-pwa-native-install" data-action="trigger-native-pwa-install">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>INSTALAR APLICACIÓN EN 1 TOQUE</span>
+          </button>
+          <span class="pwa-native-hint">Tu navegador permite instalar la App directamente sin pasos manuales.</span>
+        </div>
+
+        <div class="pwa-steps-list">
+          <div class="pwa-step-card">
+            <div class="pwa-step-num">1</div>
+            <div class="pwa-step-body">
+              <strong class="pwa-step-title">Abre el menú del navegador (3 puntos)</strong>
+              <p class="pwa-step-desc">
+                Toca el icono de <strong>tres puntos verticales</strong> ubicado en la esquina superior derecha de Chrome o de tu navegador en Android.
+              </p>
+              <div class="pwa-step-visual-pill">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                <span>Menú de opciones del navegador</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pwa-step-card">
+            <div class="pwa-step-num">2</div>
+            <div class="pwa-step-body">
+              <strong class="pwa-step-title">Toca "Instalar aplicación" o "Agregar a la pantalla principal"</strong>
+              <p class="pwa-step-desc">
+                En el menú desplegable, selecciona <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla principal"</strong>.
+              </p>
+              <div class="pwa-step-visual-pill">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 8v6"/><path d="M9.5 11.5L12 14l2.5-2.5"/></svg>
+                <span>Instalar aplicación / Pantalla principal</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pwa-step-card">
+            <div class="pwa-step-num">3</div>
+            <div class="pwa-step-body">
+              <strong class="pwa-step-title">Confirma en "Instalar"</strong>
+              <p class="pwa-step-desc">
+                Acepta la ventana de confirmación tocando <strong>"Instalar"</strong>. El icono de la tienda se añadirá a tu escritorio Android en formato App nativa.
+              </p>
+              <div class="pwa-step-visual-pill success">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>App instalada en tu pantalla principal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-footer-actions">
+      <button type="button" class="btn-sheet-apply" data-action="close-drawer" style="width: 100%;">
+        ENTENDIDO
+      </button>
     </div>
   </aside>
 

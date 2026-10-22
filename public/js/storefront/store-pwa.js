@@ -1403,16 +1403,16 @@
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
               <span>Guardados para después</span>
             </div>
-            <span style="background: #f4f4f5; color: var(--text-muted); padding: 1px 7px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700;">${storeState.savedForLater.length}</span>
+            <span style="background: var(--bg-tertiary); color: var(--text-muted); padding: 1px 7px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700;">${storeState.savedForLater.length}</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             ${storeState.savedForLater.map((sItem, sIdx) => `
-              <div style="display: flex; gap: 12px; padding: 10px; background: #fafafa; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); align-items: center;">
-                <div style="width: 44px; height: 44px; background: #f4f4f5; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+              <div class="cart-saved-card" style="display: flex; gap: 12px; padding: 10px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); align-items: center;">
+                <div style="width: 44px; height: 44px; background: var(--bg-tertiary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
                   ${sItem.image && sItem.image !== '/user-avatar.png' ? `<img src="${sItem.image}" alt="${sItem.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `<svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>`}
                 </div>
                 <div style="flex-grow: 1; min-width: 0;">
-                  <div style="font-family: var(--font-heading); font-size: 0.76rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${sItem.name}</div>
+                  <div style="font-family: var(--font-heading); font-size: 0.76rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary);">${sItem.name}</div>
                   <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">Talla: <strong style="color: var(--text-primary);">${sItem.size}</strong> &bull; MXN $${(sItem.price).toFixed(2)}</div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
@@ -1441,7 +1441,7 @@
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
               <span>Mi Lista de Deseos</span>
             </div>
-            <span style="background: #f4f4f5; color: var(--text-muted); padding: 1px 7px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700;">${storeState.wishlist.length}</span>
+            <span style="background: var(--bg-tertiary); color: var(--text-muted); padding: 1px 7px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700;">${storeState.wishlist.length}</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             ${storeState.wishlist.map(productId => {
@@ -1449,12 +1449,12 @@
               if (!wProd) return '';
               const wSize = storeState.selectedSizes[productId] || 'M';
               return `
-                <div style="display: flex; gap: 12px; padding: 10px; background: #fafafa; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); align-items: center;">
-                  <div style="width: 44px; height: 44px; background: #f4f4f5; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                <div class="cart-wishlist-card" style="display: flex; gap: 12px; padding: 10px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); align-items: center;">
+                  <div style="width: 44px; height: 44px; background: var(--bg-tertiary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
                     ${wProd.image && wProd.image !== '/user-avatar.png' ? `<img src="${wProd.image}" alt="${wProd.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `<svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>`}
                   </div>
                   <div style="flex-grow: 1; min-width: 0;">
-                    <a href="/productos/${encodeURIComponent(wProd.slug || wProd.id)}" style="font-family: var(--font-heading); font-size: 0.76rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; color: inherit; text-decoration: none;">${wProd.name}</a>
+                    <a href="/productos/${encodeURIComponent(wProd.slug || wProd.id)}" style="font-family: var(--font-heading); font-size: 0.76rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; color: var(--text-primary); text-decoration: none;">${wProd.name}</a>
                     <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">Talla: <strong style="color: var(--text-primary);">${wSize}</strong> &bull; MXN $${(wProd.price).toFixed(2)}</div>
                   </div>
                   <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
@@ -1476,7 +1476,7 @@
     if (storeState.cart.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 40px 20px 24px; color: var(--text-muted);">
-          <div style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: #f4f4f5; display: flex; align-items: center; justify-content: center;">
+          <div class="cart-empty-icon-circle" style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center;">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
           </div>
           <strong style="font-family: var(--font-heading); color: var(--text-primary); display: block; font-size: 1rem;">Tu carrito está vacío</strong>
@@ -1528,12 +1528,12 @@
     } else {
       shippingNotice = `
         <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 16px;">
-          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 700; margin-bottom: 6px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
             <span>Agrega MXN $${remainingForFree.toFixed(2)} para Envío Gratis</span>
             <span>${shippingProgress}%</span>
           </div>
-          <div style="width: 100%; height: 5px; background: #e4e4e7; border-radius: 3px; overflow: hidden;">
-            <div style="width: ${shippingProgress}%; height: 100%; background: #050505; transition: width 0.3s ease;"></div>
+          <div class="cart-shipping-progress-track" style="width: 100%; height: 5px; background: var(--border-medium); border-radius: 3px; overflow: hidden;">
+            <div class="cart-shipping-progress-fill" style="width: ${shippingProgress}%; height: 100%; background: var(--text-primary); transition: width 0.3s ease;"></div>
           </div>
         </div>
       `;
@@ -1839,7 +1839,7 @@
     if (storeState.wishlist.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
-          <div style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: #f4f4f5; display: flex; align-items: center; justify-content: center; color: #a1a1aa;">
+          <div class="cart-empty-icon-circle" style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           </div>
           <strong style="font-family: var(--font-heading); color: var(--text-primary); display: block; font-size: 1rem;">Tu lista de deseos está vacía</strong>
@@ -1861,9 +1861,9 @@
           </a>
 
           <div style="flex-grow: 1;">
-            <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; line-height: 1.2; cursor: pointer; color: inherit; text-decoration: none; display: block;">${prod.name}</a>
-            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Talla: <strong style="color: var(--text-primary);">${selectedSize}</strong> · <span style="color: #047857; font-weight: 600;">${prod.stockLabel}</span></div>
-            <div style="font-family: var(--font-heading); font-size: 0.84rem; font-weight: 800; color: #050505; margin-top: 4px;">MXN $${prod.price.toFixed(2)}</div>
+            <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; line-height: 1.2; cursor: pointer; color: var(--text-primary); text-decoration: none; display: block;">${prod.name}</a>
+            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Talla: <strong style="color: var(--text-primary);">${selectedSize}</strong> · <span style="color: #059669; font-weight: 600;">${prod.stockLabel}</span></div>
+            <div style="font-family: var(--font-heading); font-size: 0.84rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;">MXN $${prod.price.toFixed(2)}</div>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
@@ -6029,6 +6029,36 @@
       closeLeadMagnetModal();
       return;
     }
+
+    // 28. Tutorial de Instalacion PWA con Deteccion de Sistema Operativo (iOS / Android)
+    const openPwaTutBtn = e.target.closest('[data-action="open-pwa-tutorial"]');
+    if (openPwaTutBtn) {
+      e.preventDefault();
+      openPwaTutorialSheet();
+      return;
+    }
+
+    const switchPwaOsBtn = e.target.closest('[data-action="switch-pwa-os-tab"]');
+    if (switchPwaOsBtn) {
+      e.preventDefault();
+      const targetOs = switchPwaOsBtn.dataset.os || 'ios';
+      switchPwaTutorialOsTab(targetOs);
+      return;
+    }
+
+    const dismissPwaBannerBtn = e.target.closest('[data-action="dismiss-pwa-banner"]');
+    if (dismissPwaBannerBtn) {
+      e.preventDefault();
+      dismissPwaInstallBanner();
+      return;
+    }
+
+    const triggerNativePwaBtn = e.target.closest('[data-action="trigger-native-pwa-install"]');
+    if (triggerNativePwaBtn) {
+      e.preventDefault();
+      triggerNativePwaInstall();
+      return;
+    }
   });
 
   // Cambio de Radio Button en Pagos y Estrategia de Despacho
@@ -6156,6 +6186,176 @@
   `;
   document.head.appendChild(styleEl);
 
+  // ============================================================================
+  // DETECCION AUTOMATICA DE SO (iOS / iPadOS vs ANDROID) & TUTORIAL PWA
+  // ============================================================================
+  let deferredPwaInstallPrompt = null;
+
+  function isRunningStandalonePwa() {
+    if (typeof window === 'undefined') return false;
+    return (
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      window.navigator.standalone === true
+    );
+  }
+
+  function detectPwaMobileOS() {
+    if (typeof navigator === 'undefined') return 'ios';
+    const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+    const platform = navigator.platform || '';
+
+    // Detectar iPadOS 13+ (reporta MacIntel con touch points) o iPhone/iPad/iPod
+    const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+      (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) return 'ios';
+
+    if (/android/i.test(ua)) return 'android';
+
+    // Fallback inteligente para pruebas o tablets genericas
+    if (/Mac/i.test(platform)) return 'ios';
+    return 'android';
+  }
+
+  function switchPwaTutorialOsTab(os) {
+    const normalizedOs = (os === 'android') ? 'android' : 'ios';
+    const tabIos = document.getElementById('pwaTabBtnIos');
+    const tabAndroid = document.getElementById('pwaTabBtnAndroid');
+    const panelIos = document.getElementById('pwaTutorialPanelIos');
+    const panelAndroid = document.getElementById('pwaTutorialPanelAndroid');
+
+    if (tabIos) tabIos.classList.toggle('active', normalizedOs === 'ios');
+    if (tabAndroid) tabAndroid.classList.toggle('active', normalizedOs === 'android');
+    if (panelIos) panelIos.style.display = (normalizedOs === 'ios') ? 'block' : 'none';
+    if (panelAndroid) panelAndroid.style.display = (normalizedOs === 'android') ? 'block' : 'none';
+  }
+
+  function openPwaTutorialSheet() {
+    const detectedOs = detectPwaMobileOS();
+    const badgeText = document.getElementById('pwaDetectedOsText');
+    if (badgeText) {
+      badgeText.textContent = detectedOs === 'ios'
+        ? 'Sistema detectado: iOS / iPadOS (Safari)'
+        : 'Sistema detectado: Android (Chrome)';
+    }
+    switchPwaTutorialOsTab(detectedOs);
+    openDrawer('pwaInstallTutorialSheet');
+  }
+
+  function dismissPwaInstallBanner() {
+    const banner = document.getElementById('pwaInstallBanner');
+    if (banner) banner.style.display = 'none';
+    try {
+      sessionStorage.setItem('multiverse_pwa_banner_dismissed', '1');
+    } catch (e) {}
+  }
+
+  async function triggerNativePwaInstall() {
+    if (!deferredPwaInstallPrompt) {
+      showToastNotification('Sigue los 3 pasos en pantalla desde el menu de tu navegador.');
+      return;
+    }
+    try {
+      deferredPwaInstallPrompt.prompt();
+      const { outcome } = await deferredPwaInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        closeAllDrawers();
+        dismissPwaInstallBanner();
+        showToastNotification('Acceso directo instalado en tu pantalla de inicio.');
+      }
+      deferredPwaInstallPrompt = null;
+    } catch (e) {}
+  }
+
+  function initPwaInstallAssistant() {
+    const banner = document.getElementById('pwaInstallBanner');
+    const bannerHint = document.getElementById('pwaBannerOsHint');
+    const headerBtn = document.getElementById('btnOpenPwaTutorialHeader');
+    const detectedOs = detectPwaMobileOS();
+
+    if (isRunningStandalonePwa()) {
+      if (banner) banner.style.display = 'none';
+      if (headerBtn) headerBtn.style.display = 'none';
+      return;
+    }
+
+    if (bannerHint) {
+      bannerHint.textContent = detectedOs === 'ios'
+        ? 'Instala el acceso directo en tu iPhone o iPad'
+        : 'Instala el acceso directo en tu Android o Tablet';
+    }
+
+    // Mostrar banner en móvil y tablet (<= 1024px) si no ha sido descartado en la sesión
+    let dismissed = false;
+    try {
+      dismissed = sessionStorage.getItem('multiverse_pwa_banner_dismissed') === '1';
+    } catch (e) {}
+
+    if (banner && !dismissed && window.innerWidth <= 1024) {
+      banner.style.display = 'flex';
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPwaInstallPrompt = e;
+      const nativeZone = document.getElementById('pwaNativeInstallActionZone');
+      if (nativeZone) nativeZone.style.display = 'block';
+    });
+  }
+
+  // ============================================================================
+  // MOTOR DE PARALLAX SCROLLING 60FPS PARA HERO (COMPATIBLE CON iOS, ANDROID & WEB)
+  // ============================================================================
+  function initHeroParallaxEngine() {
+    let ticking = false;
+
+    const updateParallaxLayers = () => {
+      const layers = document.querySelectorAll('[data-hero-parallax-layer="1"]');
+      if (!layers.length) {
+        ticking = false;
+        return;
+      }
+
+      const viewportH = window.innerHeight || document.documentElement.clientHeight || 800;
+
+      layers.forEach((layer) => {
+        const container = layer.parentElement;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+
+        // Solo calcular si el hero es visible en el viewport
+        if (rect.bottom < -120 || rect.top > viewportH + 120) return;
+
+        // Progreso relativo del centro del hero respecto al centro de la pantalla
+        const containerCenter = rect.top + rect.height * 0.5;
+        const viewportCenter = viewportH * 0.5;
+        const delta = viewportCenter - containerCenter;
+
+        // Desplazamiento vertical suave y perceptible en móvil y desktop
+        const maxShift = Math.min(85, rect.height * 0.22);
+        const rawShift = delta * 0.24;
+        const clampedShift = Math.max(-maxShift, Math.min(maxShift, rawShift));
+
+        layer.style.transform = `translate3d(0, ${clampedShift.toFixed(1)}px, 0) scale(1.08)`;
+      });
+
+      ticking = false;
+    };
+
+    const requestParallaxTick = () => {
+      if (!ticking) {
+        ticking = true;
+        window.requestAnimationFrame(updateParallaxLayers);
+      }
+    };
+
+    window.addEventListener('scroll', requestParallaxTick, { passive: true });
+    window.addEventListener('touchmove', requestParallaxTick, { passive: true });
+    window.addEventListener('resize', requestParallaxTick, { passive: true });
+
+    // Ejecución inicial
+    updateParallaxLayers();
+  }
+
   // Inicialización de la Aplicación
   function initStoreApp() {
     if (typeof window !== 'undefined' && Array.isArray(window.__INITIAL_STORE_PRODUCTS__) && window.__INITIAL_STORE_PRODUCTS__.length > 0) {
@@ -6185,6 +6385,8 @@
     renderCouponBoxes();
     initPushNotifications();
     setAppTheme(getAppTheme(), false);
+    initPwaInstallAssistant();
+    initHeroParallaxEngine();
 
     // Regla 6.35: Restaurar facetas activas si se redirigió desde PDP o sesión previa
     try {
@@ -6391,6 +6593,10 @@
     window.renderAccountPushPreferences = renderAccountPushPreferences;
     window.sendSimulatedPush = sendSimulatedPush;
     window.logoutBuyerSession = logoutBuyerSession;
+    window.detectPwaMobileOS = detectPwaMobileOS;
+    window.openPwaTutorialSheet = openPwaTutorialSheet;
+    window.switchPwaTutorialOsTab = switchPwaTutorialOsTab;
+    window.initHeroParallaxEngine = initHeroParallaxEngine;
 
     window.closeStorePopup = function(secId) {
       const m = document.getElementById('promoModal_' + secId);
