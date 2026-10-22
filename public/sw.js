@@ -2,7 +2,7 @@
 // Politica estricta de Cero Emojis
 // Soporte Web Push Notifications VAPID (RFC 8292 - TASK-STR-06)
 
-const CACHE_NAME = 'multiverse-store-v4';
+const CACHE_NAME = 'multiverse-store-v5';
 const STATIC_ASSETS = [
   '/',
   '/css/store-pwa.css',
@@ -40,14 +40,21 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        return caches.match('/');
-      });
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          }).catch(() => {});
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          return cachedResponse || caches.match('/');
+        });
+      })
   );
 });
 

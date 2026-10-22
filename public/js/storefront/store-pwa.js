@@ -789,6 +789,87 @@
     }
   }
 
+  function openCatalogWithCategory(category, universe, supplier, tags) {
+    let targetUniverse = universe;
+    if (targetUniverse === 'dama') {
+      targetUniverse = 'venus';
+    } else if (targetUniverse === 'caballero') {
+      targetUniverse = 'marte';
+    } else if (!targetUniverse || targetUniverse === 'all') {
+      targetUniverse = storeState.activeUniverse || 'marte';
+    }
+
+    storeState.activeUniverse = targetUniverse;
+    document.querySelectorAll('.universe-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.universe === targetUniverse);
+    });
+    document.querySelectorAll('.zara-filter-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.universe === targetUniverse);
+    });
+
+    const cleanNorm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/(s|es)$/, '');
+
+    if (category && category !== 'all') {
+      const cNorm = cleanNorm(category);
+      storeState.activeCategory = category;
+      storeState.activeCategories = [category];
+      document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
+        const pCat = p.dataset.category || '';
+        p.classList.toggle('active', pCat === category || cleanNorm(pCat) === cNorm);
+      });
+      document.querySelectorAll('.filter-cat-checkbox, input[name="filter_category"]').forEach(cb => {
+        const val = cb.getAttribute('data-val') || cb.value || '';
+        const isMatch = (val === category || cleanNorm(val) === cNorm || cleanNorm(val).includes(cNorm) || cNorm.includes(cleanNorm(val)));
+        cb.checked = isMatch;
+        if (isMatch && !storeState.activeCategories.includes(val)) {
+          storeState.activeCategories.push(val);
+        }
+      });
+    } else {
+      storeState.activeCategory = 'all';
+      storeState.activeCategories = [];
+      document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
+        p.classList.remove('active');
+      });
+      document.querySelectorAll('.filter-cat-checkbox, input[name="filter_category"]').forEach(cb => {
+        cb.checked = false;
+      });
+    }
+
+    if (supplier && supplier !== 'all') {
+      storeState.activeSupplier = supplier;
+      storeState.activeSuppliers = [supplier];
+      document.querySelectorAll('.filter-brand-checkbox, input[name="filter_brand"]').forEach(cb => {
+        const val = cb.getAttribute('data-val') || cb.value || '';
+        cb.checked = (val.toLowerCase() === supplier.toLowerCase());
+      });
+    }
+
+    if (tags) {
+      storeState.searchQuery = tags;
+    }
+
+    switchDockTab('catalog');
+    renderProductsGrid('catalogProductsGrid');
+
+    setTimeout(() => {
+      const catalogGridEl = document.getElementById('catalogProductsGrid') || document.getElementById('viewCatalog');
+      if (catalogGridEl) {
+        catalogGridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+
+    try {
+      const queryParams = new URLSearchParams(window.location.search);
+      queryParams.set('tab', 'catalog');
+      if (category && category !== 'all') queryParams.set('categoria', category);
+      if (universe && universe !== 'all') queryParams.set('universo', universe);
+      if (supplier && supplier !== 'all') queryParams.set('proveedor', supplier);
+      if (tags) queryParams.set('tags', tags);
+      window.history.pushState(null, '', '?' + queryParams.toString());
+    } catch (err) {}
+  }
+
   // Manejo de Drawers / Bottom Sheets
   function openDrawer(drawerId) {
     const backdrop = document.getElementById('drawerBackdrop');
@@ -826,13 +907,22 @@
     closeAllDrawers();
   }
 
+  // Clasificador global de Linea B (Bajo Pedido / Taller / Scraping) vs Linea A (Bodega Local)
+  function isLineBItem(item) {
+    if (!item) return false;
+    const lt = item.lineType || item.line_type;
+    const st = item.stockType || item.stock_type;
+    return lt === 'line_b' || st === 'on_demand' || st === 'drop_on_demand' || Boolean(item.is_scraped);
+  }
+
   // Logica del Carrito (Agregar, Quitar, Renderizar y Sincronizacion RESTful TASK-INT-06)
   function addToCart(productId, explicitSize = null, explicitVariantId = null) {
-    const product = STORE_PRODUCTS.find(p => p.id === productId);
+    const targetId = (productId && typeof productId === 'object') ? (productId.id || productId.productId || productId.sku) : productId;
+    const product = STORE_PRODUCTS.find(p => String(p.id) === String(targetId) || String(p.sku) === String(targetId));
     if (!product) return;
 
-    const size = explicitSize || storeState.selectedSizes[productId] || 'M';
-    const existingIndex = storeState.cart.findIndex(i => i.productId === productId && i.size === size);
+    const size = explicitSize || storeState.selectedSizes[product.id] || storeState.selectedSizes[targetId] || 'M';
+    const existingIndex = storeState.cart.findIndex(i => String(i.productId) === String(product.id) && i.size === size);
 
     if (existingIndex > -1) {
       storeState.cart[existingIndex].quantity += 1;
@@ -1055,7 +1145,8 @@
     if (!storeState.savedForLater || !storeState.savedForLater[index]) return;
     const item = storeState.savedForLater.splice(index, 1)[0];
     saveSavedForLater();
-    addItemToCart(item.id, item.size, item.quantity || 1);
+    addToCart(item.productId || item.id, item.size, item.variantId);
+    renderCartSheetContent();
     showToastNotification(`"${item.name}" movido al carrito`);
   }
 
@@ -1449,13 +1540,6 @@
     }
 
     // Desglose de carrito mixto: Linea A (Bodega local, entrega 24-48h) vs Linea B (Bajo Pedido / Taller / Scraping)
-    const isLineBItem = item => {
-      if (!item) return false;
-      const lt = item.lineType || item.line_type;
-      const st = item.stockType || item.stock_type;
-      return lt === 'line_b' || st === 'on_demand' || st === 'drop_on_demand' || Boolean(item.is_scraped);
-    };
-
     const lineAEntries = storeState.cart.map((item, idx) => ({ item, idx }))
       .filter(x => !isLineBItem(x.item));
     const lineBEntries = storeState.cart.map((item, idx) => ({ item, idx }))
@@ -1601,28 +1685,36 @@
         transform: translateX(-50%) translateY(20px);
         background: #09090b;
         color: #ffffff;
-        padding: 10px 18px;
-        border-radius: 9999px;
+        padding: 10px 16px;
+        border-radius: 14px;
         font-family: var(--font-heading);
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         font-weight: 700;
-        letter-spacing: 0.04em;
-        z-index: 2000;
+        letter-spacing: 0.03em;
+        line-height: 1.35;
+        text-align: center;
+        max-width: calc(100vw - 24px);
+        width: max-content;
+        box-sizing: border-box;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        z-index: 10000;
         opacity: 0;
         transition: all 0.25s ease;
         box-shadow: 0 4px 16px rgba(0,0,0,0.25);
         pointer-events: none;
-        white-space: nowrap;
       `;
       document.body.appendChild(toast);
     }
     toast.textContent = msg;
     toast.style.opacity = '1';
     toast.style.transform = 'translateX(-50%) translateY(0)';
-    setTimeout(() => {
+    if (toast._hideTimer) clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => {
       toast.style.opacity = '0';
       toast.style.transform = 'translateX(-50%) translateY(20px)';
-    }, 2400);
+    }, 2800);
   }
 
   // ============================================================================
@@ -2518,9 +2610,22 @@
     if (scrollContainer) scrollContainer.scrollTop = 0;
   }
 
+  function focusCheckoutField(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      try {
+        el.focus();
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (e) {}
+    }
+  }
+
   function validateCheckoutStep1() {
     const name = (document.getElementById('checkoutCustomerName')?.value || '').trim();
-    const rawPhone = (document.getElementById('checkoutCustomerPhone')?.value || '').replace(/\D/g, '');
+    let rawPhone = (document.getElementById('checkoutCustomerPhone')?.value || '').replace(/\D/g, '');
+    if (rawPhone.length > 10 && rawPhone.startsWith('52')) {
+      rawPhone = rawPhone.slice(-10);
+    }
     const email = (document.getElementById('checkoutCustomerEmail')?.value || '').trim();
     const rawZip = (document.getElementById('checkoutShippingZip')?.value || '').replace(/\D/g, '');
     const state = (document.getElementById('checkoutShippingState')?.value || '').trim();
@@ -2532,23 +2637,43 @@
 
     if (!name) {
       showToastNotification('Ingresa tu nombre completo.');
+      focusCheckoutField('checkoutCustomerName');
       return false;
     }
     if (rawPhone.length !== 10) {
       showToastNotification('Ingresa un teléfono celular válido de 10 dígitos.');
+      focusCheckoutField('checkoutCustomerPhone');
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       showToastNotification('Ingresa un correo electrónico válido.');
+      focusCheckoutField('checkoutCustomerEmail');
       return false;
     }
     if (rawZip.length !== 5) {
       showToastNotification('Ingresa un código postal de 5 dígitos.');
+      focusCheckoutField('checkoutShippingZip');
       return false;
     }
-    if (!state || !city || !colony || !street) {
-      showToastNotification('Por favor completa todos los campos de tu dirección.');
+    if (!state) {
+      showToastNotification('Ingresa el estado de tu dirección.');
+      focusCheckoutField('checkoutShippingState');
+      return false;
+    }
+    if (!city) {
+      showToastNotification('Ingresa el municipio o alcaldía de tu dirección.');
+      focusCheckoutField('checkoutShippingCity');
+      return false;
+    }
+    if (!colony) {
+      showToastNotification('Ingresa la colonia de tu dirección.');
+      focusCheckoutField('checkoutShippingColony');
+      return false;
+    }
+    if (!street) {
+      showToastNotification('Ingresa la calle y número de tu dirección.');
+      focusCheckoutField('checkoutShippingStreet');
       return false;
     }
 
@@ -2587,18 +2712,22 @@
 
       if (cardNum.length < 15 || cardNum.length > 19) {
         showToastNotification('Ingresa un número de tarjeta válido.');
+        focusCheckoutField('checkoutCardNumber');
         return false;
       }
       if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) {
         showToastNotification('Ingresa una fecha de vencimiento válida (MM/AA).');
+        focusCheckoutField('checkoutCardExpiry');
         return false;
       }
       if (cvv.length < 3 || cvv.length > 4) {
         showToastNotification('Ingresa un código de seguridad (CVV) válido.');
+        focusCheckoutField('checkoutCardCvv');
         return false;
       }
       if (!holder) {
         showToastNotification('Ingresa el nombre del titular como aparece en la tarjeta.');
+        focusCheckoutField('checkoutCardHolder');
         return false;
       }
 
@@ -5322,97 +5451,16 @@
       return;
     }
 
-  function openCatalogWithCategory(category, universe, supplier, tags) {
-    let targetUniverse = universe;
-    if (targetUniverse === 'dama') {
-      targetUniverse = 'venus';
-    } else if (targetUniverse === 'caballero') {
-      targetUniverse = 'marte';
-    } else if (!targetUniverse || targetUniverse === 'all') {
-      targetUniverse = storeState.activeUniverse || 'marte';
+    const exploreFilterBtn = e.target.closest('[data-action="explore-filter-catalog"]');
+    if (exploreFilterBtn) {
+      e.preventDefault();
+      const universe = exploreFilterBtn.dataset.universe;
+      const category = exploreFilterBtn.dataset.category;
+      const supplier = exploreFilterBtn.dataset.supplier;
+      const tags = exploreFilterBtn.dataset.tags;
+      openCatalogWithCategory(category, universe, supplier, tags);
+      return;
     }
-
-    storeState.activeUniverse = targetUniverse;
-    document.querySelectorAll('.universe-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.universe === targetUniverse);
-    });
-    document.querySelectorAll('.zara-filter-tab').forEach(tab => {
-      tab.classList.toggle('active', tab.dataset.universe === targetUniverse);
-    });
-
-    const cleanNorm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/(s|es)$/, '');
-
-    if (category && category !== 'all') {
-      const cNorm = cleanNorm(category);
-      storeState.activeCategory = category;
-      storeState.activeCategories = [category];
-      document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
-        const pCat = p.dataset.category || '';
-        p.classList.toggle('active', pCat === category || cleanNorm(pCat) === cNorm);
-      });
-      document.querySelectorAll('.filter-cat-checkbox, input[name="filter_category"]').forEach(cb => {
-        const val = cb.getAttribute('data-val') || cb.value || '';
-        const isMatch = (val === category || cleanNorm(val) === cNorm || cleanNorm(val).includes(cNorm) || cNorm.includes(cleanNorm(val)));
-        cb.checked = isMatch;
-        if (isMatch && !storeState.activeCategories.includes(val)) {
-          storeState.activeCategories.push(val);
-        }
-      });
-    } else {
-      storeState.activeCategory = 'all';
-      storeState.activeCategories = [];
-      document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
-        p.classList.remove('active');
-      });
-      document.querySelectorAll('.filter-cat-checkbox, input[name="filter_category"]').forEach(cb => {
-        cb.checked = false;
-      });
-    }
-
-    if (supplier && supplier !== 'all') {
-      storeState.activeSupplier = supplier;
-      storeState.activeSuppliers = [supplier];
-      document.querySelectorAll('.filter-brand-checkbox, input[name="filter_brand"]').forEach(cb => {
-        const val = cb.getAttribute('data-val') || cb.value || '';
-        cb.checked = (val.toLowerCase() === supplier.toLowerCase());
-      });
-    }
-
-    if (tags) {
-      storeState.searchQuery = tags;
-    }
-
-    switchDockTab('catalog');
-    renderProductsGrid('catalogProductsGrid');
-
-    setTimeout(() => {
-      const catalogGridEl = document.getElementById('catalogProductsGrid') || document.getElementById('viewCatalog');
-      if (catalogGridEl) {
-        catalogGridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 150);
-
-    try {
-      const queryParams = new URLSearchParams(window.location.search);
-      queryParams.set('tab', 'catalog');
-      if (category && category !== 'all') queryParams.set('categoria', category);
-      if (universe && universe !== 'all') queryParams.set('universo', universe);
-      if (supplier && supplier !== 'all') queryParams.set('proveedor', supplier);
-      if (tags) queryParams.set('tags', tags);
-      window.history.pushState(null, '', '?' + queryParams.toString());
-    } catch (err) {}
-  }
-
-  const exploreFilterBtn = e.target.closest('[data-action="explore-filter-catalog"]');
-  if (exploreFilterBtn) {
-    e.preventDefault();
-    const universe = exploreFilterBtn.dataset.universe;
-    const category = exploreFilterBtn.dataset.category;
-    const supplier = exploreFilterBtn.dataset.supplier;
-    const tags = exploreFilterBtn.dataset.tags;
-    openCatalogWithCategory(category, universe, supplier, tags);
-    return;
-  }
 
     // 21. Apertura y Cierre de Checkout
     const openChkBtn = e.target.closest('[data-action="open-checkout"]');
@@ -5430,6 +5478,38 @@
     }
 
     // 22. Navegación de Pasos Checkout (4 Pasos)
+    const stepperStepBtn = e.target.closest('.checkout-stepper .stepper-step');
+    if (stepperStepBtn && checkoutState.step !== 4) {
+      const targetStep = parseInt(stepperStepBtn.dataset.step, 10);
+      if (targetStep === 1) {
+        e.preventDefault();
+        goToCheckoutStep(1);
+        return;
+      } else if (targetStep === 2) {
+        e.preventDefault();
+        if (checkoutState.step === 1) {
+          if (validateCheckoutStep1()) goToCheckoutStep(2);
+        } else {
+          goToCheckoutStep(2);
+        }
+        return;
+      } else if (targetStep === 3) {
+        e.preventDefault();
+        if (checkoutState.step === 1) {
+          if (validateCheckoutStep1() && validateCheckoutStep2()) {
+            renderCheckoutStep3Review();
+            goToCheckoutStep(3);
+          }
+        } else if (checkoutState.step === 2) {
+          if (validateCheckoutStep2()) {
+            renderCheckoutStep3Review();
+            goToCheckoutStep(3);
+          }
+        }
+        return;
+      }
+    }
+
     const toStep2Btn = e.target.closest('[data-action="checkout-to-step-2"]');
     if (toStep2Btn) {
       e.preventDefault();

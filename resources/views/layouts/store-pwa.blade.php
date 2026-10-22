@@ -1998,7 +1998,7 @@
           <div class="checkout-form-row">
             <div class="checkout-form-group" style="flex: 1;">
               <label for="checkoutCustomerPhone" class="checkout-label">Teléfono Celular *</label>
-              <input type="tel" id="checkoutCustomerPhone" class="checkout-input" placeholder="10 dígitos (ej: 5512345678)" maxlength="10" required autocomplete="tel">
+              <input type="tel" id="checkoutCustomerPhone" class="checkout-input" placeholder="10 dígitos (ej: 5512345678)" maxlength="18" required autocomplete="tel">
             </div>
             <div class="checkout-form-group" style="flex: 1;">
               <label for="checkoutCustomerEmail" class="checkout-label">Correo Electrónico *</label>
