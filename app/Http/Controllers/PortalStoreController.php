@@ -1395,12 +1395,10 @@ class PortalStoreController extends Controller
             $qnaPage = CmsFaq::syncToQnaPage();
         }
 
-        $imageUrl = $request->input('image_url', $qnaPage->image_url);
+        $imageUrl = $qnaPage->image_url;
         if ($request->has('clear_image') && $request->boolean('clear_image')) {
             $imageUrl = null;
-        }
-
-        if ($request->hasFile('image_file')) {
+        } elseif ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $uploadDir = public_path('uploads/pages');
             if (!file_exists($uploadDir)) {
@@ -1409,18 +1407,28 @@ class PortalStoreController extends Controller
             $filename = 'qna_hero_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $file->move($uploadDir, $filename);
             $imageUrl = '/uploads/pages/' . $filename;
+        } elseif ($request->filled('image_url')) {
+            $imageUrl = trim($request->input('image_url'));
         }
 
         $isFullwidth = $request->has('is_fullwidth');
 
+        $opacityStart = ($request->has('overlay_opacity_start') && $request->input('overlay_opacity_start') !== '' && $request->input('overlay_opacity_start') !== null)
+            ? max(0, min(100, (int)$request->input('overlay_opacity_start')))
+            : 30;
+
+        $opacityEnd = ($request->has('overlay_opacity_end') && $request->input('overlay_opacity_end') !== '' && $request->input('overlay_opacity_end') !== null)
+            ? max(0, min(100, (int)$request->input('overlay_opacity_end')))
+            : 75;
+
         $qnaPage->update([
             'title' => $request->input('title', $qnaPage->title) ?: 'Q&A Preguntas Frecuentes',
             'image_url' => $imageUrl,
-            'overlay_gradient' => $request->input('overlay_gradient', $qnaPage->overlay_gradient),
+            'overlay_gradient' => $request->input('overlay_gradient', 'custom'),
             'overlay_color_start' => $request->input('overlay_color_start', $qnaPage->overlay_color_start ?: '#0f172a'),
             'overlay_color_end' => $request->input('overlay_color_end', $qnaPage->overlay_color_end ?: '#1e1b4b'),
-            'overlay_opacity_start' => $request->filled('overlay_opacity_start') ? (int)$request->input('overlay_opacity_start') : 40,
-            'overlay_opacity_end' => $request->filled('overlay_opacity_end') ? (int)$request->input('overlay_opacity_end') : 90,
+            'overlay_opacity_start' => $opacityStart,
+            'overlay_opacity_end' => $opacityEnd,
             'text_color' => $request->input('text_color', $qnaPage->text_color ?: '#ffffff'),
             'is_fullwidth' => $isFullwidth,
             'seo_description' => $request->input('seo_description', $qnaPage->seo_description),

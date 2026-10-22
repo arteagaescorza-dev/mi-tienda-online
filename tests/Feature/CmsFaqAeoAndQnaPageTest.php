@@ -137,7 +137,8 @@ class CmsFaqAeoAndQnaPageTest extends TestCase
         ]);
         CmsFaq::syncToQnaPage();
 
-        // Actualizar el hero de Q&A
+        // Actualizar el hero de Q&A con archivo de imagen subido
+        $fakeFile = \Illuminate\Http\UploadedFile::fake()->image('my_qna_hero.jpg');
         $response = $this->actingAs($admin)->post(route('portal.store.qna-hero.update'), [
             'title' => 'Centro Oficial Q&A Torzo',
             'seo_description' => 'Respuestas instantáneas verificadas para inteligencia artificial.',
@@ -147,7 +148,7 @@ class CmsFaqAeoAndQnaPageTest extends TestCase
             'overlay_opacity_end' => 90,
             'text_color' => '#ffffff',
             'is_fullwidth' => 1,
-            'image_url' => 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f',
+            'image_file' => $fakeFile,
         ]);
 
         $response->assertRedirect();
@@ -165,8 +166,41 @@ class CmsFaqAeoAndQnaPageTest extends TestCase
         // Verificar vista Storefront
         $viewResp = $this->get('/pagina/q&a');
         $viewResp->assertStatus(200);
+        $content = $viewResp->getContent();
+        $this->assertStringNotContainsString('url(&#039;', $content);
         $viewResp->assertSee('Centro Oficial Q&A Torzo');
         $viewResp->assertSee('aeo-hero-box is-fullwidth', false);
         $viewResp->assertSee('aeo-hero-overlay', false);
+        $viewResp->assertSee('background-image:', false);
+
+        // 2. Actualizar solo colores u opacidad sin subir nueva imagen: debe PRESERVAR la imagen existente
+        $qnaPage = CmsPage::where('slug', 'q&a')->first();
+        $this->assertNotNull($qnaPage->image_url);
+        $prevImageUrl = $qnaPage->image_url;
+
+        $responseKeep = $this->actingAs($admin)->post(route('portal.store.qna-hero.update'), [
+            'title' => 'Centro Oficial Q&A Torzo Modificado',
+            'overlay_color_start' => '#000000',
+            'overlay_color_end' => '#111111',
+            'overlay_opacity_start' => 20,
+            'overlay_opacity_end' => 60,
+            'text_color' => '#ffffff',
+            'is_fullwidth' => 1,
+        ]);
+        $responseKeep->assertRedirect();
+        $qnaPage->refresh();
+        $this->assertEquals($prevImageUrl, $qnaPage->image_url, 'La imagen existente debe preservarse si no se solicita borrarla');
+        $this->assertEquals(20, $qnaPage->overlay_opacity_start);
+        $this->assertEquals(60, $qnaPage->overlay_opacity_end);
+        $this->assertStringContainsString('rgba(0, 0, 0, 0.2)', $qnaPage->getOverlayGradientCss());
+        $this->assertStringContainsString('rgba(17, 17, 17, 0.6)', $qnaPage->getOverlayGradientCss());
+
+        // 3. Marcar clear_image debe borrar la imagen
+        $responseClear = $this->actingAs($admin)->post(route('portal.store.qna-hero.update'), [
+            'clear_image' => 1,
+        ]);
+        $responseClear->assertRedirect();
+        $qnaPage->refresh();
+        $this->assertNull($qnaPage->image_url);
     }
 }

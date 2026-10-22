@@ -1745,8 +1745,11 @@ $curatedGoogleFonts = [
                                         <input type="file" name="image_file" id="qna_hero_image_file" accept="image/*" class="w-full text-[11px] text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 file:cursor-pointer">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] text-slate-300 mb-1 font-semibold">O pegar URL directa de imagen</label>
-                                        <input type="text" name="image_url" id="qna_hero_image_url" value="{{ $qnaPage->image_url }}" oninput="window.updateQnaHeroLivePreview()" placeholder="https://... o /uploads/..." class="w-full text-xs bg-slate-900/90 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-500">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="block text-[10px] text-slate-300 font-semibold">O seleccionar / pegar URL directa</label>
+                                            <button type="button" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold underline cursor-pointer" onclick="window.openCmsMediaModal('qna_hero_image_url')">Gestor de Medios</button>
+                                        </div>
+                                        <input type="text" name="image_url" id="qna_hero_image_url" value="{{ $qnaPage->image_url }}" oninput="if(this.value.trim()){window._qnaUploadedPreviewUrl=null; const fi=document.getElementById('qna_hero_image_file'); if(fi) fi.value='';} window.updateQnaHeroLivePreview()" placeholder="https://... o /uploads/..." class="w-full text-xs bg-slate-900/90 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-500">
                                     </div>
                                 </div>
                                 @if(!empty($qnaPage->image_url))
@@ -6835,12 +6838,12 @@ $curatedGoogleFonts = [
 
     window.applyQnaGradientPreset = function(preset) {
         const presets = {
-            indigo: { start: '#0f172a', end: '#1e1b4b', opStart: 40, opEnd: 90, text: '#ffffff' },
-            deep: { start: '#020617', end: '#09090b', opStart: 50, opEnd: 95, text: '#ffffff' },
-            wine: { start: '#4a0404', end: '#0f0505', opStart: 35, opEnd: 92, text: '#ffffff' },
-            emerald: { start: '#064e3b', end: '#022c22', opStart: 35, opEnd: 90, text: '#ffffff' },
-            carbon: { start: '#18181b', end: '#09090b', opStart: 30, opEnd: 88, text: '#ffffff' },
-            contrast: { start: '#000000', end: '#000000', opStart: 65, opEnd: 95, text: '#ffffff' }
+            indigo: { start: '#0f172a', end: '#1e1b4b', opStart: 25, opEnd: 70, text: '#ffffff' },
+            deep: { start: '#020617', end: '#09090b', opStart: 30, opEnd: 75, text: '#ffffff' },
+            wine: { start: '#4a0404', end: '#0f0505', opStart: 25, opEnd: 70, text: '#ffffff' },
+            emerald: { start: '#064e3b', end: '#022c22', opStart: 25, opEnd: 70, text: '#ffffff' },
+            carbon: { start: '#18181b', end: '#09090b', opStart: 20, opEnd: 65, text: '#ffffff' },
+            contrast: { start: '#000000', end: '#000000', opStart: 35, opEnd: 75, text: '#ffffff' }
         };
         const cfg = presets[preset] || presets.indigo;
         const cStart = document.getElementById('qna_overlay_color_start');
@@ -6962,6 +6965,8 @@ $curatedGoogleFonts = [
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     window._qnaUploadedPreviewUrl = e.target.result;
+                    const urlIn = document.getElementById('qna_hero_image_url');
+                    if (urlIn) urlIn.value = '';
                     window.updateQnaHeroLivePreview();
                 };
                 reader.readAsDataURL(this.files[0]);

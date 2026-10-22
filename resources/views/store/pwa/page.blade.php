@@ -116,9 +116,10 @@
   .aeo-hero-box {
     text-align: center;
     padding: 44px 20px;
-    background: linear-gradient(135deg, #09090b 0%, #1e1b4b 60%, #0f172a 100%);
+    background-color: #09090b;
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     border-radius: 20px;
     color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -570,8 +571,8 @@
       $heroBgImage = !empty($page->image_url) ? asset($page->image_url) : null;
       $heroTextColor = $page->getTextColor();
     @endphp
-    <div class="aeo-hero-box {{ $isHeroFullwidth ? 'is-fullwidth' : '' }}" style="{{ $heroBgImage ? "background-image: url('{$heroBgImage}');" : '' }}">
-      <div class="aeo-hero-overlay" style="background: {{ $overlayGradientCss }};"></div>
+    <div class="aeo-hero-box {{ $isHeroFullwidth ? 'is-fullwidth' : '' }}" style="{!! $heroBgImage ? "background-image: url('{$heroBgImage}');" : '' !!}">
+      <div class="aeo-hero-overlay" style="background: {!! $overlayGradientCss !!};"></div>
       <div class="aeo-hero-inner" style="color: {{ $heroTextColor }};">
         <span class="aeo-kicker-pill" style="border-color: rgba(255,255,255,0.3); background: rgba(0,0,0,0.3); color: {{ $heroTextColor }}; backdrop-filter: blur(4px);">
           AEO // CENTRO OFICIAL DE RESPUESTAS DIRECTAS &amp; IA SEARCH

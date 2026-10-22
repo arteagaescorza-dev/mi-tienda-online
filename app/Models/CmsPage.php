@@ -104,6 +104,13 @@ class CmsPage extends Model
 
     public function getOverlayGradientCss(): string
     {
+        // Si el usuario configuró colores y opacidades custom directamente, tienen prioridad
+        if (!empty($this->overlay_color_start) && !empty($this->overlay_color_end)) {
+            $rgbaStart = static::hexToRgba($this->overlay_color_start, $this->overlay_opacity_start ?? 25);
+            $rgbaEnd = static::hexToRgba($this->overlay_color_end, $this->overlay_opacity_end ?? 85);
+            return "linear-gradient(180deg, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
+        }
+
         $val = trim($this->overlay_gradient ?? '');
 
         if (!empty($val) && in_array($val, ['indigo', 'rose', 'emerald', 'amber', 'subtle'])) {
@@ -118,13 +125,6 @@ class CmsPage extends Model
 
         if (str_starts_with($val, 'linear-gradient') || str_starts_with($val, 'radial-gradient')) {
             return $val;
-        }
-
-        // Si el usuario configuró colores y opacidades custom directamente
-        if (!empty($this->overlay_color_start) && !empty($this->overlay_color_end)) {
-            $rgbaStart = static::hexToRgba($this->overlay_color_start, $this->overlay_opacity_start ?? 25);
-            $rgbaEnd = static::hexToRgba($this->overlay_color_end, $this->overlay_opacity_end ?? 85);
-            return "linear-gradient(180deg, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
         }
 
         return 'linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.88) 100%)';
