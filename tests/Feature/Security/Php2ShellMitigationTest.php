@@ -82,3 +82,4 @@ class Php2ShellMitigationTest extends TestCase
         $this->assertNotSame(403, $response->getStatusCode());
     }
 }
+
