@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Mitigacion Preventiva PHP2Shell (CVE-2026-109618 / CVE-2026-109619)
+    # Bloqueo inmediato de solicitudes que manipulan progreso de subida de sesion
+    RewriteCond %{QUERY_STRING} (?:PHP_SESSION_UPLOAD_PROGRESS|upload_progress_) [NC]
+    RewriteRule .* - [F,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

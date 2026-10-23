@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(\App\Http\Middleware\PreventPhp2ShellExploit::class);
+
         $middleware->validateCsrfTokens(except: [
             'api/*',
             'admin/tienda-cms/*',

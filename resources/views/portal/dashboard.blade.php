@@ -2632,10 +2632,7 @@
                             <span class="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
                             <div>
                                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                                    <span>Mesa de Picking & Packing: Pedido #MIX-1048</span>
-                                    <template x-if="selectedTask?.reference_code && selectedTask?.reference_code !== '#MIX-1048'">
-                                        <span class="text-indigo-600 font-mono text-xs ml-1 font-bold" x-text="'[' + selectedTask.reference_code + ']'"></span>
-                                    </template>
+                                    <span>Mesa de Picking & Packing: Pedido #MIX-1048</span><template x-if="selectedTask?.reference_code && selectedTask?.reference_code !== '#MIX-1048'"><span class="text-indigo-600 font-mono text-xs ml-1 font-bold" x-text="'[' + selectedTask.reference_code + ']'"></span></template>
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold"
                                           :class="selectedTask?.priority === 'critical' ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'"
                                           x-text="selectedTask?.priority === 'critical' ? 'Corte DHL 14:00' : 'SLA Estándar'"></span>

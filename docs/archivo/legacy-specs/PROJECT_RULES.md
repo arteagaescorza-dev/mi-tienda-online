@@ -715,6 +715,13 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   2. El proceso de checkout antes del pago.
   3. Los avisos impresos en etiquetas térmicas y cajas de embalaje expedidas por Almacén.
 
+### Regla 8.4: Mitigación de Vulnerabilidades de Runtime en Motor PHP y Blindaje Multicapa (PHP2Shell: CVE-2026-109618 y CVE-2026-109619)
+* **Arquitectura de Defensa en Profundidad ante Incidentes de Runtime:** Ante vulnerabilidades críticas globales del motor PHP (Pre-Auth RCE, corrupción de memoria OOM en `longjmp` o Use-After-Free en estados globales), la plataforma implementa una estrategia de mitigación en 4 capas concurrentes:
+  1. **Hardening del Motor PHP (`php.ini`):** Deshabilitación obligatoria de `session.upload_progress.enabled = Off` y `session.upload_progress.cleanup = Off` en todos los entornos de ejecución, erradicando el vector de manipulación de estado de sesión persistente.
+  2. **Virtual Patching / WAF de Aplicación (`PreventPhp2ShellExploit`):** Registro de middleware HTTP prioritario en la cúspide del pipeline (`bootstrap/app.php`) que inspecciona y rechaza con HTTP 403 Forbidden cualquier solicitud que intente inyectar variables de progreso de sesión (`PHP_SESSION_UPLOAD_PROGRESS`), cabeceras anómalas o delimitadores multipart irregulares.
+  3. **Blindaje en Servidor Web (`.htaccess` / Nginx):** Bloqueo a nivel de capa perimetral web para rechazar peticiones malformadas antes de su derivación al proceso PHP.
+  4. **Gobernanza de Actualización Upstream:** Migración obligatoria a versiones oficiales con parche de seguridad (PHP 8.3.36+ para rama 8.3, 8.4.27+ o 8.5.12+).
+
 ---
 
 ## 9. Reglas de Calidad, Pruebas Automatizadas y Validación CDP
