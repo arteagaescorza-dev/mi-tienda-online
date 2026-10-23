@@ -275,7 +275,7 @@ class PortalVendorController extends Controller
             ], 422);
         }
 
-        $validated = 
+        $validated = $request->validated();
 
         $dispatchedUnits = $validated['dispatched_units'] ?? $order->total_units;
         $packagesCount = $validated['packages_count'] ?? 1;

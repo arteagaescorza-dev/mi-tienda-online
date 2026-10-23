@@ -10,6 +10,20 @@ class PortalAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        \App\Models\Ally::firstOrCreate(
+            ['code' => 'ALLY-PARADISO'],
+            [
+                'name' => 'Paradiso Circuit CDMX',
+                'category' => 'circuit_party',
+                'universe' => 'marte',
+                'portal_token' => 'tok_paradiso_2026',
+            ]
+        );
+    }
+
     public function test_portal_user_can_access_the_dashboard(): void
     {
         $user = User::factory()->create(['role' => 'portal']);

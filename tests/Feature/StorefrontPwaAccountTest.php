@@ -176,7 +176,9 @@ class StorefrontPwaAccountTest extends TestCase
 
     public function test_can_subscribe_to_mrr_tier(): void
     {
-        $response = $this->postJson('/api/v1/store/account/subscriptions/subscribe', [
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->postJson('/api/v1/store/account/subscriptions/subscribe', [
             'tier_name' => 'Caja Marte Nivel 2 (Plus)',
             'monthly_amount' => 599.00,
             'universe' => 'marte',
@@ -240,7 +242,9 @@ class StorefrontPwaAccountTest extends TestCase
 
     public function test_can_update_anatomical_profile(): void
     {
-        $response = $this->postJson('/api/v1/store/account/profile', [
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->postJson('/api/v1/store/account/profile', [
             'waist_cm' => 84,
             'preferred_cut' => 'jockstrap',
             'silhouettes' => [

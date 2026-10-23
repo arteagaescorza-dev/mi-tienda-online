@@ -1144,7 +1144,7 @@
       <span>Volver Atrás</span>
     </button>
 
-    <a href="{{ route('store.catalog', ['universo' => $activeUniverse]) }}" class="pdp-action-nav-btn" aria-label="Explorar catálogo completo" style="text-decoration: none;">
+    <a href="{{ route('store.catalog', ['universo' => $activeUniverse]) }}" class="pdp-action-nav-btn" data-action="open-filters" aria-label="Explorar catálogo completo" style="text-decoration: none;">
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
       <span>Ver Catálogo</span>
     </a>

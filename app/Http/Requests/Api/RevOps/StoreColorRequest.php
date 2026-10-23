@@ -20,7 +20,12 @@ class StoreColorRequest extends FormRequest
             'color_type' => 'nullable|string|max:30',
             'type' => 'nullable|string|max:30',
             'gradient_css' => 'nullable|string|max:250',
-        ], [
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
             'name.required' => 'El nombre del color es obligatorio.',
             'name.unique' => 'Este color ya se encuentra registrado.',
         ];

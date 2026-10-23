@@ -16,4 +16,14 @@ class GovernanceApiGetAuditLogsRequest extends FormRequest
     {
         return [];
     }
+
+    protected function failedAuthorization()
+    {
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            response()->json([
+                'error' => 'Acceso denegado por politica de gobernanza y auditoria RBAC (TASK-DSH-09).',
+                'message' => 'Solo los perfiles con rango de superadministrador pueden auditar la bitacora omnicanal.',
+            ], 403)
+        );
+    }
 }

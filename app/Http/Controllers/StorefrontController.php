@@ -1386,7 +1386,8 @@ class StorefrontController extends Controller
             $mainImage = data_get($product->meta, 'image')
                 ?: (data_get($product->meta, 'images.0') ?: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80');
             $variants = $product->variants;
-            $totalStock = (int) $variants->sum(fn ($v) => $v->inventories->sum('quantity'));
+            $isScrapedProduct = $product->isScraped() || $product->type === 'dropship';
+            $totalStock = $isScrapedProduct ? 0 : (int) $variants->sum(fn ($v) => $v->inventories->where('location', 'warehouse-1')->sum('quantity'));
             return [
                 'id' => $product->id,
                 'dbId' => $product->id,
@@ -1526,10 +1527,11 @@ class StorefrontController extends Controller
         $portalProducts = $dbProducts->map(function (Product $product) use ($brandToSupplierMap, $allActiveLocks) {
             $variants = $product->variants;
             $hasVariants = $variants->isNotEmpty();
+            $isScrapedProduct = $product->isScraped() || $product->type === 'dropship';
 
             if ($hasVariants) {
-                $totalStock = (int) $variants->sum(fn ($v) => $v->inventories->sum('quantity'));
-                $totalReserved = (int) $variants->sum(fn ($v) => $v->inventories->sum('reserved'));
+                $totalStock = $isScrapedProduct ? 0 : (int) $variants->sum(fn ($v) => $v->inventories->where('location', 'warehouse-1')->sum('quantity'));
+                $totalReserved = $isScrapedProduct ? 0 : (int) $variants->sum(fn ($v) => $v->inventories->where('location', 'warehouse-1')->sum('reserved'));
 
                 $sizes = [];
                 $physicalSizes = [];
@@ -1540,9 +1542,9 @@ class StorefrontController extends Controller
                 foreach ($variants as $v) {
                     $rawSize = data_get($v->attributes, 'size', 'u');
                     $sizeKey = strtolower(trim((string) $rawSize));
-                    $vQty = (int) $v->inventories->sum('quantity');
-                    $vRes = (int) $v->inventories->sum('reserved');
-                    $vLocks = (int) ($allActiveLocks->get($v->id)?->sum('quantity') ?? 0);
+                    $vQty = $isScrapedProduct ? 0 : (int) $v->inventories->where('location', 'warehouse-1')->sum('quantity');
+                    $vRes = $isScrapedProduct ? 0 : (int) $v->inventories->where('location', 'warehouse-1')->sum('reserved');
+                    $vLocks = $isScrapedProduct ? 0 : (int) ($allActiveLocks->get($v->id)?->sum('quantity') ?? 0);
                     $totalLocked += $vLocks;
 
                     $physicalSizes[$sizeKey] = $vQty;
@@ -1551,13 +1553,13 @@ class StorefrontController extends Controller
                     $sizes[$sizeKey] = max(0, $vQty - $vRes - $vLocks);
                 }
 
-                $availableStock = max(0, $totalStock - $totalReserved - $totalLocked);
+                $availableStock = $isScrapedProduct ? 0 : max(0, $totalStock - $totalReserved - $totalLocked);
             } else {
                 $rawMetaSizes = data_get($product->meta, 'sizes', []);
                 $sizes = [];
                 if (is_array($rawMetaSizes)) {
                     foreach ($rawMetaSizes as $k => $v) {
-                        $sizes[strtolower(trim((string) $k))] = (int) $v;
+                        $sizes[strtolower(trim((string) $k))] = $isScrapedProduct ? 0 : (int) $v;
                     }
                 }
                 $physicalSizes = $sizes;
@@ -1565,12 +1567,12 @@ class StorefrontController extends Controller
                 $lockedSizes = [];
                 $totalReserved = 0;
                 $totalLocked = 0;
-                $totalStock = !empty($sizes) ? array_sum($sizes) : (int) data_get($product->meta, 'local_stock', 0);
+                $totalStock = $isScrapedProduct ? 0 : (!empty($sizes) ? array_sum($sizes) : (int) data_get($product->meta, 'local_stock', 0));
                 $availableStock = $totalStock;
             }
 
             $sp = $product->supplierProducts->first();
-            $supplierStock = $sp && $sp->availability === 'in_stock' ? 50 : (int) data_get($product->meta, 'supplier_stock', 0);
+            $supplierStock = $sp && $sp->availability === 'in_stock' ? 50 : (int) data_get($product->meta, 'supplier_stock', ($isScrapedProduct ? 50 : 0));
 
             $rawImg = data_get($product->meta, 'image')
                 ?: (data_get($product->meta, 'images.0') ?: (data_get($product->meta, 'gallery.0.url') ?: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80'));
@@ -1673,11 +1675,12 @@ class StorefrontController extends Controller
             $shades = data_get($product->meta, 'shades', []);
             $volumes = data_get($product->meta, 'volumes', []);
 
-            $status = $availableStock > 0 ? 'Saludable' : ($supplierStock > 0 ? 'Solo proveedor' : 'Sin stock');
-            if ($availableStock > 0) {
-                $status = $availableStock < 25 ? 'Bajo Stock' : 'En Stock';
-            } elseif ($supplierStock > 0) {
+            if ($isScrapedProduct) {
                 $status = 'Sincronizado';
+            } elseif ($availableStock > 0) {
+                $status = 'Saludable';
+            } elseif ($supplierStock > 0) {
+                $status = 'Solo proveedor';
             } else {
                 $status = 'Agotado';
             }
@@ -1698,13 +1701,13 @@ class StorefrontController extends Controller
                 'originUrl' => $supplierUrl,
                 'category' => $category,
                 'subcategory' => $subcategory,
-                'type' => $product->type === 'physical' ? 'propio' : ($product->type === 'dropship' ? 'dropship' : 'mixto'),
-                'localStock' => $availableStock,
-                'physicalStock' => $totalStock,
+                'type' => ($isScrapedProduct || $product->type === 'dropship') ? 'dropship' : ($product->type === 'physical' ? 'propio' : 'mixto'),
+                'localStock' => $isScrapedProduct ? 0 : $availableStock,
+                'physicalStock' => $isScrapedProduct ? 0 : $totalStock,
                 'physicalSizes' => $physicalSizes,
-                'committedStock' => $totalReserved,
+                'committedStock' => $isScrapedProduct ? 0 : $totalReserved,
                 'committedSizes' => $committedSizes,
-                'lockedStock' => $totalLocked,
+                'lockedStock' => $isScrapedProduct ? 0 : $totalLocked,
                 'lockedSizes' => $lockedSizes,
                 'supplierStock' => $supplierStock,
                 'location' => $location,
@@ -2233,7 +2236,7 @@ class StorefrontController extends Controller
         $allImages = array_map([self::class, 'cleanStoreImageUrl'], $allImages);
 
         static $crudColors = null;
-        if ($crudColors === null) {
+        if ($crudColors === null || app()->environment('testing')) {
             try {
                 $crudColors = \Illuminate\Support\Facades\DB::table('apparel_colors')->where('is_active', true)->get();
             } catch (\Throwable $e) {

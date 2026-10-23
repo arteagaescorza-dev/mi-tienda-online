@@ -12,6 +12,14 @@ class BrandCrudAndFiltersRulesTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $adminUser;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->adminUser = User::factory()->create(['role' => 'admin']);
+    }
+
     /**
      * Test de creación, consulta, actualización, toggle-active, archivo, restauración y borrado de marcas.
      */
@@ -37,7 +45,7 @@ class BrandCrudAndFiltersRulesTest extends TestCase
             'is_active' => true,
         ];
 
-        $postRes = $this->postJson('/api/v1/inventory/brands', $createPayload);
+        $postRes = $this->actingAs($this->adminUser)->postJson('/api/v1/inventory/brands', $createPayload);
         $postRes->assertStatus(201);
         $postRes->assertJsonPath('status', 'success');
         $postRes->assertJsonPath('data.name', 'Aura Lingerie');
@@ -58,19 +66,19 @@ class BrandCrudAndFiltersRulesTest extends TestCase
         $this->assertContains('Aura Lingerie', $supplier->brands);
 
         // 3. Listar marcas maestras
-        $listRes = $this->getJson('/api/v1/inventory/brands');
+        $listRes = $this->actingAs($this->adminUser)->getJson('/api/v1/inventory/brands');
         $listRes->assertStatus(200);
         $listRes->assertJsonPath('status', 'success');
         $this->assertNotEmpty($listRes->json('data'));
 
         // 4. Ver detalle de marca
-        $showRes = $this->getJson("/api/v1/inventory/brands/{$brandId}");
+        $showRes = $this->actingAs($this->adminUser)->getJson("/api/v1/inventory/brands/{$brandId}");
         $showRes->assertStatus(200);
         $showRes->assertJsonPath('data.name', 'Aura Lingerie');
         $showRes->assertJsonPath('data.supplier.tradeName', 'Textiles MX');
 
         // 5. Actualizar marca
-        $updateRes = $this->putJson("/api/v1/inventory/brands/{$brandId}", [
+        $updateRes = $this->actingAs($this->adminUser)->putJson("/api/v1/inventory/brands/{$brandId}", [
             'name' => 'Aura Lingerie Premium',
             'description' => 'Descripción actualizada de alta gama',
         ]);
@@ -78,31 +86,31 @@ class BrandCrudAndFiltersRulesTest extends TestCase
         $updateRes->assertJsonPath('data.name', 'Aura Lingerie Premium');
 
         // 6. Alternar estado activo
-        $toggleRes = $this->patchJson("/api/v1/inventory/brands/{$brandId}/toggle-active");
+        $toggleRes = $this->actingAs($this->adminUser)->patchJson("/api/v1/inventory/brands/{$brandId}/toggle-active");
         $toggleRes->assertStatus(200);
         $toggleRes->assertJsonPath('data.is_active', false);
 
         // 7. Archivar marca
-        $archiveRes = $this->postJson("/api/v1/inventory/brands/{$brandId}/archive");
+        $archiveRes = $this->actingAs($this->adminUser)->postJson("/api/v1/inventory/brands/{$brandId}/archive");
         $archiveRes->assertStatus(200);
         $archiveRes->assertJsonPath('data.is_archived', true);
         $archiveRes->assertJsonPath('data.is_active', false);
 
         // 8. Restaurar marca
-        $restoreRes = $this->postJson("/api/v1/inventory/brands/{$brandId}/restore");
+        $restoreRes = $this->actingAs($this->adminUser)->postJson("/api/v1/inventory/brands/{$brandId}/restore");
         $restoreRes->assertStatus(200);
         $restoreRes->assertJsonPath('data.is_archived', false);
         $restoreRes->assertJsonPath('data.is_active', true);
 
         // 9. Reasignar / Asociar a otro proveedor o desvincular
-        $assignRes = $this->postJson("/api/v1/inventory/brands/{$brandId}/assign-supplier", [
+        $assignRes = $this->actingAs($this->adminUser)->postJson("/api/v1/inventory/brands/{$brandId}/assign-supplier", [
             'supplier_id' => null,
         ]);
         $assignRes->assertStatus(200);
         $assignRes->assertJsonPath('data.supplier_id', null);
 
         // 10. Eliminar marca
-        $deleteRes = $this->deleteJson("/api/v1/inventory/brands/{$brandId}");
+        $deleteRes = $this->actingAs($this->adminUser)->deleteJson("/api/v1/inventory/brands/{$brandId}");
         $deleteRes->assertStatus(200);
         $this->assertSoftDeleted('brands', ['id' => $brandId]);
     }
@@ -184,8 +192,8 @@ class BrandCrudAndFiltersRulesTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $hub2Res = $this->actingAs($admin)->get(route('portal.store'));
         $hub2Res->assertStatus(200);
-        $hub2Res->assertSee('query_rules[brand]', false);
-        $hub2Res->assertSee('query_rules[supplier]', false);
+        $hub2Res->assertSee('qr.brand', false);
+        $hub2Res->assertSee('qr.supplier', false);
 
         // Validar ruta específica reportada por usuario con tab=pages&universe=marte
         $hub2PagesRes = $this->actingAs($admin)->get('/admin/tienda-cms?tab=pages&universe=marte');
@@ -206,10 +214,18 @@ class BrandCrudAndFiltersRulesTest extends TestCase
     public function test_product_line_categories_cannot_be_commercial_brands_and_are_excluded_from_tree(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $supplier = Supplier::create([
+            'name' => 'Proveedor Marcas Test',
+            'legal_name' => 'Proveedor Marcas Test SA de CV',
+            'vendor_code' => 'SUP-TEST-99',
+            'origin' => 'manual',
+            'status' => 'connected',
+        ]);
 
         // 1. Intentar crear una marca llamada 'TANGA' o 'JOCKSTRAPS' debe ser rechazado con 422
         $resTanga = $this->actingAs($admin)->postJson('/api/v1/inventory/brands', [
             'name' => 'TANGA',
+            'supplier_id' => $supplier->id,
         ]);
         $resTanga->assertStatus(422);
         $resTanga->assertJsonFragment([
@@ -218,6 +234,7 @@ class BrandCrudAndFiltersRulesTest extends TestCase
 
         $resJock = $this->actingAs($admin)->postJson('/api/v1/inventory/brands', [
             'name' => 'JOCKSTRAPS',
+            'supplier_id' => $supplier->id,
         ]);
         $resJock->assertStatus(422);
 

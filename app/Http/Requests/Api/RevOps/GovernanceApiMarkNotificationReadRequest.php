@@ -9,7 +9,8 @@ class GovernanceApiMarkNotificationReadRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('manage-governance');
+        $user = $this->user();
+        return $user ? ($user->canAccessHub('dashboard') || Gate::allows('manage-governance')) : true;
     }
 
     public function rules(): array

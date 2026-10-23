@@ -188,7 +188,7 @@ class PortalLogisticsController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $courierPrefix = match ($validated['courier']) {
             'dhl_express' => 'DHL',
@@ -237,7 +237,7 @@ class PortalLogisticsController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $resType = match ($validated['resolution_type'] ?? 'replacement_order') {
             'store_credit_wallet', 'store_credit' => 'store_credit',
@@ -264,7 +264,7 @@ class PortalLogisticsController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $this->packagingService->adjustStock(
             $packageType,
@@ -284,7 +284,7 @@ class PortalLogisticsController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $packageType = !empty($validated['package_type_id']) 
             ? PackageType::find($validated['package_type_id']) 
@@ -305,7 +305,7 @@ class PortalLogisticsController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $data = ['status' => $validated['status']];
         if ($validated['status'] === 'delivered') {

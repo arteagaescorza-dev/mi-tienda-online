@@ -22,6 +22,15 @@ class RevOpsApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $adminUser;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->adminUser = \App\Models\User::factory()->create(['role' => 'admin']);
+        $this->actingAs($this->adminUser);
+    }
+
     public function test_inventory_api_endpoints(): void
     {
         $supplier = Supplier::create(['name' => 'Torzo', 'code' => 'SUP-TORZO']);

@@ -26,7 +26,7 @@ class CheckoutStoreRequest extends FormRequest
             'email' => ['required', 'email', 'max:255'],
             'mobile' => ['required', 'string', 'max:20'],
             'birth_date' => ['nullable', 'date'],
-            'delivery_method' => ['required', 'string', 'in:paqueteria,tienda'],
+            'delivery_method' => ['required', 'string', 'in:paqueteria,tienda,personal'],
             'universe' => ['nullable', 'string', 'in:marte,venus,tiresias,terra'],
             'coupon_code' => ['nullable', 'string', 'max:50'],
         ];

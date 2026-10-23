@@ -119,7 +119,9 @@ class Hub2PopUpSubscriptionIntegrationTest extends TestCase
         $this->assertEquals(75, $lead->lead_score);
 
         // Check Meta CAPI interaction
-        $interaction = LeadInteraction::where('lead_id', $lead->id)->latest()->first();
+        $interaction = LeadInteraction::where('lead_id', $lead->id)
+            ->where('interaction_type', 'meta_capi_lead_captured')
+            ->first();
         $this->assertNotNull($interaction);
         $this->assertEquals('meta_capi_lead_captured', $interaction->interaction_type);
         $this->assertEquals(9.8, (float)($interaction->metadata['capi_score'] ?? 0));

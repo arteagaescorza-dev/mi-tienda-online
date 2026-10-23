@@ -298,6 +298,7 @@ class CrossHubRmaResolutionTest extends TestCase
 
     public function test_api_logistics_endpoints_for_rma_resolution(): void
     {
+        $user = User::factory()->create(['role' => 'portal']);
         [$product, $variant, $inventory] = $this->createProductWithInventory('TEST-API-01', 20);
 
         $rma = RmaRequest::create([
@@ -311,7 +312,7 @@ class CrossHubRmaResolutionTest extends TestCase
         ]);
 
         // 1. Endpoint general de resolucion
-        $res = $this->postJson("/api/v1/logistics/rma/{$rma->id}/resolve", [
+        $res = $this->actingAs($user)->postJson("/api/v1/logistics/rma/{$rma->id}/resolve", [
             'resolution_type' => 'store_credit',
             'has_hygiene_seal_intact' => true,
             'has_factory_tag' => true,
@@ -335,7 +336,7 @@ class CrossHubRmaResolutionTest extends TestCase
             'status' => 'open',
         ]);
 
-        $resRep = $this->postJson("/api/v1/logistics/rma/{$rma2->id}/replacement-order", [
+        $resRep = $this->actingAs($user)->postJson("/api/v1/logistics/rma/{$rma2->id}/replacement-order", [
             'replacement_sku' => 'TEST-API-01',
             'technical_notes' => 'Reposicion automatica via API.',
         ]);

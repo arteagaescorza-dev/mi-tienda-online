@@ -39,7 +39,7 @@ class PortalMetricsTest extends TestCase
     public function test_inventory_uses_available_stock_grouped_by_product(): void
     {
         $user = User::factory()->create(['role' => 'portal']);
-        $product = Product::factory()->create(['sku' => 'SKU-REAL']);
+        $product = Product::factory()->create(['sku' => 'SKU-REAL', 'type' => 'physical']);
         $variant = ProductVariant::factory()->for($product)->create();
         Inventory::create([
             'variant_id' => $variant->id,

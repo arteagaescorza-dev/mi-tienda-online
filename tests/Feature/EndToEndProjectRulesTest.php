@@ -13,9 +13,12 @@ class EndToEndProjectRulesTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $adminUser;
+
     protected function setUp(): void
     {
         parent::setUp();
+        $this->adminUser = User::factory()->create(['role' => 'admin']);
     }
 
     public function test_rule_2_cms_page_filter_supplier_attribute_and_persistence(): void
@@ -151,7 +154,7 @@ class EndToEndProjectRulesTest extends TestCase
         ];
 
         // 1. Alta manual completa
-        $res = $this->postJson('/api/v1/inventory/suppliers', $payload);
+        $res = $this->actingAs($this->adminUser)->postJson('/api/v1/inventory/suppliers', $payload);
         $res->assertStatus(201);
         $res->assertJsonPath('status', 'success');
         $res->assertJsonPath('data.taxId', 'MTM990101XYZ');
@@ -169,7 +172,7 @@ class EndToEndProjectRulesTest extends TestCase
         $supplierId = $res->json('data.dbId');
 
         // 2. Asociación de nueva marca al árbol
-        $addBrandRes = $this->postJson("/api/v1/inventory/suppliers/{$supplierId}/brands", [
+        $addBrandRes = $this->actingAs($this->adminUser)->postJson("/api/v1/inventory/suppliers/{$supplierId}/brands", [
             'brand' => 'Nueva Marca Hija',
         ]);
         $addBrandRes->assertStatus(200);
@@ -177,14 +180,14 @@ class EndToEndProjectRulesTest extends TestCase
         $addBrandRes->assertJsonCount(4, 'data.brandsTree');
 
         // 3. Desvinculación de marca del árbol
-        $removeBrandRes = $this->deleteJson("/api/v1/inventory/suppliers/{$supplierId}/brands", [
+        $removeBrandRes = $this->actingAs($this->adminUser)->deleteJson("/api/v1/inventory/suppliers/{$supplierId}/brands", [
             'brand' => 'Nueva Marca Hija',
         ]);
         $removeBrandRes->assertStatus(200);
         $removeBrandRes->assertJsonCount(3, 'data.brands');
 
         // 4. Actualización de datos fiscales
-        $updateRes = $this->putJson("/api/v1/inventory/suppliers/{$supplierId}", [
+        $updateRes = $this->actingAs($this->adminUser)->putJson("/api/v1/inventory/suppliers/{$supplierId}", [
             'fiscalRegime' => '626 - Régimen Simplificado de Confianza (RESICO)',
             'taxId' => 'MTM990101ABC',
         ]);

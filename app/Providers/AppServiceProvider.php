@@ -79,7 +79,7 @@ class AppServiceProvider extends ServiceProvider
         });
         \Illuminate\Support\Facades\Gate::define('manage-b2b', function ($user = null) {
             $user = $user ?? auth()->user();
-            return $user && $user->canAccessHub('allies');
+            return $user && ($user->canAccessHub('allies') || $user->canAccessHub('vendor_extranet'));
         });
         \Illuminate\Support\Facades\Gate::define('manage-governance', function ($user = null) {
             $user = $user ?? auth()->user();

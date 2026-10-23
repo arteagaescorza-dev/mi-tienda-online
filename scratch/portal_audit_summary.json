@@ -1,0 +1,366 @@
+{
+  "Hub 1: Dashboard Operativo": {
+    "name": "Hub 1: Dashboard Operativo",
+    "url": "http://127.0.0.1:8000/admin/dashboard",
+    "final_url": "http://127.0.0.1:8000/admin/dashboard",
+    "status": "OK",
+    "load_time_sec": 3.18,
+    "title": "Dashboard General - Mi Tienda",
+    "elements": {
+      "buttons": 112,
+      "links": 17,
+      "forms": 4,
+      "modals": 10
+    },
+    "severe_logs": [
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712311460
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4 Error: <circle> attribute cx: Unexpected end of attribute. Expected length, \"\".",
+        "source": "rendering",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4 Error: <circle> attribute cy: Unexpected end of attribute. Expected length, \"\".",
+        "source": "rendering",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4 Error: <circle> attribute cx: Unexpected end of attribute. Expected length, \"\".",
+        "source": "rendering",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4 Error: <circle> attribute cy: Unexpected end of attribute. Expected length, \"\".",
+        "source": "rendering",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:36945 Uncaught TypeError: Failed to execute 'importNode' on 'Document': parameter 1 is not of type 'Node'.",
+        "source": "javascript",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:36945 Uncaught TypeError: Failed to execute 'importNode' on 'Document': parameter 1 is not of type 'Node'.",
+        "source": "javascript",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: idx is not defined",
+        "source": "javascript",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712311461
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712311462
+      },
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712312515
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4 Error: <circle> attribute cx: Unexpected end of attribute. Expected length, \"\".",
+        "source": "rendering",
+        "timestamp": 1792712312576
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4 Error: <circle> attribute cy: Unexpected end of attribute. Expected length, \"\".",
+        "source": "rendering",
+        "timestamp": 1792712312576
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4 Error: <circle> attribute cx: Unexpected end of attribute. Expected length, \"\".",
+        "source": "rendering",
+        "timestamp": 1792712312576
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4 Error: <circle> attribute cy: Unexpected end of attribute. Expected length, \"\".",
+        "source": "rendering",
+        "timestamp": 1792712312576
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:36945 Uncaught TypeError: Failed to execute 'importNode' on 'Document': parameter 1 is not of type 'Node'.",
+        "source": "javascript",
+        "timestamp": 1792712312623
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:36945 Uncaught TypeError: Failed to execute 'importNode' on 'Document': parameter 1 is not of type 'Node'.",
+        "source": "javascript",
+        "timestamp": 1792712312624
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712312629
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712312630
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: idx is not defined",
+        "source": "javascript",
+        "timestamp": 1792712312630
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712312631
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712312631
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught ReferenceError: pt is not defined",
+        "source": "javascript",
+        "timestamp": 1792712312631
+      }
+    ],
+    "snippet": "M MI TIENDA PORTAL ADMINISTRADOR HUB 1 Dashboard General CENTRO DE MANDO SANDBOX • Simulado 2 Ver tienda Salir ‹ AD Dash"
+  },
+  "Hub 2: CMS & Tienda Vitrinas": {
+    "name": "Hub 2: CMS & Tienda Vitrinas",
+    "url": "http://127.0.0.1:8000/admin/tienda-cms",
+    "final_url": "http://127.0.0.1:8000/admin/tienda-cms?tab=visual&universe=marte",
+    "status": "OK",
+    "load_time_sec": 3.47,
+    "title": "Tienda & CMS Multiverso - Mi Tienda",
+    "elements": {
+      "buttons": 306,
+      "links": 33,
+      "forms": 50,
+      "modals": 17
+    },
+    "severe_logs": [
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712316060
+      }
+    ],
+    "snippet": "M MI TIENDA PORTAL ADMINISTRADOR HUB 2 Tienda & CMS Multiverso 4 VITRINAS ACTIVAS SANDBOX • Simulado 2 Ver tienda Salir "
+  },
+  "Hub 3: Marketing & CRM": {
+    "name": "Hub 3: Marketing & CRM",
+    "url": "http://127.0.0.1:8000/admin/marketing",
+    "final_url": "http://127.0.0.1:8000/admin/marketing",
+    "status": "OK",
+    "load_time_sec": 2.78,
+    "title": "Marketing & CRM 360° - Mi Tienda",
+    "elements": {
+      "buttons": 83,
+      "links": 30,
+      "forms": 19,
+      "modals": 10
+    },
+    "severe_logs": [
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712319948
+      }
+    ],
+    "snippet": "M MI TIENDA PORTAL ADMINISTRADOR HUB 3 Marketing & CRM 360° 11 LEADS ACTIVOS SANDBOX • Simulado 2 Ver tienda Salir ‹ AD "
+  },
+  "Hub 4: Inventario & Catalogo": {
+    "name": "Hub 4: Inventario & Catalogo",
+    "url": "http://127.0.0.1:8000/admin/inventario-catalogo",
+    "status": "TIMEOUT_OR_CRASH",
+    "error": "Message: timeout: Timed out receiving message from renderer: 59.186\n  (Session info: chrome=155.0.8059.85)\nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t(No symbol) [0x7ff79569e745]\n\t(No symbol) [0x7ff795253d00]\n\t(No symbol) [0x7ff795083f3d]\n\t(No symbol) [0x7ff795071329]\n\t(No symbol) [0x7ff795071011]\n\t(No symbol) [0x7ff79506ecfa]\n\t(No symbol) [0x7ff79506f62f]\n\t(No symbol) [0x7ff79507e74a]\n\t(No symbol) [0x7ff795094e4b]\n\t(No symbol) [0x7ff79509cdda]\n\t(No symbol) [0x7ff79506fdf1]\n\t(No symbol) [0x7ff795094b65]\n\t(No symbol) [0x7ff795134ece]\n\t(No symbol) [0x7ff7950d1462]\n\t(No symbol) [0x7ff7950d2273]\n\t(No symbol) [0x7ff7957417b1]\n\t(No symbol) [0x7ff7957787c7]\n\t(No symbol) [0x7ff79576c85e]\n\t(No symbol) [0x7ff79541884e]\n\t(No symbol) [0x7ff795260415]\n\t(No symbol) [0x7ff79525bdf4]\n\t(No symbol) [0x7ff79525bf84]\n\t(No symbol) [0x7ff795247f7c]\n\t(No symbol) [0x7ffd267f7124]\n\t(No symbol) [0x7ffd2709cc91]\n"
+  },
+  "Hub 5: Finanzas & Rentabilidad": {
+    "name": "Hub 5: Finanzas & Rentabilidad",
+    "url": "http://127.0.0.1:8000/admin/finanzas",
+    "final_url": "http://127.0.0.1:8000/admin/finanzas",
+    "status": "OK",
+    "load_time_sec": 2.98,
+    "title": "Finanzas & Conciliación - Mi Tienda",
+    "elements": {
+      "buttons": 81,
+      "links": 9,
+      "forms": 15,
+      "modals": 13
+    },
+    "severe_logs": [
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712323688
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught TypeError: Cannot read properties of null (reading 'isGeneratingSku')",
+        "source": "javascript",
+        "timestamp": 1792712324903
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught TypeError: Cannot read properties of null (reading 'isGeneratingSku')",
+        "source": "javascript",
+        "timestamp": 1792712324903
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js 4:26 Uncaught TypeError: Cannot read properties of null (reading 'isGeneratingSku')",
+        "source": "javascript",
+        "timestamp": 1792712324903
+      },
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712383113
+      }
+    ],
+    "snippet": "M MI TIENDA PORTAL ADMINISTRADOR HUB 5 Finanzas & Conciliación MXN $10,289.00 MRR ACTIVO SANDBOX • Simulado 2 Ver tienda"
+  },
+  "Hub 6: Logistica & Expedicion": {
+    "name": "Hub 6: Logistica & Expedicion",
+    "url": "http://127.0.0.1:8000/admin/logistica",
+    "final_url": "http://127.0.0.1:8000/admin/logistica",
+    "status": "OK",
+    "load_time_sec": 2.96,
+    "title": "Logística & Fulfillment - Mi Tienda",
+    "elements": {
+      "buttons": 81,
+      "links": 9,
+      "forms": 16,
+      "modals": 21
+    },
+    "severe_logs": [
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712386225
+      }
+    ],
+    "snippet": "M MI TIENDA PORTAL ADMINISTRADOR HUB 3 Logística, Expedición & Post-Venta 5 BULTOS EN RAMPA SANDBOX • Simulado 2 Ver tie"
+  },
+  "Hub 7: Convenios & Aliados": {
+    "name": "Hub 7: Convenios & Aliados",
+    "url": "http://127.0.0.1:8000/admin/convenios",
+    "final_url": "http://127.0.0.1:8000/admin/convenios?tab=directory",
+    "status": "OK",
+    "load_time_sec": 2.77,
+    "title": "Convenios & Aliados - Mi Tienda",
+    "elements": {
+      "buttons": 163,
+      "links": 10,
+      "forms": 63,
+      "modals": 11
+    },
+    "severe_logs": [
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712389147
+      }
+    ],
+    "snippet": "M MI TIENDA PORTAL ADMINISTRADOR HUB 7 Convenios, Aliados & Atribución 0 ALIADOS ACTIVOS SANDBOX • Simulado 2 Ver tienda"
+  },
+  "Hub 7 Extranet: Proveedores": {
+    "name": "Hub 7 Extranet: Proveedores",
+    "url": "http://127.0.0.1:8000/admin/extranet/proveedores",
+    "final_url": "http://127.0.0.1:8000/admin/extranet/proveedores",
+    "status": "OK",
+    "load_time_sec": 2.62,
+    "title": "Forbidden",
+    "elements": {
+      "buttons": 0,
+      "links": 0,
+      "forms": 0,
+      "modals": 0
+    },
+    "severe_logs": [
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/admin/extranet/proveedores - Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "source": "network",
+        "timestamp": 1792712391990
+      }
+    ],
+    "snippet": "403 Acceso restringido unicamente a proveedores autorizados."
+  },
+  "Gobernanza del Sistema": {
+    "name": "Gobernanza del Sistema",
+    "url": "http://127.0.0.1:8000/admin/gobernanza",
+    "final_url": "http://127.0.0.1:8000/admin/gobernanza",
+    "status": "OK",
+    "load_time_sec": 2.67,
+    "title": "Hub 8: Gobernanza, Auditoria & RBAC - Mi Tienda",
+    "elements": {
+      "buttons": 51,
+      "links": 14,
+      "forms": 13,
+      "modals": 10
+    },
+    "severe_logs": [
+      {
+        "level": "SEVERE",
+        "message": "http://127.0.0.1:8000/js/revops-panel/app.js?v=20261007_v2 20864:48 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')",
+        "source": "javascript",
+        "timestamp": 1792712394718
+      }
+    ],
+    "snippet": "M MI TIENDA PORTAL ADMINISTRADOR HUB 8 Gobernanza Global, Auditoria Forense & RBAC ACTIVO SANDBOX • Simulado 2 Ver tiend"
+  }
+}

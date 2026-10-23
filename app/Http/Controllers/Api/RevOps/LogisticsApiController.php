@@ -29,7 +29,7 @@ class LogisticsApiController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $manifest = ShippingManifest::create([
             'manifest_number' => 'MAN-' . strtoupper(substr($validated['courier'], 0, 3)) . '-' . date('YmdHis'),
@@ -56,7 +56,7 @@ class LogisticsApiController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $rma = RmaRequest::findOrFail($id);
 
@@ -97,7 +97,7 @@ class LogisticsApiController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $rma = RmaRequest::findOrFail($id);
 
@@ -122,7 +122,7 @@ class LogisticsApiController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $rma = RmaRequest::findOrFail($id);
         $result = $this->rmaService->issueReplacementOrder($rma, $validated, auth()->user());
@@ -137,7 +137,7 @@ class LogisticsApiController extends Controller
     {
         Gate::authorize('manage-logistics');
 
-        $validated = 
+        $validated = $request->validated();
 
         $rma = RmaRequest::findOrFail($id);
         $result = $this->rmaService->issueStoreCredit($rma, $validated, auth()->user());

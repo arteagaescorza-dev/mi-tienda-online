@@ -902,11 +902,16 @@ class InventoryApiController extends Controller
                 'description' => $validated['curated_description'] ?? ($item->curated_description ?? ($item->scraped_description ?? '')),
                 'bullet_points' => $validated['bullet_points'] ?? [],
                 'seo_tags' => $validated['seo_tags'] ?? [],
-                'stock' => isset($validated['curated_stock']) ? (int)$validated['curated_stock'] : (int)($item->supplier_stock ?: 50),
+                'is_scraped' => true,
+                'local_stock' => 0,
+                'physical_stock' => 0,
+                'available_stock' => 0,
+                'stock' => 0,
+                'supplier_stock' => isset($validated['curated_stock']) ? (int)$validated['curated_stock'] : (int)($item->supplier_stock ?: 50),
             ];
 
             $productCost = isset($validated['curated_cost']) ? (float)$validated['curated_cost'] : (float)($item->scraped_cost ?: $item->external_price);
-            $productType = $validated['curated_type'] ?? 'dropship';
+            $productType = 'dropship'; // Política Oficial: Todo producto scrapeado opera como dropship con 0 stock físico local
             $productDesc = $validated['curated_description'] ?? ($item->curated_description ?? ($item->scraped_description ?? null));
 
             // Insertar o sincronizar en catálogo de productos

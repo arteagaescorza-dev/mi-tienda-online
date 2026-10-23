@@ -200,7 +200,20 @@ class ProductCatalogSyncService
     public function syncProductSizesAndCurve(Product $product, ?array $sizes = null): void
     {
         $meta = (array) ($product->meta ?? []);
-        $existingSizes = $sizes ?? data_get($meta, 'sizes');
+        $rawSizes = $sizes ?? data_get($meta, 'sizes');
+        $existingSizes = [];
+
+        if (is_array($rawSizes) && !empty($rawSizes)) {
+            foreach ($rawSizes as $k => $v) {
+                if (is_array($v)) {
+                    $sName = $v['name'] ?? ($v['size'] ?? ($v['code'] ?? ($v['talla'] ?? (string) $k)));
+                    $sQty = $v['stock'] ?? ($v['quantity'] ?? ($v['qty'] ?? 0));
+                    $existingSizes[strtolower(trim((string) $sName))] = (int) $sQty;
+                } else {
+                    $existingSizes[strtolower(trim((string) $k))] = (int) $v;
+                }
+            }
+        }
 
         // Si no tiene tallas definidas o es un array vacío, resolver por curva de talla asociada
         if (empty($existingSizes) || !is_array($existingSizes)) {
@@ -223,7 +236,20 @@ class ProductCatalogSyncService
             }
         }
 
+        $isScrapedProduct = $product->isScraped() || $product->type === 'dropship';
+        if ($isScrapedProduct) {
+            foreach ($existingSizes as $k => $v) {
+                $existingSizes[$k] = 0;
+            }
+        }
+
         $meta['sizes'] = $existingSizes;
+        if ($isScrapedProduct) {
+            $meta['is_scraped'] = true;
+            $meta['local_stock'] = 0;
+            $meta['physical_stock'] = 0;
+            $meta['available_stock'] = 0;
+        }
         $product->meta = $meta;
         $product->saveQuietly();
 
@@ -231,7 +257,7 @@ class ProductCatalogSyncService
         $product->load('variants.inventories');
         foreach ($existingSizes as $szKey => $targetQty) {
             $cleanSz = strtolower(trim((string) $szKey));
-            $targetQty = max(0, (int) $targetQty);
+            $targetQty = $isScrapedProduct ? 0 : max(0, (int) $targetQty);
 
             $variant = $product->variants->first(function ($v) use ($cleanSz) {
                 return strtolower(trim((string) data_get($v->attributes, 'size', ''))) === $cleanSz;
@@ -262,7 +288,7 @@ class ProductCatalogSyncService
                     'location' => 'warehouse-1',
                     'quantity' => $targetQty,
                     'reserved' => 0,
-                    'type' => 'physical',
+                    'type' => $isScrapedProduct ? 'dropship' : 'physical',
                 ]);
 
                 if ($targetQty > 0) {
@@ -276,21 +302,30 @@ class ProductCatalogSyncService
                     ]);
                 }
             } else {
-                $currentQty = (int) $inv->quantity;
-                $diff = $targetQty - $currentQty;
+                if ($isScrapedProduct) {
+                    if ($inv->quantity !== 0 || $inv->reserved !== 0 || $inv->type !== 'dropship') {
+                        $inv->quantity = 0;
+                        $inv->reserved = 0;
+                        $inv->type = 'dropship';
+                        $inv->save();
+                    }
+                } else {
+                    $currentQty = (int) $inv->quantity;
+                    $diff = $targetQty - $currentQty;
 
-                if ($product->type === 'physical' && $diff !== 0) {
-                    $inv->quantity = $targetQty;
-                    $inv->save();
+                    if ($product->type === 'physical' && $diff !== 0) {
+                        $inv->quantity = $targetQty;
+                        $inv->save();
 
-                    InventoryMovement::create([
-                        'inventory_id' => $inv->id,
-                        'user_id' => auth()->id(),
-                        'quantity' => $diff,
-                        'quantity_before' => $currentQty,
-                        'quantity_after' => $targetQty,
-                        'reason' => "Ajuste de talla '{$cleanSz}' desde edicion integral de SKU ({$product->sku})",
-                    ]);
+                        InventoryMovement::create([
+                            'inventory_id' => $inv->id,
+                            'user_id' => auth()->id(),
+                            'quantity' => $diff,
+                            'quantity_before' => $currentQty,
+                            'quantity_after' => $targetQty,
+                            'reason' => "Ajuste de talla '{$cleanSz}' desde edicion integral de SKU ({$product->sku})",
+                        ]);
+                    }
                 }
             }
         }
@@ -364,13 +399,18 @@ class ProductCatalogSyncService
 
         // Calcular existencias físicas y disponibles en tiempo real desde variantes
         $product->load('variants.inventories');
-        $totalPhysical = (int) $product->variants->sum(fn ($v) => $v->inventories->sum('quantity'));
-        $totalReserved = (int) $product->variants->sum(fn ($v) => $v->inventories->sum('reserved'));
+        $isScrapedProduct = $product->isScraped() || $product->type === 'dropship';
+        $totalPhysical = $isScrapedProduct ? 0 : (int) $product->variants->sum(fn ($v) => $v->inventories->where('location', 'warehouse-1')->sum('quantity'));
+        $totalReserved = $isScrapedProduct ? 0 : (int) $product->variants->sum(fn ($v) => $v->inventories->where('location', 'warehouse-1')->sum('reserved'));
         $totalAvailable = max(0, $totalPhysical - $totalReserved);
 
         $meta['local_stock'] = $totalPhysical;
         $meta['physical_stock'] = $totalPhysical;
         $meta['available_stock'] = $totalAvailable;
+        if ($isScrapedProduct) {
+            $meta['is_scraped'] = true;
+            $meta['stock'] = 0;
+        }
 
         $product->meta = $meta;
         if ($updated || $product->isDirty('meta')) {

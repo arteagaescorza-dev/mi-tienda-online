@@ -15,8 +15,8 @@ class EnsureUserHasRole
             return redirect()->guest(route('login'));
         }
 
-        // Superadmin and admin base accounts never get locked out of the portal
-        if (in_array($user->role, ['admin', 'superadmin'], true)) {
+        // Superadmin, admin and portal base staff accounts never get locked out of the portal
+        if (in_array($user->role, ['admin', 'superadmin', 'portal'], true)) {
             return $next($request);
         }
 
@@ -38,8 +38,6 @@ class EnsureUserHasRole
             'marketing',
             'packer',
             'picker',
-            'vendor',
-            'ally',
         ];
 
         if ($role === 'portal' && in_array($activeRole, $portalRoles, true)) {

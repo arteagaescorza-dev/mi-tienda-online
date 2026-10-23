@@ -170,7 +170,7 @@ class ProductSkuAndDuplicateApiController extends Controller
             'shades' => $meta['shades'] ?? [],
             'volumes' => $meta['volumes'] ?? [],
             'stock' => [
-                'local_stock' => $availableStock,
+                'local_stock' => $physicalStock,
                 'physical_stock' => $physicalStock,
                 'committed_stock' => $committedStock,
                 'locked_stock' => $lockedStock,
@@ -438,7 +438,13 @@ class ProductSkuAndDuplicateApiController extends Controller
         $marginPct = $effectivePrice > 0 ? round((($effectivePrice - $cpp) / $effectivePrice) * 100, 1) : 0.0;
 
         $sizes = $validated['sizes'] ?? ($product?->meta['sizes'] ?? []);
-        $localStock = array_sum(array_map('intval', $sizes));
+        $isScrapedProduct = ($product && $product->isScraped()) || $dbType === 'dropship';
+        if ($isScrapedProduct && is_array($sizes)) {
+            foreach ($sizes as $sk => $sv) {
+                $sizes[$sk] = 0;
+            }
+        }
+        $localStock = $isScrapedProduct ? 0 : array_sum(array_map('intval', $sizes));
 
         $existingMeta = $product && is_array($product->meta) ? $product->meta : [];
 

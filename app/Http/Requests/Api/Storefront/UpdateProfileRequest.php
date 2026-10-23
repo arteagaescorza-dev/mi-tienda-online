@@ -24,7 +24,6 @@ class UpdateProfileRequest extends FormRequest
             'waist_cm' => 'required|integer|min:50|max:160',
             'preferred_cut' => 'nullable|string|max:100',
             'silhouettes' => 'nullable|array',
-            'silhouettes.*' => 'string|max:100',
         ];
     }
 }

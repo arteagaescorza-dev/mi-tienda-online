@@ -187,6 +187,86 @@ class ScrapedPendingItemsCurationTest extends TestCase
         $this->assertNotNull($product);
         $this->assertEquals('verano_fresh', $product->section_name);
         $this->assertEquals($fabric->id, $product->fabric_id);
+        $this->assertTrue($product->isScraped());
+        $this->assertEquals(0, data_get($product->meta, 'local_stock'));
+        $this->assertEquals(0, $product->variants->sum(fn ($v) => $v->inventories->where('location', 'warehouse-1')->sum('quantity')));
+    }
+
+    /**
+     * Política Oficial: Todos los productos scrapeados / dropship muestran 0 de stock local
+     * tanto en Hub 4 (admin) como en Hub 2 / Storefront (PDP y vitrinas).
+     */
+    public function test_scraped_and_dropship_products_strictly_display_zero_local_stock_in_hub4_and_storefront()
+    {
+        $supplier = Supplier::create([
+            'name' => 'Torzo Dropship Supplier',
+            'type' => 'dropship_scrape',
+            'contact_name' => 'Torzo Contact',
+            'email' => 'dropship@torzo.test',
+        ]);
+
+        $product = Product::create([
+            'sku' => 'TOR-DROP-001',
+            'title' => 'Suspensorio Dropship Scrapeado',
+            'slug' => 'suspensorio-dropship-scrapeado',
+            'brand' => 'Torzo',
+            'type' => 'dropship',
+            'price' => 299.00,
+            'cost' => 120.00,
+            'visible' => true,
+            'is_archived' => false,
+            'meta' => [
+                'is_scraped' => true,
+                'provider' => 'Torzo',
+                'category' => 'Jockstraps',
+                'supplier_stock' => 50,
+                'sizes' => ['ch' => 10, 'm' => 20, 'g' => 15],
+            ],
+        ]);
+
+        // Sincronizar variantes y tallas
+        $syncService = app(\App\Services\Catalog\ProductCatalogSyncService::class);
+        $syncService->syncProduct($product, $product->meta);
+
+        // 1. En modelo y BD: isScraped es true y las existencias físicas locales son 0
+        $this->assertTrue($product->isScraped());
+        $product->refresh();
+        $this->assertEquals(0, $product->variants->sum(fn ($v) => $v->inventories->where('location', 'warehouse-1')->sum('quantity')));
+        $this->assertEquals(0, data_get($product->meta, 'local_stock'));
+        $this->assertEquals(0, data_get($product->meta, 'physical_stock'));
+
+        // 2. En Hub 4 (Gestor de Inventario en Portal)
+        $portalResponse = $this->actingAs($this->adminUser)->get('/admin/inventario-catalogo');
+        $portalResponse->assertStatus(200);
+        $portalResponse->assertViewHas('portalProducts', function ($products) use ($product) {
+            $item = collect($products)->firstWhere('id', $product->id);
+            if (!$item) return false;
+
+            return $item['localStock'] === 0
+                && $item['physicalStock'] === 0
+                && $item['committedStock'] === 0
+                && $item['type'] === 'dropship'
+                && $item['supplierStock'] === 50
+                && $item['status'] === 'Sincronizado';
+        });
+
+        // 3. En Storefront PWA (Servicio de Detalle de Producto PDP)
+        $catalogService = app(\App\Services\Storefront\StorefrontCatalogService::class);
+        $detailPayload = $catalogService->getProductDetailPayload($product->slug);
+
+        $this->assertNotNull($detailPayload);
+        $this->assertTrue($detailPayload['is_scraped']);
+        $this->assertEquals(0, $detailPayload['total_physical_stock']);
+        $this->assertEquals(0, $detailPayload['total_available_stock']);
+        $this->assertEquals('on_demand', $detailPayload['stock_type']);
+        $this->assertEquals('Bajo Pedido', $detailPayload['stock_label']);
+
+        // Todas las variantes de la ficha de producto se marcan como Bajo Pedido
+        foreach ($detailPayload['variants'] as $variant) {
+            $this->assertEquals(0, $variant['stock_physical']);
+            $this->assertEquals(0, $variant['stock_available']);
+            $this->assertEquals('Bajo Pedido', $variant['stock_badge']);
+        }
     }
 
     /**

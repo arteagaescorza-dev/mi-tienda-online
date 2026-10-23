@@ -95,7 +95,7 @@ class GovernanceApiController extends Controller
             ], 403);
         }
 
-        $validated = 
+        $validated = $request->validated();
 
         $log = $this->auditService->logAction(
             action: $validated['action'],
@@ -119,8 +119,6 @@ class GovernanceApiController extends Controller
      */
     public function getNotifications(GovernanceApiGetNotificationsRequest $request): JsonResponse
     {
-        Gate::authorize('manage-governance');
-
         $user = $request->user();
 
         // En caso de invocacion no autenticada en entorno de pruebas, asociar al primer usuario portal
@@ -160,8 +158,6 @@ class GovernanceApiController extends Controller
      */
     public function markNotificationRead(GovernanceApiMarkNotificationReadRequest $request, int $id): JsonResponse
     {
-        Gate::authorize('manage-governance');
-
         $user = $request->user();
         if (!$user) {
             $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
@@ -192,8 +188,6 @@ class GovernanceApiController extends Controller
      */
     public function markAllNotificationsRead(GovernanceApiMarkAllNotificationsReadRequest $request): JsonResponse
     {
-        Gate::authorize('manage-governance');
-
         $user = $request->user();
         if (!$user) {
             $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
@@ -230,7 +224,7 @@ class GovernanceApiController extends Controller
             ], 403);
         }
 
-        $validated = 
+        $validated = $request->validated();
 
         $notification = $this->notificationService->dispatch($validated);
 
@@ -246,8 +240,6 @@ class GovernanceApiController extends Controller
      */
     public function getChatMessages(GovernanceApiGetChatMessagesRequest $request): JsonResponse
     {
-        Gate::authorize('manage-governance');
-
         $channel = $request->query('channel', 'almacen');
         $limit = (int) $request->query('limit', 50);
         $user = $request->user();
@@ -270,9 +262,7 @@ class GovernanceApiController extends Controller
      */
     public function sendChatMessage(GovernanceApiSendChatMessageRequest $request): JsonResponse
     {
-        Gate::authorize('manage-governance');
-
-        $validated = 
+        $validated = $request->validated();
 
         $user = $request->user();
 
@@ -303,8 +293,6 @@ class GovernanceApiController extends Controller
      */
     public function resolveChatMessage(GovernanceApiResolveChatMessageRequest $request, int $id): JsonResponse
     {
-        Gate::authorize('manage-governance');
-
         $user = $request->user();
         $success = $this->chatService->resolveMessage($id, $user);
 
@@ -329,8 +317,6 @@ class GovernanceApiController extends Controller
      */
     public function getChatSummary(GovernanceApiGetChatSummaryRequest $request): JsonResponse
     {
-        Gate::authorize('manage-governance');
-
         $summary = $this->chatService->getChannelsSummary();
 
         return response()->json([

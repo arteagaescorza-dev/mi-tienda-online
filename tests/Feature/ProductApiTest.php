@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,16 +14,19 @@ class ProductApiTest extends TestCase
 
     public function test_products_index_returns_products(): void
     {
+        $admin = User::factory()->create(['role' => 'admin']);
         Product::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/products');
+        $response = $this->actingAs($admin)->getJson('/api/products');
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data',
-            'current_page',
-            'last_page',
-            'per_page',
+            'meta' => [
+                'current_page',
+                'last_page',
+                'per_page',
+            ],
         ]);
         $response->assertJsonCount(3, 'data');
     }

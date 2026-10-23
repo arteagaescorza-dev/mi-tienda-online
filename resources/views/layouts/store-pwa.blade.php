@@ -966,15 +966,38 @@
     <div class="sheet-content-scroll">
       @php
         $cmsFiltersList = $catalogFilters ?? \App\Models\CmsCatalogFilter::orderBy('sort_order')->get();
-        if ($cmsFiltersList->where('filter_key', 'universe')->isEmpty()) {
-          $cmsFiltersList->prepend((object)[
-            'filter_key' => 'universe',
-            'label' => 'Universos del Catálogo',
-            'display_type' => 'checkbox',
-            'sort_order' => 0,
-            'is_visible' => true,
-          ]);
+        $defaultFilters = [
+          'universe' => ['label' => 'Universos del Catálogo', 'sort_order' => 1],
+          'category' => ['label' => 'Categorías & Familias', 'sort_order' => 2],
+          'subcategory' => ['label' => 'Subcategorías Específicas', 'sort_order' => 3],
+          'brand' => ['label' => 'Colección / Marca', 'sort_order' => 4],
+          'supplier' => ['label' => 'Proveedores & Distribuidores', 'sort_order' => 5],
+          'size' => ['label' => 'Talla Anatómica', 'sort_order' => 6],
+          'color' => ['label' => 'Color & Tornasoles', 'sort_order' => 7],
+          'textile_family' => ['label' => 'Familia Textil / Fibras', 'sort_order' => 8],
+          'garment_type' => ['label' => 'Silueta / Tipo de Prenda', 'sort_order' => 9],
+          'style_tag' => ['label' => 'Estilo & Ocasión', 'sort_order' => 10],
+          'price' => ['label' => 'Rango de Precio', 'sort_order' => 11],
+          'discount' => ['label' => 'Descuentos & Ofertas', 'sort_order' => 12],
+          'volume' => ['label' => 'Volúmenes de Perfumería', 'sort_order' => 13],
+          'shade' => ['label' => 'Tonos Cosméticos & Shading', 'sort_order' => 14],
+          'availability' => ['label' => 'Disponibilidad (Stock / Bajo Pedido)', 'sort_order' => 15],
+        ];
+
+        $existingKeys = $cmsFiltersList->pluck('filter_key')->all();
+        foreach ($defaultFilters as $k => $def) {
+          if (!in_array($k, $existingKeys)) {
+            $cmsFiltersList->push((object)[
+              'filter_key' => $k,
+              'label' => $def['label'],
+              'display_type' => 'checkbox',
+              'sort_order' => $def['sort_order'],
+              'is_visible' => true,
+            ]);
+          }
         }
+        $cmsFiltersList = $cmsFiltersList->sortBy('sort_order');
+      @endphp
         if (!isset($catalogColors)) {
           $dbColors = \Illuminate\Support\Facades\DB::table('apparel_colors')->where('is_active', true)->get();
           $catalogColors = $dbColors->map(function ($c) {
@@ -1137,7 +1160,7 @@
             </button>
             <div class="filter-accordion-content">
               <div class="filter-checkbox-grid">
-                @foreach(($catalogBrands ?? ['Torzo Sexywear', 'Dajo Underwear', 'Mazho']) as $bName)
+                @foreach((!empty($catalogBrands) ? $catalogBrands : ['Torzo Sexywear', 'Dajo Underwear', 'Mazho']) as $bName)
                   <label class="filter-checkbox-label">
                     <input type="checkbox" name="filter_brand" value="{{ $bName }}" class="filter-facet-checkbox filter-brand-checkbox" data-action="filter-facet" data-facet-type="brand" data-val="{{ $bName }}">
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $bName }}</span>
@@ -1156,7 +1179,7 @@
             </button>
             <div class="filter-accordion-content">
               <div class="filter-checkbox-grid">
-                @foreach(($suppliers ?? ['Torzo B2B', 'ModaIntima Textil MX', 'Silk & Cotton Iberia SL']) as $sup)
+                @foreach((!empty($suppliers) ? $suppliers : ['Torzo B2B', 'ModaIntima Textil MX', 'Silk & Cotton Iberia SL']) as $sup)
                   <label class="filter-checkbox-label">
                     <input type="checkbox" name="filter_supplier" value="{{ $sup }}" class="filter-facet-checkbox filter-supplier-checkbox" data-action="filter-facet" data-facet-type="supplier" data-val="{{ $sup }}">
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $sup }}</span>
@@ -1178,7 +1201,7 @@
                 @php
                   $medidas = ['CH' => '28-30', 'S' => '28-30', 'M' => '31-32', 'G' => '33-34', 'L' => '33-34', 'XL' => '35-36', 'XG' => '35-36', '2XL' => '38-40', '3XL' => '42-44', 'UNI' => 'Unitalla'];
                 @endphp
-                @foreach(($catalogSizes ?? ['CH', 'M', 'G', 'XL', '2XL', '3XL', 'UNI']) as $talla)
+                @foreach((!empty($catalogSizes) ? $catalogSizes : ['CH', 'M', 'G', 'XL', '2XL', '3XL', 'UNI']) as $talla)
                   <label class="filter-checkbox-label" style="border: 1px solid var(--border-subtle, #e4e4e7); padding: 5px 8px; border-radius: 6px;">
                     <input type="checkbox" name="filter_size" value="{{ $talla }}" class="filter-facet-checkbox filter-size-checkbox" data-action="filter-facet" data-facet-type="size" data-val="{{ $talla }}">
                     <span style="display: flex; justify-content: space-between; width: 100%;">
@@ -1200,7 +1223,12 @@
             </button>
             <div class="filter-accordion-content">
               <div class="filter-checkbox-grid">
-                @foreach(($catalogColors ?? []) as $cItem)
+                @foreach((!empty($catalogColors) ? $catalogColors : [
+                  ['key' => 'negro', 'name' => 'Negro', 'hex' => '#09090b', 'grad' => null, 'border' => false],
+                  ['key' => 'blanco', 'name' => 'Blanco', 'hex' => '#ffffff', 'grad' => null, 'border' => true],
+                  ['key' => 'rojo', 'name' => 'Rojo', 'hex' => '#ef4444', 'grad' => null, 'border' => false],
+                  ['key' => 'azul', 'name' => 'Azul Marino', 'hex' => '#1e3a8a', 'grad' => null, 'border' => false],
+                ]) as $cItem)
                   <label class="filter-checkbox-label">
                     <input type="checkbox" name="filter_color" value="{{ $cItem['key'] }}" class="filter-facet-checkbox filter-color-checkbox" data-action="filter-facet" data-facet-type="color" data-val="{{ $cItem['key'] }}">
                     <span style="width: 14px; height: 14px; border-radius: 50%; background: {{ $cItem['grad'] ?? $cItem['hex'] }}; border: 1px solid {{ !empty($cItem['border']) ? '#cbd5e1' : 'rgba(0,0,0,0.18)' }}; display: inline-block; flex-shrink: 0;"></span>
@@ -1220,7 +1248,7 @@
             </button>
             <div class="filter-accordion-content">
               <div class="filter-checkbox-grid">
-                @foreach(($catalogFabrics ?? ['Licra', 'Poliester 95%, Elastano 5%']) as $fItem)
+                @foreach((!empty($catalogFabrics) ? $catalogFabrics : ['Licra', 'Poliester 95%, Elastano 5%', 'Modal Pima']) as $fItem)
                   <label class="filter-checkbox-label">
                     <input type="checkbox" name="filter_fabric" value="{{ $fItem }}" class="filter-facet-checkbox filter-fabric-checkbox" data-action="filter-facet" data-facet-type="fabric" data-val="{{ $fItem }}">
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $fItem }}</span>

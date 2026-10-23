@@ -43,7 +43,6 @@ class ProductAiCopilotEndpointTest extends TestCase
             'name' => 'Bóxer Modal Seamless Azul',
         ]);
 
-        dump($response->status(), $response->getContent());
-        // We will see what status code unauthenticated returns
+        $response->assertStatus(403);
     }
 }

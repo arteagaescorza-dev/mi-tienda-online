@@ -181,7 +181,7 @@ class PortalGovernanceController extends Controller
     {
         Gate::authorize('manage-governance');
 
-        $validated = 
+        $validated = $request->validated();
 
         $config = SystemEnvironmentConfig::firstOrCreate(
             ['module' => $validated['module']],

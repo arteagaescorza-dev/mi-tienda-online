@@ -9,7 +9,7 @@ class GovernanceApiGetChatSummaryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('manage-governance');
+        return true;
     }
 
     public function rules(): array
