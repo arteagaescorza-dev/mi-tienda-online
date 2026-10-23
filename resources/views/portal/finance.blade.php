@@ -822,7 +822,7 @@ textarea { resize: vertical !important; }
                                 </td>
                                 <td class="py-3 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        @if($twm->match_status === 'discrepancy_held')
+                                        @if($twm->match_status === 'discrepancy_held' || $twm->spei_payout_blocked)
                                             <button 
                                                 type="button" 
                                                 onclick="openDebitNoteModal({{ $twm->id }}, '{{ $twm->po_code }}', '{{ $twm->invoice_number }}', {{ $twm->debit_note_amount }})" 
@@ -830,12 +830,12 @@ textarea { resize: vertical !important; }
                                             >
                                                 Emitir Nota Débito
                                             </button>
-                                            <span class="px-2 py-1 bg-slate-100 text-slate-400 text-[10px] font-semibold rounded-lg cursor-not-allowed" title="Dispersión bloqueada preventivamente por faltantes">
-                                                SPEI Bloqueado
+                                            <span class="px-2 py-1 bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-bold rounded-lg cursor-not-allowed" title="Dispersión retenida preventivamente por faltantes o discrepancias">
+                                                SPEI Retenido
                                             </span>
                                         @elseif($twm->match_status === 'approved_for_payment')
                                             <span class="text-emerald-700 font-mono font-bold text-[11px]">DISPERSADO</span>
-                                        @else
+                                        @elseif(in_array($twm->match_status, ['matched', 'debit_note_issued']))
                                             <button 
                                                 type="button" 
                                                 onclick="openSpeiModal({{ $twm->id }}, '{{ $twm->po_code }}', {{ $twm->payable_net_amount }})" 
@@ -843,6 +843,8 @@ textarea { resize: vertical !important; }
                                             >
                                                 Autorizar SPEI
                                             </button>
+                                        @else
+                                            <span class="px-2 py-1 bg-slate-100 text-slate-400 text-[10px] font-semibold rounded-lg">Pendiente</span>
                                         @endif
                                     </div>
                                 </td>
@@ -925,12 +927,19 @@ textarea { resize: vertical !important; }
                                 </td>
                                 <td class="py-3 px-4 text-right">
                                     @if($bill->status !== 'paid')
-                                        <form method="POST" action="{{ route('portal.finance.vendor_bills.pay', $bill->id) }}" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg cursor-pointer transition">
-                                                Pagar SPEI
-                                            </button>
-                                        </form>
+                                        @if($bill->is_spei_blocked || ($bill->threeWayMatching && $bill->threeWayMatching->spei_payout_blocked))
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg cursor-not-allowed" title="Dispersión bloqueada: Retención preventiva por discrepancia en cotejo de 3 vías">
+                                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                SPEI Retenido
+                                            </span>
+                                        @else
+                                            <form method="POST" action="{{ route('portal.finance.vendor_bills.pay', $bill->id) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg cursor-pointer transition">
+                                                    Pagar SPEI
+                                                </button>
+                                            </form>
+                                        @endif
                                     @else
                                         <span class="text-[11px] font-mono text-emerald-700 font-semibold">{{ $bill->payment_reference ?? 'PAGADO' }}</span>
                                     @endif

@@ -352,13 +352,36 @@ class PortalFinanceController extends Controller
 
     public function payVendorBill(VendorBill $vendorBill)
     {
+        if ($vendorBill->is_spei_blocked) {
+            return redirect()->route('portal.finance', ['tab' => 'expenses'])
+                ->with('error', "No se puede liquidar la cuenta {$vendorBill->bill_number}: cuenta con retención preventiva SPEI por discrepancia en cotejo de 3 vías.");
+        }
+
+        if ($vendorBill->threeWayMatching && $vendorBill->threeWayMatching->spei_payout_blocked) {
+            return redirect()->route('portal.finance', ['tab' => 'expenses'])
+                ->with('error', "No se puede liquidar la cuenta {$vendorBill->bill_number}: el cotejo de 3 vías asociado está retenido.");
+        }
+
+        $clabe = preg_replace('/\D/', '', (string) $vendorBill->bank_clabe);
+        if (strlen($clabe) !== 18) {
+            return redirect()->route('portal.finance', ['tab' => 'expenses'])
+                ->with('error', "No se puede dispersar SPEI: la cuenta CLABE registrada es inválida o no cuenta con 18 dígitos.");
+        }
+
+        $ref = 'SPEI-BBVA-' . rand(10000000, 99999999);
         $vendorBill->update([
             'status' => 'paid',
             'paid_at' => now(),
-            'payment_reference' => 'SPEI-AUTO-' . rand(100000, 999999),
+            'payment_reference' => $ref,
         ]);
 
+        if ($vendorBill->threeWayMatching) {
+            $vendorBill->threeWayMatching->update([
+                'match_status' => 'approved_for_payment',
+            ]);
+        }
+
         return redirect()->route('portal.finance', ['tab' => 'expenses'])
-            ->with('success', "Cuenta por pagar {$vendorBill->bill_number} liquidada por SPEI.");
+            ->with('success', "Cuenta por pagar {$vendorBill->bill_number} liquidada exitosamente vía SPEI ({$ref}).");
     }
 }

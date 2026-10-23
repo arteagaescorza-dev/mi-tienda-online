@@ -14959,6 +14959,7 @@ function isScreenRenderedByBlade(screenName) {
   if (screenName === 'vendor' && container.querySelector('[x-data*="vendorExtranetApp"]')) return true;
   if (screenName === 'allies' && (container.querySelector('#alliesAppRoot') || container.querySelector('[x-data*="alliesPortalApp"]') || container.querySelector('[data-screen="allies"]'))) return true;
   if (screenName === 'store' && (container.querySelector('#storeAppRoot') || container.querySelector('[data-screen="store"]'))) return true;
+  if (screenName === 'finance' && (container.querySelector('#financeAppRoot') || container.querySelector('[data-screen="finance"]'))) return true;
   if (container.dataset && container.dataset.screen && container.dataset.screen === screenName) return true;
   return false;
 }

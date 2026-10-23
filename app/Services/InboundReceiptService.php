@@ -63,12 +63,21 @@ class InboundReceiptService
                     $prevQty = $inventory->quantity;
                     $newQty = $prevQty + $qtyToReceive;
 
-                    // 2. Recálculo del Costo Promedio Ponderado (CPP) - TASK-INV-04
-                    $prevCost = (float) ($variant->cost ?? ($product ? $product->cost : $item->unit_cost));
-                    if ($prevQty > 0 && $prevCost > 0) {
-                        $newCpp = (($prevQty * $prevCost) + ($qtyToReceive * (float)$item->unit_cost)) / $newQty;
+                    // 2. Recálculo del Costo Promedio Ponderado (CPP) - TASK-INV-04 & Blindaje Fiscal Hub 5
+                    $incomingUnitCost = (float) $item->unit_cost;
+                    $prevCost = (float) ($variant->cost ?? ($product ? $product->cost : 0.00));
+
+                    if ($incomingUnitCost > 0) {
+                        if ($prevQty > 0 && $prevCost > 0) {
+                            $newCpp = round((($prevQty * $prevCost) + ($qtyToReceive * $incomingUnitCost)) / $newQty, 2);
+                        } else {
+                            $newCpp = round($incomingUnitCost, 2);
+                        }
                     } else {
-                        $newCpp = (float) $item->unit_cost;
+                        // Recepción a costo $0.00 (bonificación comercial o muestra):
+                        // Preservar costo previo para evitar distorsión artificial en márgenes contables
+                        $referencePrice = (float) ($variant->price ?: ($product ? $product->price : 0.00));
+                        $newCpp = $prevCost > 0 ? $prevCost : round($referencePrice * 0.40, 2);
                     }
 
                     // Actualizar costo y trazabilidad sanitaria en variante y producto (TASK-INV-06)
