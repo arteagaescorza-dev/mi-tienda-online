@@ -2623,7 +2623,7 @@
             class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-4xl w-full overflow-hidden my-8"
             @click.away="closeModal()"
         >
-            <!-- 1. MODAL PICKING & PACKING (#MIX-1048) -->
+            <!-- 1. MODAL PICKING & PACKING DINÁMICO (CARRITO MIXTO Y ESTÁNDAR) -->
             <template x-if="activeModal === 'pack'">
                 <div>
                     <!-- Modal Header -->
@@ -2633,7 +2633,12 @@
                             <div>
                                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                                     <span>Mesa de Picking & Packing: Pedido #MIX-1048</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Corte DHL 14:00</span>
+                                    <template x-if="selectedTask?.reference_code && selectedTask?.reference_code !== '#MIX-1048'">
+                                        <span class="text-indigo-600 font-mono text-xs ml-1 font-bold" x-text="'[' + selectedTask.reference_code + ']'"></span>
+                                    </template>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                          :class="selectedTask?.priority === 'critical' ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'"
+                                          x-text="selectedTask?.priority === 'critical' ? 'Corte DHL 14:00' : 'SLA Estándar'"></span>
                                 </h3>
                                 <p class="text-xs text-slate-500">Verificación física de artículos antes de encintar y rotular guía</p>
                             </div>
@@ -2649,15 +2654,15 @@
                         <div class="space-y-4">
                             <div class="bg-indigo-50/70 border border-indigo-100 rounded-xl p-4">
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-900 block mb-1">Destinatario D2C</span>
-                                <div class="text-sm font-black text-slate-900">Mariana Garza Treviño</div>
-                                <div class="text-xs text-slate-600 mt-1">Av. Real San Agustín 402, Residencial San Agustín, San Pedro Garza García, NL &bull; CP 66260</div>
-                                <div class="text-xs font-mono font-bold text-indigo-700 mt-2">Guía DHL: DHL-9482-MX-EXP</div>
+                                <div class="text-sm font-black text-slate-900" x-text="selectedTask?.action_payload?.customer || 'Mariana Garza Treviño'"></div>
+                                <div class="text-xs text-slate-600 mt-1" x-text="selectedTask?.action_payload?.destination || 'Av. Real San Agustín 402, Residencial San Agustín, San Pedro Garza García, NL • CP 66260'"></div>
+                                <div class="text-xs font-mono font-bold text-indigo-700 mt-2" x-text="'Guía DHL: ' + (selectedTask?.action_payload?.carrier || 'DHL Express (DHL-9482-MX-EXP)')"></div>
                             </div>
 
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2 text-slate-700">
                                 <div class="flex justify-between">
                                     <span class="text-slate-500">Tipo de Pedido:</span>
-                                    <span class="font-bold text-slate-800">D2C Mixto (Stock Local + Inbound)</span>
+                                    <span class="font-bold text-slate-800" x-text="selectedTask?.action_payload?.is_mixed ? 'D2C Mixto (Stock Local + Bajo Pedido)' : 'D2C Estándar (Almacén Local)'"></span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-slate-500">Mesa Asignada:</span>
@@ -2665,13 +2670,13 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-slate-500">Hora Límite SLA:</span>
-                                    <span class="font-bold text-rose-700 font-mono">13:30 hrs (Corte Inminente)</span>
+                                    <span class="font-bold text-rose-700 font-mono" x-text="(selectedTask?.due_time_formatted || '14:00 hrs') + ' (Corte Inminente)'"></span>
                                 </div>
                             </div>
 
                             <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2">
                                 <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span><strong>Instrucción Especial:</strong> Incluir bolsa de lavado premium de cortesía y colocar precinto de inviolabilidad en la caja exterior.</span>
+                                <span><strong>Instrucción Especial:</strong> <span x-text="selectedTask?.action_payload?.special_instructions || 'Incluir bolsa de lavado premium de cortesía y colocar precinto de inviolabilidad en la caja exterior.'"></span></span>
                             </div>
                         </div>
 
@@ -2679,32 +2684,43 @@
                         <div class="space-y-4">
                             <h4 class="text-xs font-black uppercase tracking-wider text-slate-900">Checklist de Artículos y Ubicación</h4>
                             
-                            <div class="space-y-2.5">
-                                <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
-                                    <input type="checkbox" x-model="packChecklist.item1" class="mt-1 rounded text-indigo-600 focus:ring-indigo-500">
-                                    <div class="text-xs">
-                                        <div class="font-bold text-slate-900">2x Boxer Modal Negro (Talla M)</div>
-                                        <div class="text-slate-500 mt-0.5">Ubicación: <strong class="text-indigo-700">Pasillo A-02 &bull; Rack R-08 &bull; Nivel 1</strong></div>
-                                        <div class="text-[10px] text-emerald-700 font-bold mt-1">Inbound Torzo recibido en rampa a las 11:30 hrs</div>
+                            <div class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+                                <template x-if="selectedTask?.action_payload?.items && selectedTask.action_payload.items.length > 0">
+                                    <div class="space-y-2">
+                                        <template x-for="(item, idx) in selectedTask.action_payload.items" :key="'pack-item-' + idx">
+                                            <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
+                                                <input type="checkbox" x-model="item.checked" class="mt-1 rounded text-indigo-600 focus:ring-indigo-500">
+                                                <div class="text-xs">
+                                                    <div class="font-bold text-slate-900" x-text="item.qty + 'x ' + item.name"></div>
+                                                    <div class="text-slate-500 mt-0.5">Ubicación: <strong class="text-indigo-700" x-text="item.source || ('Rack: ' + item.location)"></strong></div>
+                                                    <template x-if="item.is_scraped">
+                                                        <div class="text-[10px] text-emerald-700 font-bold mt-1">Prenda Bajo Pedido verificada</div>
+                                                    </template>
+                                                </div>
+                                            </label>
+                                        </template>
                                     </div>
-                                </label>
-
-                                <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
-                                    <input type="checkbox" x-model="packChecklist.item2" class="mt-1 rounded text-indigo-600 focus:ring-indigo-500">
-                                    <div class="text-xs">
-                                        <div class="font-bold text-slate-900">1x Playera Oversize Blanca (Talla L)</div>
-                                        <div class="text-slate-500 mt-0.5">Ubicación: <strong class="text-indigo-700">Pasillo A-02 &bull; Rack R-04 &bull; Nivel 2</strong></div>
-                                        <div class="text-[10px] text-slate-500 mt-1">Stock de almacén verificado</div>
+                                </template>
+                                <template x-if="!selectedTask?.action_payload?.items || selectedTask.action_payload.items.length === 0">
+                                    <div class="space-y-2">
+                                        <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
+                                            <input type="checkbox" x-model="packChecklist.item1" class="mt-1 rounded text-indigo-600 focus:ring-indigo-500">
+                                            <div class="text-xs">
+                                                <div class="font-bold text-slate-900">2x Boxer Modal Negro (Talla M)</div>
+                                                <div class="text-slate-500 mt-0.5">Ubicación: <strong class="text-indigo-700">Pasillo A-02 &bull; Rack R-08 &bull; Nivel 1</strong></div>
+                                                <div class="text-[10px] text-emerald-700 font-bold mt-1">Inbound Torzo recibido en rampa a las 11:30 hrs</div>
+                                            </div>
+                                        </label>
+                                        <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
+                                            <input type="checkbox" x-model="packChecklist.item2" class="mt-1 rounded text-indigo-600 focus:ring-indigo-500">
+                                            <div class="text-xs">
+                                                <div class="font-bold text-slate-900">1x Playera Oversize Blanca (Talla L)</div>
+                                                <div class="text-slate-500 mt-0.5">Ubicación: <strong class="text-indigo-700">Pasillo A-02 &bull; Rack R-04 &bull; Nivel 2</strong></div>
+                                                <div class="text-[10px] text-slate-500 mt-1">Stock de almacén verificado</div>
+                                            </div>
+                                        </label>
                                     </div>
-                                </label>
-
-                                <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
-                                    <input type="checkbox" x-model="packChecklist.item3" class="mt-1 rounded text-indigo-600 focus:ring-indigo-500">
-                                    <div class="text-xs">
-                                        <div class="font-bold text-slate-900">1x Bolsa de Lavado Premium (Cortesía)</div>
-                                        <div class="text-slate-500 mt-0.5">Ubicación: <strong class="text-indigo-700">Mesa de Empaque &bull; Cajón C-01</strong></div>
-                                    </div>
-                                </label>
+                                </template>
 
                                 <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
                                     <input type="checkbox" x-model="packChecklist.sealed" class="mt-1 rounded text-indigo-600 focus:ring-indigo-500">

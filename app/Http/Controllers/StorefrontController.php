@@ -1103,7 +1103,7 @@ class StorefrontController extends Controller
         $avgTicket = $todayOrderCount > 0 ? ((float) $todaySales / $todayOrderCount) : 0;
 
         // Operative Metrics (Physical units, ZERO monetary symbols)
-        $pendingPackingQuery = Order::query()->whereIn('status', ['processing', 'verified']);
+        $pendingPackingQuery = Order::query()->whereIn('status', ['pending', 'processing', 'verified']);
         $pendingPacking = (clone $pendingPackingQuery)->count();
         $physicalReady = (clone $pendingPackingQuery)->whereDoesntHave('items.variant.product', function ($q) {
             $q->whereIn('type', ['dropship']);
@@ -1112,7 +1112,7 @@ class StorefrontController extends Controller
             $q->whereIn('type', ['dropship']);
         })->count();
 
-        $mixedReady = Order::query()->whereIn('status', ['processing', 'verified'])
+        $mixedReady = Order::query()->whereIn('status', ['pending', 'processing', 'verified'])
             ->whereHas('items.variant.product', function ($q) {
                 $q->whereIn('type', ['dropship', 'both']);
             })->count();

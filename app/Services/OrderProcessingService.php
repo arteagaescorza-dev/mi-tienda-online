@@ -10,6 +10,8 @@ use App\Models\InventoryMovement;
 use App\Models\Order;
 use App\Models\OrderFinancialMargin;
 use App\Models\OrderItem;
+use App\Models\OperationalTask;
+use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shipment;
 use App\Models\StockLock;
@@ -185,6 +187,50 @@ class OrderProcessingService
                 ->lockForUpdate()
                 ->first();
 
+            // Sincronización de rescate si el carrito en base de datos quedó desfasado de la vista del comprador
+            if ((!$cart || $cart->items->isEmpty()) && !empty($data['items']) && is_array($data['items'])) {
+                if (!$cart) {
+                    $cart = Cart::create([
+                        'session_id' => $cartSessionId,
+                        'user_id' => $userId,
+                        'status' => 'active',
+                    ]);
+                }
+                foreach ($data['items'] as $rawItem) {
+                    $vId = $rawItem['variant_id'] ?? $rawItem['variantId'] ?? null;
+                    $qty = max(1, (int) ($rawItem['quantity'] ?? 1));
+                    $pId = $rawItem['product_id'] ?? $rawItem['productId'] ?? null;
+                    $sku = $rawItem['sku'] ?? null;
+                    $size = $rawItem['size'] ?? null;
+
+                    if (!$vId && ($pId || $sku)) {
+                        $pQuery = Product::with('variants.inventories');
+                        $p = $pId ? $pQuery->find($pId) : $pQuery->where('sku', $sku)->first();
+                        if ($p) {
+                            $reqSize = strtoupper(trim((string) $size));
+                            $matchedV = $p->variants->first(function ($v) use ($reqSize) {
+                                $attrSize = strtoupper(trim((string) data_get($v->attributes, 'size', '')));
+                                return $attrSize === $reqSize || str_ends_with($v->sku, '-' . $reqSize);
+                            }) ?: $p->variants->first();
+                            if ($matchedV) $vId = $matchedV->id;
+                        }
+                    }
+
+                    if ($vId) {
+                        $variantModel = ProductVariant::find($vId);
+                        if ($variantModel) {
+                            $cart->items()->create([
+                                'variant_id' => $variantModel->id,
+                                'quantity' => $qty,
+                                'price' => (float) ($rawItem['price'] ?? $variantModel->price),
+                                'added_from' => 'storefront_pwa',
+                            ]);
+                        }
+                    }
+                }
+                $cart->load(['items.variant.product', 'items.variant.inventories']);
+            }
+
             if (!$cart || $cart->items->isEmpty()) {
                 throw new Exception('El carrito esta vacio. Agrega prendas antes de proceder al checkout.');
             }
@@ -306,13 +352,19 @@ class OrderProcessingService
                 'user_id' => $userId,
                 'billing_address' => $addressPayload,
                 'shipping_address' => $addressPayload,
-                'status' => 'pending',
+                'status' => $isCard ? 'processing' : 'pending',
                 'total' => $grandTotal,
                 'payment_status' => $isCard ? 'paid' : 'pending',
                 'payment_method' => $paymentMethod,
                 'notes' => $isMixedCart ? 'Pedido Mixto (Bodega Local + Taller)' : 'Pedido E-commerce Directo',
                 'created_via' => 'web',
                 'attributed_via_id' => $attributionId,
+                'meta' => [
+                    'order_type' => $isMixedCart ? 'mixed' : 'standard',
+                    'is_mixed' => $isMixedCart,
+                    'dispatch_strategy' => $data['dispatch_strategy'] ?? 'standard',
+                    'universe' => $data['universe'] ?? 'terra',
+                ],
             ]);
 
             // Consumir candados de stock, descontar fisico y asentar en Kardex
@@ -410,13 +462,78 @@ class OrderProcessingService
             ]);
 
             // Generacion de Guia de Envio DHL Express (Hub 6 TASK-LOG-01)
-            Shipment::create([
+            $shipment = Shipment::create([
                 'order_id' => $order->id,
                 'tracking_number' => 'DHL-MX-' . strtoupper(Str::random(10)),
                 'courier' => 'dhl_express',
                 'service_type' => 'express',
                 'shipping_cost_declared' => $shippingCourierCost,
                 'status' => 'label_created',
+            ]);
+
+            $order->update([
+                'meta' => array_merge((array) $order->meta, [
+                    'tracking_number' => $shipment->tracking_number,
+                    'carrier' => 'DHL Express Nacional',
+                ]),
+            ]);
+
+            // Preparar items para la checklist operativa de empaque
+            $taskItems = [];
+            foreach ($order->items as $orderItem) {
+                $v = $orderItem->variant;
+                $p = $v?->product;
+                $isScraped = $p ? $p->isScraped() : false;
+                $loc = data_get($p?->meta, 'location', 'Rack A-01 / Nivel 1');
+                $size = data_get($v?->attributes, 'size', 'M');
+                $source = $isScraped 
+                    ? 'Bajo Pedido (Torzo B2B / Dropshipping)' 
+                    : 'Almacén Local (' . $loc . ')';
+
+                $taskItems[] = [
+                    'id' => 'item-' . $orderItem->id,
+                    'sku' => $v?->sku ?: ($p?->sku ?: 'SKU-PENDING'),
+                    'name' => ($p?->title ?: 'Prenda') . ' - Talla ' . strtoupper($size),
+                    'source' => $source,
+                    'location' => $loc,
+                    'qty' => $orderItem->quantity,
+                    'checked' => false,
+                    'is_scraped' => $isScraped,
+                ];
+            }
+
+            $customerName = data_get($order->shipping_address, 'name') 
+                ?: (data_get($data, 'customer.name') ?: 'Cliente D2C');
+            $cityState = trim((data_get($order->shipping_address, 'city') ?: '') . ', ' . (data_get($order->shipping_address, 'state') ?: ''));
+            $zip = data_get($order->shipping_address, 'postal_code') ?: data_get($order->shipping_address, 'zip', '');
+            $destination = ($cityState ?: 'México') . ($zip ? " (CP {$zip})" : '');
+            $addressLine = trim((data_get($order->shipping_address, 'street') ?: '') . ' ' . (data_get($order->shipping_address, 'exterior_number') ?: ''));
+            $fullDestination = $addressLine ? ($addressLine . ', ' . $destination) : $destination;
+
+            // Generar Tarea Operativa Oficial en Hub 1 (Mesa de Picking & Packing)
+            OperationalTask::create([
+                'title' => 'Empaque: Pedido ' . $order->order_number,
+                'reference_code' => $order->order_number,
+                'category' => 'empaque',
+                'priority' => $isMixedCart ? 'critical' : 'high',
+                'assigned_role' => 'warehouse',
+                'status' => 'pending',
+                'description' => count($taskItems) . ' prenda(s) en ' . ($isMixedCart ? 'preparación mixta (Local + Bajo Pedido)' : 'almacén local') . '. Requiere inspección y guía DHL.',
+                'due_at' => now()->hour < 14 ? today()->setTime(14, 0) : now()->addHours(2),
+                'sla_minutes_limit' => 60,
+                'action_payload' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'is_mixed' => $isMixedCart,
+                    'customer' => $customerName,
+                    'destination' => $fullDestination,
+                    'carrier' => 'DHL Express (' . $shipment->tracking_number . ')',
+                    'tracking_number' => $shipment->tracking_number,
+                    'items' => $taskItems,
+                    'special_instructions' => $isMixedCart
+                        ? 'Pedido Mixto D2C: Verificar prendas de almacén local y validar arribo de mayorista/taller.'
+                        : 'Prendas de almacén local listas para embalaje discreto y precinto de inviolabilidad.',
+                ],
             ]);
 
             // Actualizar metricas de cupones

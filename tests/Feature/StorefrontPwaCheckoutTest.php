@@ -9,13 +9,16 @@ use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\Inventory;
 use App\Models\InventoryMovement;
+use App\Models\OperationalTask;
 use App\Models\Order;
 use App\Models\OrderFinancialMargin;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\ShiftLog;
 use App\Models\Shipment;
 use App\Models\StockLock;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -420,5 +423,187 @@ class StorefrontPwaCheckoutTest extends TestCase
         $response->assertJson([
             'success' => false,
         ]);
+    }
+
+    public function test_checkout_automatically_dispatches_warehouse_operational_task_with_action_payload(): void
+    {
+        [$product, $variant, $inventory] = $this->createProductWithStock('TEST-TASK-01', 5, 499.00, 150.00);
+
+        $this->postJson('/api/v1/store/cart/items', [
+            'cart_id' => 'sess_task_dispatch_01',
+            'variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $checkoutData = [
+            'cart_id' => 'sess_task_dispatch_01',
+            'customer' => [
+                'name' => 'Eduardo Lozano',
+                'email' => 'eduardo@ejemplo.com',
+                'phone' => '8119876543',
+            ],
+            'shipping' => [
+                'street' => 'Av. Vasconcelos',
+                'exterior_number' => '300',
+                'colony' => 'Del Valle',
+                'postal_code' => '66220',
+                'city' => 'San Pedro Garza Garcia',
+                'state' => 'Nuevo Leon',
+            ],
+            'payment_method' => 'credit_debit_card',
+            'universe' => 'terra',
+        ];
+
+        $response = $this->postJson('/api/v1/store/checkout', $checkoutData);
+        $response->assertStatus(201);
+        $orderNumber = $response->json('order.order_number');
+
+        // Verificar que la tarea de empaque fue creada en la bandeja de bodega
+        $this->assertDatabaseHas('operational_tasks', [
+            'category' => 'empaque',
+            'assigned_role' => 'warehouse',
+            'reference_code' => $orderNumber,
+            'status' => 'pending',
+        ]);
+
+        $task = OperationalTask::where('reference_code', $orderNumber)->first();
+        $this->assertNotNull($task);
+        $this->assertIsArray($task->action_payload);
+        $this->assertSame($orderNumber, $task->action_payload['order_number']);
+        $this->assertSame('Eduardo Lozano', $task->action_payload['customer']);
+        $this->assertStringContainsString('Av. Vasconcelos', $task->action_payload['destination']);
+        $this->assertNotEmpty($task->action_payload['items']);
+        $this->assertSame('Prenda Anatómica TEST-TASK-01 - Talla M', $task->action_payload['items'][0]['name']);
+        $this->assertSame(1, $task->action_payload['items'][0]['qty']);
+    }
+
+    public function test_warehouse_operator_can_complete_packing_task_and_transition_order_and_shipment_to_packed(): void
+    {
+        [$product, $variant, $inventory] = $this->createProductWithStock('TEST-TASK-02', 8, 350.00, 100.00);
+
+        $this->postJson('/api/v1/store/cart/items', [
+            'cart_id' => 'sess_pack_complete_01',
+            'variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $checkoutData = [
+            'cart_id' => 'sess_pack_complete_01',
+            'customer' => [
+                'name' => 'Fernando Gomez',
+                'email' => 'fernando@ejemplo.com',
+                'phone' => '8123456789',
+            ],
+            'shipping' => [
+                'street' => 'Calzada San Pedro',
+                'exterior_number' => '102',
+                'colony' => 'Miravalle',
+                'postal_code' => '64660',
+                'city' => 'Monterrey',
+                'state' => 'Nuevo Leon',
+            ],
+            'payment_method' => 'spei_bbva',
+            'universe' => 'marte',
+        ];
+
+        $checkoutResponse = $this->postJson('/api/v1/store/checkout', $checkoutData);
+        $checkoutResponse->assertStatus(201);
+        $orderNumber = $checkoutResponse->json('order.order_number');
+
+        $task = OperationalTask::where('reference_code', $orderNumber)->firstOrFail();
+        $this->assertSame('pending', $task->status);
+
+        // Operador de bodega completa la tarea de empaque desde Hub 1
+        $warehouseUser = User::factory()->create([
+            'role' => 'portal',
+            'name' => 'Carlos Almacén (Turno Matutino)',
+            'email' => 'carlos.almacen@mitienda.online',
+        ]);
+
+        $completeResponse = $this->actingAs($warehouseUser)->postJson("/api/v1/dashboard/tasks/{$task->id}/complete", [
+            'operator_name' => 'Carlos Almacén (Turno Matutino)',
+        ]);
+
+        $completeResponse->assertStatus(200);
+        $completeResponse->assertJson([
+            'success' => true,
+            'message' => 'Tarea completada exitosamente.',
+        ]);
+
+        // 1. Tarea marcada como completada
+        $task->refresh();
+        $this->assertSame('completed', $task->status);
+        $this->assertNotNull($task->completed_at);
+
+        // 2. Registro en bitacora inmutable (ShiftLog)
+        $this->assertDatabaseHas('shift_logs', [
+            'operational_task_id' => $task->id,
+            'event_type' => 'task_completed',
+            'operator_name' => 'Carlos Almacén (Turno Matutino)',
+        ]);
+
+        $shiftLog = ShiftLog::where('operational_task_id', $task->id)->firstOrFail();
+        $this->assertSame($orderNumber, $shiftLog->metadata['reference_code']);
+
+        // 3. Notas de Orden actualizadas con sello inmutable de empaque
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+        $this->assertStringContainsString('Empacado por: Carlos Almacén (Turno Matutino)', $order->notes);
+
+        // 4. Envio courier marcado como 'packed'
+        $this->assertDatabaseHas('shipments', [
+            'order_id' => $order->id,
+            'status' => 'packed',
+        ]);
+    }
+
+    public function test_checkout_reconciles_direct_items_payload_when_session_desynchronized(): void
+    {
+        [$product, $variant, $inventory] = $this->createProductWithStock('TEST-RECON-01', 12, 600.00, 200.00);
+
+        // Sin hacer llamada previa a /store/cart/items (sesión desincronizada en frontend PWA)
+        $checkoutData = [
+            'cart_id' => 'sess_desync_cart_999',
+            'customer' => [
+                'name' => 'Daniela Ramos',
+                'email' => 'daniela@ejemplo.com',
+                'phone' => '8188990011',
+            ],
+            'shipping' => [
+                'street' => 'Av. Lazaro Cardenas',
+                'exterior_number' => '2400',
+                'colony' => 'Valle Oriente',
+                'postal_code' => '66269',
+                'city' => 'San Pedro',
+                'state' => 'Nuevo Leon',
+            ],
+            'payment_method' => 'oxxo_cash',
+            'universe' => 'terra',
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'variant_id' => $variant->id,
+                    'sku' => $variant->sku,
+                    'size' => 'M',
+                    'quantity' => 1,
+                    'price' => 600.00,
+                ],
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/store/checkout', $checkoutData);
+
+        $response->assertStatus(201);
+        $orderNumber = $response->json('order.order_number');
+        $this->assertStringStartsWith('#ORD-2026-', $orderNumber);
+
+        // Valida que la tarea operativa se genero con los articulos reconciliados
+        $this->assertDatabaseHas('operational_tasks', [
+            'category' => 'empaque',
+            'reference_code' => $orderNumber,
+        ]);
+
+        $task = OperationalTask::where('reference_code', $orderNumber)->firstOrFail();
+        $this->assertCount(1, $task->action_payload['items']);
+        $this->assertSame(1, $task->action_payload['items'][0]['qty']);
     }
 }

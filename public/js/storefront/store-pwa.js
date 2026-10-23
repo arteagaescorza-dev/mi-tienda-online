@@ -3232,6 +3232,17 @@
 
     checkoutState.lastConfirmedOrder = order;
 
+    const payloadItems = (storeState.cart || []).map(i => ({
+      productId: i.productId || i.id,
+      product_id: i.productId || i.id,
+      variantId: i.variantId || null,
+      variant_id: i.variantId || null,
+      sku: i.sku || null,
+      size: i.size || 'M',
+      quantity: i.quantity || 1,
+      price: i.price || 0
+    }));
+
     // Conectar con backend RESTful de checkout (TASK-INT-06 / TASK-FIN-01)
     fetch('/api/v1/store/checkout', {
       method: 'POST',
@@ -3242,6 +3253,7 @@
       },
       body: JSON.stringify({
         cart_id: getCartSessionId(),
+        items: payloadItems,
         customer: { ...checkoutState.customer },
         shipping: { ...checkoutState.shipping },
         payment_method: checkoutState.paymentMethod,
@@ -3257,9 +3269,21 @@
         order.trackingNumber = res.order.tracking_number;
         const folioBadge = document.getElementById('orderConfirmedFolio');
         if (folioBadge) folioBadge.textContent = res.order.order_number;
+        try {
+          const orders = JSON.parse(localStorage.getItem('multiverse_customer_orders') || '[]');
+          if (orders.length > 0) {
+            orders[0].folio = res.order.order_number;
+            orders[0].trackingNumber = res.order.tracking_number;
+            localStorage.setItem('multiverse_customer_orders', JSON.stringify(orders));
+          }
+        } catch (e) {}
+      } else if (res && !res.success) {
+        showToastNotification(res.message || 'Atención: No se pudo registrar la orden en el servidor.');
       }
     })
-    .catch(() => {});
+    .catch(err => {
+      console.warn('Error en checkout backend:', err);
+    });
 
     // Limpiar carrito local
     storeState.cart = [];

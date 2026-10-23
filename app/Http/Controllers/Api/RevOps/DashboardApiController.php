@@ -97,6 +97,25 @@ class DashboardApiController extends Controller
 
         $task->save();
 
+        if ($task->category === 'empaque') {
+            $orderId = data_get($task->action_payload, 'order_id');
+            $refCode = $task->reference_code;
+            $order = null;
+            if ($orderId) {
+                $order = Order::find($orderId);
+            } elseif ($refCode) {
+                $order = Order::where('order_number', $refCode)->first();
+            }
+            if ($order) {
+                $seal = "Empacado por: {$operatorName} [" . now()->toIso8601String() . "]";
+                $existingNotes = $order->notes ? $order->notes . "\n" : '';
+                $order->update(['notes' => $existingNotes . $seal]);
+                if ($order->shipment) {
+                    $order->shipment->update(['status' => 'packed']);
+                }
+            }
+        }
+
         $shiftLog = ShiftLog::create([
             'operational_task_id' => $task->id,
             'event_type' => 'task_completed',
@@ -111,6 +130,7 @@ class DashboardApiController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Tarea completada exitosamente.',
             'task_id' => $task->id,
             'status' => 'completed',
             'completed_at' => $task->completed_at->toIso8601String(),

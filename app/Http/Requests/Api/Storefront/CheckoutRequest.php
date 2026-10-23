@@ -23,6 +23,14 @@ class CheckoutRequest extends FormRequest
     {
         return [
             'cart_id' => 'nullable|string',
+            'items' => 'nullable|array',
+            'items.*.product_id' => 'nullable',
+            'items.*.productId' => 'nullable',
+            'items.*.variant_id' => 'nullable',
+            'items.*.variantId' => 'nullable',
+            'items.*.sku' => 'nullable|string',
+            'items.*.size' => 'nullable|string',
+            'items.*.quantity' => 'nullable|integer',
             'customer' => 'nullable|array',
             'customer.name' => 'nullable|string|max:255',
             'customer.email' => 'nullable|string|max:255',
