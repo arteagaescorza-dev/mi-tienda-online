@@ -279,20 +279,10 @@
                                     <path :d="mrrPathD" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-dasharray="4 4" stroke-linecap="round" />
 
                                     <!-- Puntos de Facturación D2C -->
-                                    <template x-for="(pt, idx) in salesPoints" :key="'sales-pt-' + idx">
-                                        <g>
-                                            <circle :cx="pt.x" :cy="pt.y" r="4.5" fill="#ffffff" stroke="#10b981" stroke-width="2.5" class="hover:r-6 transition-all cursor-pointer">
-                                                <title x-text="'Día: ' + (salesVsMrr.labels[idx] || '') + ' - MXN $' + pt.val.toLocaleString()"></title>
-                                            </circle>
-                                        </g>
-                                    </template>
+                                    <g x-html="salesCirclesSvg"></g>
 
                                     <!-- Puntos de MRR -->
-                                    <template x-for="(pt, idx) in mrrPoints" :key="'mrr-pt-' + idx">
-                                        <circle :cx="pt.x" :cy="pt.y" r="3.5" fill="#6366f1" stroke="#ffffff" stroke-width="1.5">
-                                            <title x-text="'MRR: MXN $' + pt.val.toLocaleString()"></title>
-                                        </circle>
-                                    </template>
+                                    <g x-html="mrrCirclesSvg"></g>
                                 </svg>
 
                                 <!-- Eje X: Etiquetas de Días -->
@@ -3162,6 +3152,20 @@ function dashboardModule() {
                 const y = 160 - (v / maxVal) * 130;
                 return { x: Math.round(x), y: Math.round(y), val: v };
             });
+        },
+
+        get salesCirclesSvg() {
+            const labels = (this.salesVsMrr && this.salesVsMrr.labels) || [];
+            return (this.salesPoints || []).map((pt, idx) => {
+                const label = labels[idx] || '';
+                return `<circle cx="${pt.x}" cy="${pt.y}" r="4.5" fill="#ffffff" stroke="#10b981" stroke-width="2.5" class="hover:r-6 transition-all cursor-pointer"><title>Día: ${label} - MXN $${pt.val.toLocaleString()}</title></circle>`;
+            }).join('');
+        },
+
+        get mrrCirclesSvg() {
+            return (this.mrrPoints || []).map((pt) => {
+                return `<circle cx="${pt.x}" cy="${pt.y}" r="3.5" fill="#6366f1" stroke="#ffffff" stroke-width="1.5"><title>MRR: MXN $${pt.val.toLocaleString()}</title></circle>`;
+            }).join('');
         },
 
         get salesPathD() {

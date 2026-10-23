@@ -6345,25 +6345,35 @@
                         <button 
                             type="button" 
                             @click="saveNewProductAsDraft()" 
-                            class="px-4 py-2 text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                            :disabled="newProduct.isSaving"
+                            class="px-4 py-2 text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Pre-guardar el producto como borrador para revisarlo y aprobarlo después"
                         >
-                            <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg x-show="!newProduct.isSaving" class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span>Pre-guardar Borrador</span>
+                            <svg x-show="newProduct.isSaving" class="animate-spin w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                            <span x-text="newProduct.isSaving ? 'Guardando...' : 'Pre-guardar Borrador'">Pre-guardar Borrador</span>
                         </button>
                         <!-- Regla 5: Aprobar oficialmente y publicar en catálogo operativo -->
                         <button 
                             type="button"
                             @click="saveNewProduct(true)" 
-                            class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer flex items-center gap-1.5"
+                            :disabled="newProduct.isSaving"
+                            class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Aprobar y dar de alta oficialmente en el catálogo operativo"
                         >
-                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg x-show="!newProduct.isSaving" class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span>Aprobar y Publicar en Catálogo</span>
+                            <svg x-show="newProduct.isSaving" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                            <span x-text="newProduct.isSaving ? 'Publicando...' : 'Aprobar y Publicar en Catálogo'">Aprobar y Publicar en Catálogo</span>
                         </button>
                     </div>
                 </div>
@@ -13663,14 +13673,14 @@
                             <button 
                                 type="button"
                                 @click="generateCuratingAutoSku()" 
-                                :disabled="curatingItem.isGeneratingSku"
+                                :disabled="Boolean(curatingItem && curatingItem.isGeneratingSku)"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-bold transition cursor-pointer"
                                 title="Generar código SKU automático estructurado"
                             >
-                                <svg x-show="!curatingItem.isGeneratingSku" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg x-show="!Boolean(curatingItem && curatingItem.isGeneratingSku)" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                                <svg x-show="curatingItem.isGeneratingSku" class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                                <svg x-show="Boolean(curatingItem && curatingItem.isGeneratingSku)" class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                                 </svg>
@@ -14349,12 +14359,12 @@
                                                 <button 
                                                     type="button" 
                                                     @click="generateCuratingAutoSku()" 
-                                                    :disabled="curatingItem.isGeneratingSku" 
+                                                    :disabled="Boolean(curatingItem && curatingItem.isGeneratingSku)" 
                                                     class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold transition cursor-pointer shadow-2xs"
                                                     title="Generar SKU automático"
                                                 >
-                                                    <svg x-show="!curatingItem.isGeneratingSku" class="w-3 h-3 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                                                    <svg x-show="curatingItem.isGeneratingSku" class="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                    <svg x-show="!Boolean(curatingItem && curatingItem.isGeneratingSku)" class="w-3 h-3 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                                    <svg x-show="Boolean(curatingItem && curatingItem.isGeneratingSku)" class="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                                     <span>Auto-SKU</span>
                                                 </button>
                                             </div>

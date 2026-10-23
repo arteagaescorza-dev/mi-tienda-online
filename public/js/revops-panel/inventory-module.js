@@ -466,7 +466,12 @@ function hybridInventoryModule() {
 
         // TASK-INV-08: Modal de Curaduría de Scraping
         scrapingCurationModalOpen: false,
-        curatingItem: null,
+        curatingItem: {
+            isGeneratingSku: false,
+            images: [],
+            duplicateMatches: []
+        },
+        curatingNewTagInput: '',
         isCuratingAiGenerating: false,
         showInlineAddColor: false,
         inlineColorName: '',
@@ -734,6 +739,7 @@ function hybridInventoryModule() {
             sku: 'BX-ECO-011',
             skuLocked: true,
             isGeneratingSku: false,
+            isSaving: false,
             name: '',
             category: 'Boxers',
             subcategory: '',
@@ -12975,6 +12981,7 @@ function hybridInventoryModule() {
         },
 
         async saveNewProduct(approve = true) {
+            if (this.newProduct.isSaving) return;
             if (!this.newProduct.sku || !this.newProduct.sku.trim() || !this.newProduct.name || !this.newProduct.name.trim()) {
                 this.showToast('Por favor completa el codigo SKU y el nombre del producto.', 'warning');
                 return;
@@ -13073,6 +13080,7 @@ function hybridInventoryModule() {
                 isScraping: false
             };
 
+            this.newProduct.isSaving = true;
             try {
                 const response = await fetch('/api/v1/inventory/products', {
                     method: 'POST',
@@ -13098,18 +13106,13 @@ function hybridInventoryModule() {
                     }
                     this.newProductDrawerOpen = false;
                 } else {
-                    this.showToast(resData.message || 'Error al persistir el nuevo producto.', 'error');
+                    this.showToast(resData.message || 'Error al persistir el nuevo producto en el servidor.', 'error');
                 }
             } catch (err) {
                 console.error('Error creando producto:', err);
-                if (approve) {
-                    this.products.unshift(createdItem);
-                    this.showToast('Producto ' + createdItem.sku + ' registrado localmente.', 'info');
-                } else {
-                    this.draftProducts.unshift(createdItem);
-                    this.showToast('Borrador ' + createdItem.sku + ' guardado localmente.', 'info');
-                }
-                this.newProductDrawerOpen = false;
+                this.showToast(err.message || 'Error de conexión al persistir el nuevo producto.', 'error');
+            } finally {
+                this.newProduct.isSaving = false;
             }
         },
 

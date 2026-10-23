@@ -20862,9 +20862,12 @@ function showToast(message, type = 'info', duration = 5000) {
 }
 window.showToast = showToast;
 
-document.querySelector('[data-action="logout"]').addEventListener('click', () => {
-  showToast('Sesión administrativa cerrada correctamente');
-});
+const logoutBtn = document.querySelector('[data-action="logout"]');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    showToast('Sesión administrativa cerrada correctamente');
+  });
+}
 
 document.addEventListener('click', (event) => {
   if (event.target.closest('[data-action="placeholder"]')) {
