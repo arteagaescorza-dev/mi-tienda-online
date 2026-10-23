@@ -1103,7 +1103,15 @@ class StorefrontController extends Controller
         $avgTicket = $todayOrderCount > 0 ? ((float) $todaySales / $todayOrderCount) : 0;
 
         // Operative Metrics (Physical units, ZERO monetary symbols)
-        $pendingPacking = Order::query()->whereIn('status', ['processing', 'verified'])->count();
+        $pendingPackingQuery = Order::query()->whereIn('status', ['processing', 'verified']);
+        $pendingPacking = (clone $pendingPackingQuery)->count();
+        $physicalReady = (clone $pendingPackingQuery)->whereDoesntHave('items.variant.product', function ($q) {
+            $q->whereIn('type', ['dropship']);
+        })->count();
+        $onDemandWaiting = (clone $pendingPackingQuery)->whereHas('items.variant.product', function ($q) {
+            $q->whereIn('type', ['dropship']);
+        })->count();
+
         $mixedReady = Order::query()->whereIn('status', ['processing', 'verified'])
             ->whereHas('items.variant.product', function ($q) {
                 $q->whereIn('type', ['dropship', 'both']);
@@ -1132,15 +1140,15 @@ class StorefrontController extends Controller
                 ['label' => 'Ticket promedio', 'value' => 'MXN $' . number_format($avgTicket, 2), 'trend' => 'Hoy', 'subtitle' => 'Promedio por orden finalizada'],
             ],
             'operative' => [
-                ['label' => 'Pedidos por empacar', 'value' => (string) max(4, $pendingPacking) . ' órdenes', 'trend' => 'Corte 14:00', 'subtitle' => 'Listos para empaque y rotulación'],
-                ['label' => 'Carritos mixtos listos', 'value' => (string) max(2, $mixedReady) . ' pedidos', 'trend' => 'Desbloqueados', 'subtitle' => 'Inbound recibido en rampa'],
-                ['label' => 'Recepciones en tránsito', 'value' => (string) max(1, $inboundTransit) . ' arribos', 'trend' => 'En camino', 'subtitle' => 'Fleteros con llegada hoy'],
-                ['label' => 'Quiebres ROP en anaquel', 'value' => (string) max(3, $ropBreaches) . ' SKUs', 'trend' => 'Reorden', 'subtitle' => 'Stock físico bajo punto crítico'],
+                ['label' => 'Pedidos por empacar', 'value' => (string) $pendingPacking . ' órdenes', 'trend' => 'Corte 14:00', 'subtitle' => $physicalReady . ' en rack físico · ' . $onDemandWaiting . ' bajo pedido'],
+                ['label' => 'Carritos mixtos listos', 'value' => (string) $mixedReady . ' pedidos', 'trend' => 'Desbloqueados', 'subtitle' => 'Inbound recibido en rampa'],
+                ['label' => 'Recepciones en tránsito', 'value' => (string) $inboundTransit . ' arribos', 'trend' => 'En camino', 'subtitle' => 'Fleteros con llegada hoy'],
+                ['label' => 'Quiebres ROP en anaquel', 'value' => (string) $ropBreaches . ' SKUs', 'trend' => 'Reorden', 'subtitle' => 'Stock físico bajo punto crítico'],
             ],
             'sales' => [
-                ['label' => 'Leads activos sin responder', 'value' => (string) max(5, $hotLeads) . ' prospectos', 'trend' => 'Prioritario', 'subtitle' => 'Tiempo medio espera: 14 min'],
-                ['label' => 'Carritos abandonados hoy', 'value' => (string) max(8, $todayAbandoned) . ' carritos', 'trend' => 'Recuperables', 'subtitle' => 'Gatillo WhatsApp disponible'],
-                ['label' => 'Pedidos pausados por dirección', 'value' => (string) max(2, $doubtfulAddresses) . ' envíos', 'trend' => 'Riesgo Postal', 'subtitle' => 'Falta número o CP dudoso'],
+                ['label' => 'Leads activos sin responder', 'value' => (string) $hotLeads . ' prospectos', 'trend' => 'Prioritario', 'subtitle' => 'Tiempo medio espera: 14 min'],
+                ['label' => 'Carritos abandonados hoy', 'value' => (string) $todayAbandoned . ' carritos', 'trend' => 'Recuperables', 'subtitle' => 'Gatillo WhatsApp disponible'],
+                ['label' => 'Pedidos pausados por dirección', 'value' => (string) $doubtfulAddresses . ' envíos', 'trend' => 'Riesgo Postal', 'subtitle' => 'Falta número o CP dudoso'],
                 ['label' => 'Cupones activos canjeados', 'value' => '12 canjes', 'trend' => 'Hoy', 'subtitle' => 'Efectividad comercial: 22.4%'],
             ],
         ];
@@ -1413,25 +1421,46 @@ class StorefrontController extends Controller
 
         $dbProducts = $productsQuery->get();
 
-        $portalProducts = $dbProducts->map(function (Product $product) use ($brandToSupplierMap) {
+        $allVariantIds = $dbProducts->pluck('variants')->flatten()->pluck('id')->filter()->unique()->all();
+        $allActiveLocks = !empty($allVariantIds)
+            ? \App\Models\StockLock::whereIn('product_variant_id', $allVariantIds)
+                ->where('status', 'active')
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })
+                ->get()
+                ->groupBy('product_variant_id')
+            : collect();
+
+        $portalProducts = $dbProducts->map(function (Product $product) use ($brandToSupplierMap, $allActiveLocks) {
             $variants = $product->variants;
             $hasVariants = $variants->isNotEmpty();
 
             if ($hasVariants) {
                 $totalStock = (int) $variants->sum(fn ($v) => $v->inventories->sum('quantity'));
                 $totalReserved = (int) $variants->sum(fn ($v) => $v->inventories->sum('reserved'));
-                $availableStock = max(0, $totalStock - $totalReserved);
 
                 $sizes = [];
+                $physicalSizes = [];
                 $committedSizes = [];
+                $lockedSizes = [];
+                $totalLocked = 0;
+
                 foreach ($variants as $v) {
                     $rawSize = data_get($v->attributes, 'size', 'u');
                     $sizeKey = strtolower(trim((string) $rawSize));
                     $vQty = (int) $v->inventories->sum('quantity');
                     $vRes = (int) $v->inventories->sum('reserved');
-                    $sizes[$sizeKey] = max(0, $vQty - $vRes);
+                    $vLocks = (int) ($allActiveLocks->get($v->id)?->sum('quantity') ?? 0);
+                    $totalLocked += $vLocks;
+
+                    $physicalSizes[$sizeKey] = $vQty;
                     $committedSizes[$sizeKey] = $vRes;
+                    $lockedSizes[$sizeKey] = $vLocks;
+                    $sizes[$sizeKey] = max(0, $vQty - $vRes - $vLocks);
                 }
+
+                $availableStock = max(0, $totalStock - $totalReserved - $totalLocked);
             } else {
                 $rawMetaSizes = data_get($product->meta, 'sizes', []);
                 $sizes = [];
@@ -1440,8 +1469,11 @@ class StorefrontController extends Controller
                         $sizes[strtolower(trim((string) $k))] = (int) $v;
                     }
                 }
+                $physicalSizes = $sizes;
                 $committedSizes = [];
+                $lockedSizes = [];
                 $totalReserved = 0;
+                $totalLocked = 0;
                 $totalStock = !empty($sizes) ? array_sum($sizes) : (int) data_get($product->meta, 'local_stock', 0);
                 $availableStock = $totalStock;
             }
@@ -1577,8 +1609,12 @@ class StorefrontController extends Controller
                 'subcategory' => $subcategory,
                 'type' => $product->type === 'physical' ? 'propio' : ($product->type === 'dropship' ? 'dropship' : 'mixto'),
                 'localStock' => $availableStock,
+                'physicalStock' => $totalStock,
+                'physicalSizes' => $physicalSizes,
                 'committedStock' => $totalReserved,
                 'committedSizes' => $committedSizes,
+                'lockedStock' => $totalLocked,
+                'lockedSizes' => $lockedSizes,
                 'supplierStock' => $supplierStock,
                 'location' => $location,
                 'status' => $status,

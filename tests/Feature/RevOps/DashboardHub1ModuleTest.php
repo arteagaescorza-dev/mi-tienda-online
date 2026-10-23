@@ -19,6 +19,19 @@ class DashboardHub1ModuleTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $adminUser;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->adminUser = User::factory()->create([
+            'role' => 'portal',
+            'email' => 'admin.revops.test@mitienda.online',
+        ]);
+        $this->actingAs($this->adminUser);
+    }
+
     public function test_portal_dashboard_renders_with_triple_rbac_and_hides_financials_for_warehouse_role(): void
     {
         $adminUser = User::factory()->create([

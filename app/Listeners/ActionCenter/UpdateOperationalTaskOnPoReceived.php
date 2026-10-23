@@ -26,16 +26,23 @@ class UpdateOperationalTaskOnPoReceived
             if ($operator) $operatorName = $operator->name;
         }
 
-        $task = OperationalTask::where(function ($query) use ($po) {
-            $query->where('reference_code', $po->po_number)
-                  ->orWhere('action_payload->po_number', $po->po_number)
+        $poNumber = (string) $po->po_number;
+        $cleanPo = ltrim($poNumber, '#');
+        $codes = array_values(array_unique(array_filter([
+            $poNumber,
+            '#' . $cleanPo,
+            $cleanPo,
+        ])));
+
+        $tasks = OperationalTask::where(function ($query) use ($codes, $po) {
+            $query->whereIn('reference_code', $codes)
+                  ->orWhereIn('action_payload->po_number', $codes)
                   ->orWhere('action_payload->purchase_order_id', $po->id);
         })
         ->where('status', '!=', 'completed')
-        ->latest()
-        ->first();
+        ->get();
 
-        if ($task) {
+        foreach ($tasks as $task) {
             $task->status = $isFullyReceived ? 'completed' : 'in_progress';
             if ($isFullyReceived) {
                 $task->completed_at = now();
@@ -48,19 +55,21 @@ class UpdateOperationalTaskOnPoReceived
                     'operational_task_id' => $task->id,
                     'event_type' => 'inbound_received',
                     'message' => sprintf(
-                        'Recepcion Inbound de OC #%s: %d unidades ingresadas a bodega%s.',
-                        $po->po_number,
+                        'Recepcion Inbound de OC #%s: %d unidades ingresadas a bodega%s. (Asignado: %s)',
+                        $cleanPo,
                         $event->totalUnitsReceived,
-                        $isFullyReceived ? ' (Orden completada)' : ' (Recepcion parcial)'
+                        $isFullyReceived ? ' (Orden completada)' : ' (Recepcion parcial)',
+                        $task->assigned_role ?? 'general'
                     ),
                     'operator_name' => $operatorName,
                     'metadata' => [
                         'po_id' => $po->id,
-                        'po_number' => $po->po_number,
+                        'po_number' => $poNumber,
                         'units_received' => $event->totalUnitsReceived,
                         'cost_received' => $event->totalCostReceived,
                         'is_fully_received' => $isFullyReceived,
                         'batch_number' => $batchNumber,
+                        'assigned_role' => $task->assigned_role,
                     ],
                 ]);
             }

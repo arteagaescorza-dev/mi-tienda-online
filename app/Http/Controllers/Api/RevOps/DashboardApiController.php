@@ -204,7 +204,7 @@ class DashboardApiController extends Controller
     {
         Gate::authorize('view-dashboard');
 
-        $validated = 
+        $validated = $request->validated();
 
         $case = null;
         if (!empty($validated['case_id'])) {
@@ -279,7 +279,7 @@ class DashboardApiController extends Controller
             $request->merge(['interior_number' => $request->input('int_number')]);
         }
 
-        $validated = 
+        $validated = $request->validated();
 
         $intNum = !empty($validated['interior_number']) ? " Int. {$validated['interior_number']}" : '';
         $refText = !empty($validated['references']) ? " (Ref: {$validated['references']})" : '';
@@ -404,7 +404,7 @@ class DashboardApiController extends Controller
     {
         Gate::authorize('view-dashboard');
 
-        $validated = 
+        $validated = $request->validated();
 
         $config = SystemEnvironmentConfig::firstOrCreate(
             ['module' => $validated['module']],
@@ -693,7 +693,7 @@ class DashboardApiController extends Controller
     {
         Gate::authorize('view-dashboard');
 
-        $validated = 
+        $validated = $request->validated();
 
         $userMsg = $validated['message'];
 

@@ -11801,27 +11801,28 @@ function hybridInventoryModule() {
             this.purchaseAddedSuccess = false;
             this.hasAddedPurchaseThisSession = false;
 
-            const isUni = (product.sizes && (product.sizes.uni !== undefined || product.sizes.u !== undefined || product.sizes.unitalla !== undefined)) ||
+            const effectiveSizes = product.physicalSizes || product.sizes || {};
+            const isUni = (effectiveSizes && (effectiveSizes.uni !== undefined || effectiveSizes.u !== undefined || effectiveSizes.unitalla !== undefined)) ||
                           product.selectedSizeCurveId === 'curve_unitalla' ||
                           product.variantDimension === 'unique_piece' ||
                           String(product.sku || '').toUpperCase().includes('-UNI');
 
             if (isUni) {
-                const uniQty = product.sizes?.uni !== undefined 
-                    ? product.sizes.uni 
-                    : (product.sizes?.u !== undefined ? product.sizes.u : (product.localStock || 0));
+                const uniQty = effectiveSizes.uni !== undefined 
+                    ? effectiveSizes.uni 
+                    : (effectiveSizes.u !== undefined ? effectiveSizes.u : (product.physicalStock || product.localStock || 0));
                 this.drawerSizes = {
                     uni: parseInt(uniQty) || 0
                 };
             } else {
                 this.drawerSizes = {
-                    ch: parseInt(product.sizes?.ch) || 0,
-                    m: parseInt(product.sizes?.m) || 0,
-                    g: parseInt(product.sizes?.g) || 0,
-                    xl: parseInt(product.sizes?.xl) || 0,
-                    '2xl': parseInt(product.sizes?.['2xl']) || 0,
-                    '3xl': parseInt(product.sizes?.['3xl']) || 0,
-                    ...(product.sizes || {})
+                    ch: parseInt(effectiveSizes.ch) || 0,
+                    m: parseInt(effectiveSizes.m) || 0,
+                    g: parseInt(effectiveSizes.g) || 0,
+                    xl: parseInt(effectiveSizes.xl) || 0,
+                    '2xl': parseInt(effectiveSizes['2xl']) || 0,
+                    '3xl': parseInt(effectiveSizes['3xl']) || 0,
+                    ...effectiveSizes
                 };
             }
 

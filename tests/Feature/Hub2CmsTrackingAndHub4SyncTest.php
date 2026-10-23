@@ -160,3 +160,4 @@ class Hub2CmsTrackingAndHub4SyncTest extends TestCase
         $this->assertFalse(Cache::has('cms_storefront_marte'));
     }
 }
+

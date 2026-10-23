@@ -30,11 +30,24 @@ class OperationalTask extends Model
 
     /**
      * Calcula el estado de urgencia del SLA segun el tiempo restante para el corte.
+     * Separa estrictamente el corte de empaque DHL (14:00 hrs) de tareas bajo pedido / compras B2B.
      */
     public function getSlaStatusAttribute(): string
     {
         if ($this->status === 'completed') {
             return 'completed';
+        }
+
+        // Tareas bajo pedido / compras / inbound no están sujetas al semáforo crítico de empaque DHL
+        $isOnDemandOrProcurement = $this->assigned_role === 'purchases'
+            || in_array($this->category, ['compras', 'procurement', 'inbound', 'on_demand', 'dropship', 'packaging_restock'], true)
+            || data_get($this->action_payload, 'is_on_demand') === true;
+
+        if ($isOnDemandOrProcurement) {
+            if (!$this->due_at) {
+                return 'ontime';
+            }
+            return now()->greaterThan($this->due_at) ? 'warning' : 'ontime';
         }
 
         if (!$this->due_at) {

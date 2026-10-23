@@ -12,6 +12,16 @@ class DashboardValidateOrderAddressRequest extends FormRequest
         return Gate::allows('view-dashboard');
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('ext_number') && !$this->has('exterior_number')) {
+            $this->merge(['exterior_number' => $this->input('ext_number')]);
+        }
+        if ($this->has('int_number') && !$this->has('interior_number')) {
+            $this->merge(['interior_number' => $this->input('int_number')]);
+        }
+    }
+
     public function rules(): array
     {
         return [

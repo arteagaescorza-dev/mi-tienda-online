@@ -124,10 +124,22 @@ class ProductSkuAndDuplicateApiController extends Controller
             }
         }
 
-        $localStock = (int) ($meta['local_stock'] ?? (empty($sizes) ? ($product->stock ?? 0) : array_sum($sizes)));
-        $committedStock = (int) ($meta['committed_stock'] ?? 0);
-        $lockedStock = (int) ($meta['locked_stock'] ?? 0);
-        $availableStock = max(0, $localStock - $committedStock - $lockedStock);
+        $variantIds = $product->variants->pluck('id')->filter()->all();
+        $realLockedStock = !empty($variantIds)
+            ? (int) \App\Models\StockLock::whereIn('product_variant_id', $variantIds)
+                ->where('status', 'active')
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })
+                ->sum('quantity')
+            : 0;
+        $realCommittedStock = (int) $product->variants->sum(fn ($v) => $v->inventories->sum('reserved'));
+        $realPhysicalStock = (int) $product->variants->sum(fn ($v) => $v->inventories->sum('quantity'));
+
+        $physicalStock = $realPhysicalStock > 0 ? $realPhysicalStock : (int) ($meta['local_stock'] ?? (empty($sizes) ? ($product->stock ?? 0) : array_sum($sizes)));
+        $committedStock = $realCommittedStock > 0 ? $realCommittedStock : (int) ($meta['committed_stock'] ?? 0);
+        $lockedStock = $realLockedStock > 0 ? $realLockedStock : (int) ($meta['locked_stock'] ?? 0);
+        $availableStock = max(0, $physicalStock - $committedStock - $lockedStock);
 
         $detail = [
             'sku' => $product->sku,
@@ -158,7 +170,8 @@ class ProductSkuAndDuplicateApiController extends Controller
             'shades' => $meta['shades'] ?? [],
             'volumes' => $meta['volumes'] ?? [],
             'stock' => [
-                'local_stock' => $localStock,
+                'local_stock' => $availableStock,
+                'physical_stock' => $physicalStock,
                 'committed_stock' => $committedStock,
                 'locked_stock' => $lockedStock,
                 'available_stock' => $availableStock,
