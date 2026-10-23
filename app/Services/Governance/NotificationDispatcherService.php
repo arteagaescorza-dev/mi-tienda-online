@@ -20,6 +20,7 @@ class NotificationDispatcherService
             'purchases', 'compras', 'proveedores' => '/portal/proveedores',
             'finance', 'finanzas', 'contabilidad' => '/portal/finanzas',
             'sales', 'ventas', 'atencion', 'support' => '/portal/atencion',
+            'allies', 'convenios', 'b2b' => '/admin/convenios',
             default => '/portal/dashboard',
         };
 

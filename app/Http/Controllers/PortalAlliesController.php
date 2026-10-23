@@ -368,6 +368,19 @@ class PortalAlliesController extends Controller
 
         $type = $validated['settlement_type'] ?? 'spei_transfer';
 
+        if ($type === 'spei_transfer') {
+            $clabe = preg_replace('/\D/', '', (string) $ally->bank_clabe);
+            if (strlen($clabe) !== 18) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No es posible liquidar vía transferencia SPEI: El aliado comercial no cuenta con una clave bancaria estandarizada (CLABE) válida de 18 dígitos registrada.',
+                    ], 422);
+                }
+                return back()->with('error', 'No es posible liquidar vía transferencia SPEI: El aliado comercial no cuenta con una cuenta CLABE válida de 18 dígitos registrada.');
+            }
+        }
+
         $leadsCount = $ally->leadCaptures()->count() ?: (int)$ally->campaignsDirA()->sum('leads_count');
         $leadsCredit = $leadsCount * (float)$ally->lead_acquisition_cost;
         $commissionsDebit = (float)$ally->couponsDirB()->sum('commission_earned');
@@ -537,6 +550,38 @@ class PortalAlliesController extends Controller
             'banner_image' => $posterUrl ?? '/uploads/allies_posters/default_poster.webp',
         ]);
 
+        // Crear tarea operativa para Marketing / Superadmin en Hub 1
+        $task = \App\Models\OperationalTask::create([
+            'title' => 'Revisión Convenio: ' . $ally->name . ' (' . $campaign->title . ')',
+            'reference_code' => '#ALY-CMP-' . $campaign->id,
+            'category' => 'convenios',
+            'priority' => 'high',
+            'assigned_role' => 'marketing',
+            'status' => 'pending',
+            'due_at' => now()->addHours(24),
+            'description' => 'Propuesta de promoción B2B con beneficio: ' . $campaign->benefit,
+            'action_payload' => [
+                'campaign_id' => $campaign->id,
+                'ally_id' => $ally->id,
+                'ally_name' => $ally->name,
+                'title' => $campaign->title,
+                'benefit' => $campaign->benefit,
+                'is_on_demand' => false,
+            ],
+        ]);
+
+        // Despachar alerta al Topbar Notification Bell
+        app(\App\Services\Governance\NotificationDispatcherService::class)->dispatch([
+            'category' => 'convenios',
+            'target_role' => 'marketing',
+            'operational_task_id' => $task->id,
+            'reference_code' => (string) $campaign->id,
+            'title' => 'Nueva Solicitud de Convenio B2B: ' . $ally->name,
+            'message' => 'El aliado ' . $ally->name . ' envió la propuesta "' . $campaign->title . '" para su revisión y activación.',
+            'priority' => 'high',
+            'deep_link' => '/admin/convenios?tab=pending&ally_id=' . $ally->id,
+        ]);
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -574,6 +619,16 @@ class PortalAlliesController extends Controller
             'rejection_reason' => null,
         ]);
 
+        // Cerrar tarea operativa asociada
+        \App\Models\OperationalTask::where('reference_code', '#ALY-CMP-' . $campaign->id)
+            ->orWhere('action_payload->campaign_id', $campaign->id)
+            ->where('status', '!=', 'completed')
+            ->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'completed_by' => auth()->user()?->name ?? 'Marketing Admin',
+            ]);
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -599,6 +654,16 @@ class PortalAlliesController extends Controller
             'status' => 'rejected',
             'rejection_reason' => $reason,
         ]);
+
+        // Cerrar tarea operativa asociada
+        \App\Models\OperationalTask::where('reference_code', '#ALY-CMP-' . $campaign->id)
+            ->orWhere('action_payload->campaign_id', $campaign->id)
+            ->where('status', '!=', 'completed')
+            ->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'completed_by' => auth()->user()?->name ?? 'Marketing Admin',
+            ]);
 
         if ($request->wantsJson()) {
             return response()->json([

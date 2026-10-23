@@ -654,9 +654,19 @@
                                 </td>
                                 <td class="p-3 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <button class="button button-quiet text-[11px] py-1 px-2.5 bg-slate-900 text-white rounded shadow-2xs cursor-pointer" data-action="settle-spei-btn" data-ally-id="{{ $a['id'] }}" title="Dispersión SPEI programada para viernes (TASK-INT-19)" type="button">
-                                            SPEI
-                                        </button>
+                                        @php
+                                            $cleanClabe = preg_replace('/\D/', '', (string) ($a['bankClabe'] ?? ''));
+                                            $hasValidClabe = strlen($cleanClabe) === 18;
+                                        @endphp
+                                        @if($hasValidClabe)
+                                            <button class="button button-quiet text-[11px] py-1 px-2.5 bg-slate-900 text-white rounded shadow-2xs cursor-pointer" data-action="settle-spei-btn" data-ally-id="{{ $a['id'] }}" title="Dispersión SPEI programada para viernes (TASK-INT-19)" type="button">
+                                                SPEI
+                                            </button>
+                                        @else
+                                            <button class="button text-[11px] py-1 px-2.5 bg-slate-200 text-slate-400 rounded cursor-not-allowed opacity-60" disabled title="Bloqueado: El socio comercial no tiene una cuenta CLABE de 18 dígitos registrada para dispersión SPEI." type="button">
+                                                SPEI
+                                            </button>
+                                        @endif
                                         <button class="button button-light text-[11px] py-1 px-2 rounded shadow-2xs cursor-pointer" data-action="settle-inkind-btn" data-ally-id="{{ $a['id'] }}" title="Canje de ropa interior con asiento inmutable en Kardex" type="button">
                                             Especie
                                         </button>

@@ -236,13 +236,16 @@ class OrderProcessingService
 
             if (!empty($couponCode)) {
                 $couponResult = $this->validateCoupon($couponCode, $rawSubtotal);
-                if ($couponResult['valid']) {
-                    $discountAmount = $couponResult['discount_amount'];
-                    if ($couponResult['type'] === 'standard') {
-                        $appliedCoupon = Coupon::find($couponResult['coupon_id']);
-                    } elseif ($couponResult['type'] === 'ally_b2b') {
-                        $appliedAllyCoupon = AllyCouponDirB::find($couponResult['ally_coupon_id']);
-                    }
+                if (!$couponResult['valid']) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'coupon_code' => $couponResult['message'] ?? 'El cupón no es válido o ha expirado.',
+                    ]);
+                }
+                $discountAmount = $couponResult['discount_amount'];
+                if ($couponResult['type'] === 'standard') {
+                    $appliedCoupon = Coupon::find($couponResult['coupon_id']);
+                } elseif ($couponResult['type'] === 'ally_b2b') {
+                    $appliedAllyCoupon = AllyCouponDirB::find($couponResult['ally_coupon_id']);
                 }
             }
 

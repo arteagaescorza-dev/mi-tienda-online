@@ -101,6 +101,10 @@ class CheckoutController extends Controller
                         $allyCoupon->increment('orders_count');
                         $allyCoupon->increment('revenue_attributed', $netOrderRevenue);
                         $allyCoupon->increment('commission_earned', $commissionEarned);
+                    } else {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'coupon_code' => 'El cupón "' . $code . '" no es válido, ha expirado o se encuentra pausado.',
+                        ]);
                     }
                 }
             }

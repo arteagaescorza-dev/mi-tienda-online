@@ -9,6 +9,8 @@ use App\Models\Inventory;
 use App\Observers\ProductObserver;
 use App\Observers\ProductVariantObserver;
 use App\Observers\InventoryObserver;
+use App\Observers\AllyLeadCaptureObserver;
+use App\Models\AllyLeadCapture;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,10 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Observadores de dominio para sincronización omnicanal inmutable Interhub 4 <-> 2
+        // Observadores de dominio para sincronización omnicanal inmutable Interhub 4 <-> 2 y Hub 7 <-> 3
         Product::observe(ProductObserver::class);
         ProductVariant::observe(ProductVariantObserver::class);
         Inventory::observe(InventoryObserver::class);
+        AllyLeadCapture::observe(AllyLeadCaptureObserver::class);
 
         // Directiva Blade condicional para visibilidad financiera (TASK-RBAC-03)
         \Illuminate\Support\Facades\Blade::if('canViewFinancials', function () {

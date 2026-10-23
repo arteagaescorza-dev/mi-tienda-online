@@ -2333,25 +2333,7 @@
     }
     const code = rawCode.trim().toUpperCase();
 
-    // Si ya existe en memoria local
-    if (VALID_COUPONS[code]) {
-      const cData = VALID_COUPONS[code];
-      couponState.appliedCoupon = code;
-      couponState.discountPct = cData.discountPct;
-      couponState.attributedAlly = cData.ally;
-
-      updateCheckoutSummary();
-      renderCartSheetContent();
-      renderCouponBoxes();
-      if (checkoutState && checkoutState.step === 3) {
-        renderCheckoutStep3Review();
-      }
-
-      showToastNotification(`Cupón ${code} aplicado: ${cData.discountPct}% de descuento`);
-      return { success: true, coupon: cData };
-    }
-
-    // Validar asincronamente contra la API del backend (Hub 7 / Cupones de BD)
+    // Validar en tiempo real contra la API del backend (Hub 7 / Hub 2 / Cupones BD)
     const rawSubtotal = storeState.cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
     fetch('/api/v1/store/coupons/validate', {
       method: 'POST',
@@ -2383,11 +2365,35 @@
         }
         showToastNotification(`Cupón ${res.code} aplicado: ${res.discount_pct}% de descuento`);
       } else {
+        if (VALID_COUPONS[code]) {
+          delete VALID_COUPONS[code];
+        }
+        if (couponState.appliedCoupon === code) {
+          couponState.appliedCoupon = null;
+          couponState.discountPct = 0;
+          couponState.discountAmount = 0;
+          couponState.attributedAlly = null;
+          updateCheckoutSummary();
+          renderCartSheetContent();
+          renderCouponBoxes();
+        }
         showToastNotification(res.message || `El cupón "${code}" no es válido o ha expirado`);
       }
     })
     .catch(() => {
-      showToastNotification(`El cupón "${code}" no es válido o ha expirado`);
+      // Fallback offline si el backend no responde
+      if (VALID_COUPONS[code]) {
+        const cData = VALID_COUPONS[code];
+        couponState.appliedCoupon = code;
+        couponState.discountPct = cData.discountPct;
+        couponState.attributedAlly = cData.ally;
+        updateCheckoutSummary();
+        renderCartSheetContent();
+        renderCouponBoxes();
+        showToastNotification(`Cupón ${code} aplicado en modo local`);
+      } else {
+        showToastNotification(`El cupón "${code}" no es válido o ha expirado`);
+      }
     });
 
     return { success: false, message: 'Validando cupón...' };

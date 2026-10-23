@@ -14957,7 +14957,7 @@ function isScreenRenderedByBlade(screenName) {
   if (screenName === 'inventory' && container.querySelector('[x-data*="hybridInventoryModule"]')) return true;
   if (screenName === 'dashboard' && container.querySelector('#dashboardAppRoot')) return true;
   if (screenName === 'vendor' && container.querySelector('[x-data*="vendorExtranetApp"]')) return true;
-  if (screenName === 'allies' && container.querySelector('[x-data*="alliesPortalApp"]')) return true;
+  if (screenName === 'allies' && (container.querySelector('#alliesAppRoot') || container.querySelector('[x-data*="alliesPortalApp"]') || container.querySelector('[data-screen="allies"]'))) return true;
   if (screenName === 'store' && (container.querySelector('#storeAppRoot') || container.querySelector('[data-screen="store"]'))) return true;
   if (container.dataset && container.dataset.screen && container.dataset.screen === screenName) return true;
   return false;
@@ -21475,7 +21475,7 @@ document.addEventListener('click', (e) => {
 // HUB 7: CONVENIOS, ALIADOS & ATRIBUCION BIDIRECCIONAL (TASK-ALY-01 A TASK-ALY-05)
 // ============================================================================
 
-const alliesState = {
+var alliesState = {
   viewMode: 'admin', // 'admin' | 'partner'
   activeAdminTab: 'directory', // 'directory' | 'campaigns_a' | 'attribution_b' | 'clearing' | 'partner_portal'
   selectedAllyId: 1, // Default Paradiso Circuit
