@@ -6,6 +6,7 @@ use App\Models\ApparelColor;
 use App\Models\ApparelSizeCurve;
 use App\Models\Category;
 use App\Models\Inventory;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Str;
@@ -253,15 +254,44 @@ class ProductCatalogSyncService
                 }
             }
 
-            $inv = Inventory::query()->lockForUpdate()->firstOrCreate(
-                ['variant_id' => $variant->id, 'location' => 'warehouse-1'],
-                ['quantity' => $targetQty, 'reserved' => 0, 'type' => 'physical']
-            );
+            $inv = Inventory::query()->lockForUpdate()->where('variant_id', $variant->id)->where('location', 'warehouse-1')->first();
 
-            // Si es un producto propio y la cantidad no coincide, actualizar inventario
-            if ($product->type === 'physical' && $inv->quantity != $targetQty) {
-                $inv->quantity = $targetQty;
-                $inv->save();
+            if (! $inv) {
+                $inv = Inventory::create([
+                    'variant_id' => $variant->id,
+                    'location' => 'warehouse-1',
+                    'quantity' => $targetQty,
+                    'reserved' => 0,
+                    'type' => 'physical',
+                ]);
+
+                if ($targetQty > 0) {
+                    InventoryMovement::create([
+                        'inventory_id' => $inv->id,
+                        'user_id' => auth()->id(),
+                        'quantity' => $targetQty,
+                        'quantity_before' => 0,
+                        'quantity_after' => $targetQty,
+                        'reason' => "Alta inicial de inventario para SKU {$variant->sku}",
+                    ]);
+                }
+            } else {
+                $currentQty = (int) $inv->quantity;
+                $diff = $targetQty - $currentQty;
+
+                if ($product->type === 'physical' && $diff !== 0) {
+                    $inv->quantity = $targetQty;
+                    $inv->save();
+
+                    InventoryMovement::create([
+                        'inventory_id' => $inv->id,
+                        'user_id' => auth()->id(),
+                        'quantity' => $diff,
+                        'quantity_before' => $currentQty,
+                        'quantity_after' => $targetQty,
+                        'reason' => "Ajuste de talla '{$cleanSz}' desde edicion integral de SKU ({$product->sku})",
+                    ]);
+                }
             }
         }
     }

@@ -58,7 +58,8 @@ class StorefrontPwaModuleTest extends TestCase
         [$product] = $this->createProductWithStock('TRZ-CAT-01', 5, 399.00);
 
         // Test de API de catalogo
-        $apiResponse = $this->getJson('/api/products');
+        $portalUser = \App\Models\User::factory()->create(['role' => 'portal']);
+        $apiResponse = $this->actingAs($portalUser)->getJson('/api/products');
         $apiResponse->assertStatus(200)
             ->assertJsonFragment([
                 'title' => $product->title,

@@ -132,3 +132,4 @@ class Hub1ExecutiveSubnavViewsTest extends TestCase
         $response->assertSee('Sección Reservada para Dirección y Finanzas');
     }
 }
+

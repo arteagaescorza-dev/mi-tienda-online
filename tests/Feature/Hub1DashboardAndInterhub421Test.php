@@ -6,6 +6,8 @@ use App\Events\Inventory\PurchaseOrderReceived;
 use App\Models\Inventory;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderFinancialMargin;
+use App\Models\CustomerSubscription;
 use App\Models\OperationalTask;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -333,5 +335,99 @@ class Hub1DashboardAndInterhub421Test extends TestCase
         $this->assertEquals(10, $item['physicalStock']);
         $this->assertEquals(0, $item['lockedStock']);
         $this->assertEquals(10, $item['localStock']);
+    }
+
+    public function test_get_analytics_charts_computes_dynamic_sales_mrr_and_ebitda_from_database(): void
+    {
+        // 1. Crear órdenes con márgenes financieros en universos y fechas distintas
+        $orderToday = Order::create([
+            'order_number' => 'ORD-DYN-001',
+            'user_id' => $this->adminUser->id,
+            'status' => 'processing',
+            'order_type' => 'physical',
+            'total' => 1500.00,
+            'payment_status' => 'paid',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        OrderFinancialMargin::create([
+            'order_id' => $orderToday->id,
+            'order_number' => 'ORD-DYN-001',
+            'universe' => 'terra',
+            'gross_revenue' => 1500.00,
+            'cogs_total' => 600.00,
+            'gateway_fee' => 57.00,
+            'packaging_cost' => 16.00,
+            'shipping_courier_cost' => 145.00,
+            'net_profit' => 682.00,
+            'net_margin_percent' => 45.5,
+            'margin_health_level' => 'healthy',
+        ]);
+
+        $orderPast = Order::create([
+            'order_number' => 'ORD-DYN-002',
+            'user_id' => $this->adminUser->id,
+            'status' => 'delivered',
+            'order_type' => 'dropship',
+            'total' => 2500.00,
+            'payment_status' => 'paid',
+            'created_at' => now()->subDays(3),
+            'updated_at' => now()->subDays(3),
+        ]);
+
+        OrderFinancialMargin::create([
+            'order_id' => $orderPast->id,
+            'order_number' => 'ORD-DYN-002',
+            'universe' => 'marte',
+            'gross_revenue' => 2500.00,
+            'cogs_total' => 1200.00,
+            'gateway_fee' => 93.00,
+            'packaging_cost' => 16.00,
+            'shipping_courier_cost' => 145.00,
+            'net_profit' => 1046.00,
+            'net_margin_percent' => 41.8,
+            'margin_health_level' => 'healthy',
+        ]);
+
+        CustomerSubscription::create([
+            'subscription_folio' => 'SUB-FOLIO-TEST-001',
+            'user_id' => $this->adminUser->id,
+            'tier_name' => 'Caja VIP Marte',
+            'universe' => 'marte',
+            'monthly_amount' => 499.00,
+            'status' => 'active',
+            'next_billing_at' => now()->addMonth(),
+        ]);
+
+        // 2. Probar período 7d
+        $resp7d = $this->actingAs($this->adminUser)->getJson('/api/v1/dashboard/analytics/charts?period=7d');
+        $resp7d->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('period', '7d')
+            ->assertJsonPath('sales_vs_mrr.total_gross', 4000);
+
+        // 3. Probar que ebitda_waterfall calcula COGS y EBITDA reales desde base de datos
+        $resp7d->assertJsonPath('ebitda_waterfall.0.amount', 4000)
+            ->assertJsonPath('ebitda_waterfall.1.amount', -1800);
+
+        // 4. Probar que multiverse_shares refleja Terra y Marte de manera proporcional
+        $terraShare = collect($resp7d->json('multiverse_shares'))->firstWhere('universe', 'terra');
+        $marteShare = collect($resp7d->json('multiverse_shares'))->firstWhere('universe', 'marte');
+        $this->assertEquals(1500, $terraShare['amount']);
+        $this->assertEquals(2500, $marteShare['amount']);
+        $this->assertEquals(37.5, $terraShare['percentage']);
+        $this->assertEquals(62.5, $marteShare['percentage']);
+
+        // 5. Probar períodos 14d y 30d
+        $resp14d = $this->actingAs($this->adminUser)->getJson('/api/v1/dashboard/analytics/charts?period=14d');
+        $resp14d->assertOk()
+            ->assertJsonPath('period', '14d')
+            ->assertJsonPath('sales_vs_mrr.total_gross', 4000);
+
+        $resp30d = $this->actingAs($this->adminUser)->getJson('/api/v1/dashboard/analytics/charts?period=30d');
+        $resp30d->assertOk()
+            ->assertJsonPath('period', '30d')
+            ->assertJsonPath('sales_vs_mrr.total_gross', 4000);
     }
 }

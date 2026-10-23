@@ -722,7 +722,11 @@
                     <div>
                       <div class="product-sizes-summary">
                         <span class="sizes-label">Tallas:</span>
-                        <span class="sizes-tags">{{ implode(' · ', ($prod['sizes'] ?? ['CH', 'M', 'G'])) }}</span>
+                        <span class="sizes-tags">
+                          @foreach(($prod['sizes'] ?? ['CH', 'M', 'G']) as $sz)
+                            <span data-size="{{ $sz }}">{{ $sz }}</span>@if(!$loop->last) · @endif
+                          @endforeach
+                        </span>
                       </div>
                       <div style="display: flex; gap: 6px; margin-top: 8px;">
                         <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica completa">

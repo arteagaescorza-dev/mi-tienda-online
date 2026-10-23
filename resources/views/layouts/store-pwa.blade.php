@@ -949,7 +949,7 @@
   <div id="drawerBackdrop" class="drawer-backdrop" data-mobile-nav-backdrop></div>
 
   <!-- A. Drawer de Filtros Lateral Izquierdo con Switcher Tipo ZARA (Regla 1) -->
-  <aside id="filterDrawer" class="bottom-sheet-drawer drawer-left" data-mobile-nav-drawer aria-label="Filtros del catálogo">
+  <aside id="filterDrawer" class="bottom-sheet-drawer drawer-left zara-multiverse-filter-bar" data-mobile-nav-drawer aria-label="Filtros del catálogo">
     <div class="sheet-handle-bar"></div>
     <div class="sheet-header">
       <span class="sheet-title">Filtros & Universos</span>
@@ -966,6 +966,15 @@
     <div class="sheet-content-scroll">
       @php
         $cmsFiltersList = $catalogFilters ?? \App\Models\CmsCatalogFilter::orderBy('sort_order')->get();
+        if ($cmsFiltersList->where('filter_key', 'universe')->isEmpty()) {
+          $cmsFiltersList->prepend((object)[
+            'filter_key' => 'universe',
+            'label' => 'Universos del Catálogo',
+            'display_type' => 'checkbox',
+            'sort_order' => 0,
+            'is_visible' => true,
+          ]);
+        }
         if (!isset($catalogColors)) {
           $dbColors = \Illuminate\Support\Facades\DB::table('apparel_colors')->where('is_active', true)->get();
           $catalogColors = $dbColors->map(function ($c) {
@@ -1025,7 +1034,7 @@
                   ['key' => 'terra', 'name' => 'Terra (Ecosistema Global)'],
                 ] as $uDim)
                   <label class="filter-checkbox-label">
-                    <input type="checkbox" name="filter_universe" value="{{ $uDim['key'] }}" class="filter-facet-checkbox filter-universe-checkbox" data-action="filter-facet" data-facet-type="universe" data-val="{{ $uDim['key'] }}">
+                    <input type="checkbox" name="filter_universe" value="{{ $uDim['key'] }}" class="filter-facet-checkbox filter-universe-checkbox" data-action="filter-facet" data-facet-type="universe" data-universe="{{ $uDim['key'] }}" data-val="{{ $uDim['key'] }}">
                     <span>{{ $uDim['name'] }}</span>
                   </label>
                 @endforeach

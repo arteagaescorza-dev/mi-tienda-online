@@ -30,6 +30,13 @@ class InventoryHub4ModuleTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $user = User::factory()->create(['role' => 'portal']);
+        $this->actingAs($user);
+    }
+
     public function test_can_get_pending_credit_agreements(): void
     {
         $supplier = Supplier::create([

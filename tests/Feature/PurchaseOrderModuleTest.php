@@ -16,9 +16,15 @@ class PurchaseOrderModuleTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $user = User::factory()->create(['role' => 'portal']);
+        $this->actingAs($user);
+    }
+
     public function test_portal_inventory_displays_real_purchase_orders_and_suppliers(): void
     {
-        $user = User::factory()->create(['role' => 'portal']);
         $supplier = Supplier::factory()->create(['name' => 'Torzo Test Supplier']);
         $product = Product::factory()->create(['title' => 'Boxer Torzo Pro', 'cost' => 120.00]);
         $variant = ProductVariant::factory()->for($product)->create(['attributes' => ['size' => 'M']]);
@@ -46,7 +52,7 @@ class PurchaseOrderModuleTest extends TestCase
             'total_cost' => 2400.00,
         ]);
 
-        $response = $this->actingAs($user)->get('/admin/inventario-catalogo');
+        $response = $this->get('/admin/inventario-catalogo');
 
         $response->assertOk();
         $response->assertSee('PO-2026-TEST');

@@ -595,60 +595,9 @@ class ProductSkuAndDuplicateApiController extends Controller
                 ]);
             }
 
-            // Sincronización integral y automática en tiempo real (Familias, Categorías, Colores, Curvas de Tallas)
+            // Sincronización integral y automática en tiempo real (Familias, Categorías, Colores, Curvas de Tallas y Kardex)
             $syncService = app(\App\Services\Catalog\ProductCatalogSyncService::class);
             $syncService->syncProduct($product, $validated);
-
-            if (! empty($validated['sizes']) && is_array($validated['sizes'])) {
-                $product->load('variants.inventories');
-                foreach ($validated['sizes'] as $szKey => $targetQty) {
-                    $cleanSz = strtolower(trim((string) $szKey));
-                    $targetQty = max(0, (int) $targetQty);
-
-                    $variant = $product->variants->first(function ($v) use ($cleanSz) {
-                        return strtolower(trim((string) data_get($v->attributes, 'size', ''))) === $cleanSz;
-                    });
-
-                    if (! $variant) {
-                        $variant = ProductVariant::create([
-                            'product_id' => $product->id,
-                            'sku' => $product->sku . '-' . strtoupper($cleanSz),
-                            'price' => $pvp,
-                            'cost' => $cost,
-                            'attributes' => ['size' => strtoupper($cleanSz)],
-                        ]);
-                    } else {
-                        if ($variant->price != $pvp || $variant->cost != $cost) {
-                            $variant->update([
-                                'price' => $pvp,
-                                'cost' => $cost,
-                            ]);
-                        }
-                    }
-
-                    $inv = Inventory::query()->lockForUpdate()->firstOrCreate(
-                        ['variant_id' => $variant->id, 'location' => 'warehouse-1'],
-                        ['quantity' => 0, 'reserved' => 0, 'type' => 'physical']
-                    );
-
-                    $currentQty = (int) $inv->quantity;
-                    $diff = $targetQty - $currentQty;
-
-                    if ($diff !== 0) {
-                        $inv->quantity = $targetQty;
-                        $inv->save();
-
-                        InventoryMovement::create([
-                            'inventory_id' => $inv->id,
-                            'user_id' => auth()->id(),
-                            'quantity' => $diff,
-                            'quantity_before' => $currentQty,
-                            'quantity_after' => $targetQty,
-                            'reason' => "Ajuste de talla '{$cleanSz}' desde edicion integral de SKU ({$product->sku})",
-                        ]);
-                    }
-                }
-            }
 
             return response()->json([
                 'status' => 'success',
