@@ -3,6 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\Inventory;
+use App\Observers\ProductObserver;
+use App\Observers\ProductVariantObserver;
+use App\Observers\InventoryObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Observadores de dominio para sincronización omnicanal inmutable Interhub 4 <-> 2
+        Product::observe(ProductObserver::class);
+        ProductVariant::observe(ProductVariantObserver::class);
+        Inventory::observe(InventoryObserver::class);
+
         // Directiva Blade condicional para visibilidad financiera (TASK-RBAC-03)
         \Illuminate\Support\Facades\Blade::if('canViewFinancials', function () {
             return auth()->check() && auth()->user()->canAccessFinancialData();

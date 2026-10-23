@@ -111,20 +111,9 @@ class CmsPage extends Model
 
     public function getOverlayGradientCss(): string
     {
-        // Si el usuario configuró colores y opacidades custom directamente, tienen prioridad
-        if (!empty($this->overlay_color_start) && !empty($this->overlay_color_end)) {
-            $dir = trim($this->gradient_direction ?? 'to bottom');
-            if ($dir === '180deg') $dir = 'to bottom';
-            $rgbaStart = static::hexToRgba($this->overlay_color_start, $this->overlay_opacity_start ?? 25);
-            $rgbaEnd = static::hexToRgba($this->overlay_color_end, $this->overlay_opacity_end ?? 75);
-            if ($dir === 'radial') {
-                return "radial-gradient(circle at center, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
-            }
-            return "linear-gradient({$dir}, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
-        }
-
         $val = trim($this->overlay_gradient ?? '');
 
+        // 1. Si se seleccionó un preset temático oficial (indigo, rose, etc.), tiene prioridad
         if (!empty($val) && in_array($val, ['indigo', 'rose', 'emerald', 'amber', 'subtle'])) {
             return match ($val) {
                 'indigo' => 'linear-gradient(180deg, rgba(30, 27, 75, 0.3) 0%, rgba(49, 46, 129, 0.88) 100%)',
@@ -133,6 +122,22 @@ class CmsPage extends Model
                 'amber' => 'linear-gradient(180deg, rgba(69, 26, 3, 0.3) 0%, rgba(120, 53, 15, 0.88) 100%)',
                 'subtle' => 'linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.65) 100%)',
             };
+        }
+
+        // 2. Si el usuario configuró colores y opacidades custom directamente
+        if (!empty($this->overlay_color_start) && !empty($this->overlay_color_end)) {
+            // Si son los defaults planos #000000 y el usuario dejó 'dark' sin opacidades modificadas
+            if ($this->overlay_color_start === '#000000' && $this->overlay_color_end === '#000000' && empty($this->overlay_opacity_start) && empty($this->overlay_opacity_end) && $val === 'dark') {
+                return 'linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.88) 100%)';
+            }
+            $dir = trim($this->gradient_direction ?? 'to bottom');
+            if ($dir === '180deg') $dir = 'to bottom';
+            $rgbaStart = static::hexToRgba($this->overlay_color_start, $this->overlay_opacity_start ?? 25);
+            $rgbaEnd = static::hexToRgba($this->overlay_color_end, $this->overlay_opacity_end ?? 75);
+            if ($dir === 'radial') {
+                return "radial-gradient(circle at center, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
+            }
+            return "linear-gradient({$dir}, {$rgbaStart} 0%, {$rgbaEnd} 100%)";
         }
 
         if (str_starts_with($val, 'linear-gradient') || str_starts_with($val, 'radial-gradient')) {

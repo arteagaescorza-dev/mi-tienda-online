@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\RevOps;
 
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Cache;
 
 use App\Http\Controllers\Controller;
 use App\Models\ApparelColor;
@@ -738,6 +739,8 @@ class InventorySettingsApiController extends Controller
             'status' => $status,
         ]);
 
+        $this->invalidateStorefrontCache();
+
         return response()->json([
             'status' => 'success',
             'message' => "Sección '{$section->name}' creada exitosamente.",
@@ -802,6 +805,8 @@ class InventorySettingsApiController extends Controller
 
         $section->save();
 
+        $this->invalidateStorefrontCache();
+
         return response()->json([
             'status' => 'success',
             'message' => "Sección '{$section->name}' actualizada correctamente.",
@@ -815,6 +820,8 @@ class InventorySettingsApiController extends Controller
         $section = CmsSection::findOrFail($id);
         $section->status = ($section->status === 'active') ? 'draft' : 'active';
         $section->save();
+
+        $this->invalidateStorefrontCache();
 
         return response()->json([
             'status' => 'success',
@@ -830,6 +837,8 @@ class InventorySettingsApiController extends Controller
         $section->status = 'archived';
         $section->save();
 
+        $this->invalidateStorefrontCache();
+
         return response()->json([
             'status' => 'success',
             'message' => "Sección '{$section->name}' archivada.",
@@ -843,6 +852,8 @@ class InventorySettingsApiController extends Controller
         $section = CmsSection::findOrFail($id);
         $section->status = 'active';
         $section->save();
+
+        $this->invalidateStorefrontCache();
 
         return response()->json([
             'status' => 'success',
@@ -858,10 +869,23 @@ class InventorySettingsApiController extends Controller
         $name = $section->name;
         $section->delete();
 
+        $this->invalidateStorefrontCache();
+
         return response()->json([
             'status' => 'success',
             'message' => "Sección '{$name}' eliminada permanentemente.",
         ]);
+    }
+
+    /**
+     * Limpia la caché de vitrinas de Hub 2 para sincronización inmediata tras cambios en Hub 4.
+     */
+    protected function invalidateStorefrontCache(): void
+    {
+        Cache::forget('cms_storefront_marte');
+        Cache::forget('cms_storefront_venus');
+        Cache::forget('cms_storefront_tiresias');
+        Cache::forget('cms_storefront_terra');
     }
 
     // =========================================================================

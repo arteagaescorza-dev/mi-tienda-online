@@ -2080,11 +2080,30 @@ $curatedGoogleFonts = [
                     <label for="trackingIsActive" class="font-bold text-slate-800">Activar inyección de etiquetas de seguimiento en Storefront</label>
                 </div>
 
-                <div class="pt-4 border-t border-slate-100 flex justify-end">
-                    <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg cursor-pointer">
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <button type="button" onclick="window.testTrackingConnection(this)" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg cursor-pointer flex items-center gap-2 border border-indigo-200/80 transition-colors">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Probar Conexión &amp; Ping Telemetría</span>
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg cursor-pointer shadow-sm">
                         Guardar Configuración de Tracking
                     </button>
                 </div>
+            </form>
+
+            <!-- CARD DE DIAGNÓSTICO EN VIVO (TELEMETRÍA TRACKING) -->
+            <div id="trackingTestResults" class="mt-5 p-4 rounded-xl border border-slate-200 bg-slate-50/70 hidden">
+                <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-200/70">
+                    <h4 class="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <span>Diagnóstico de Telemetría en Vivo</span>
+                    </h4>
+                    <span id="trackingTestTimestamp" class="text-[10px] font-mono text-slate-400"></span>
+                </div>
+                <div id="trackingTestGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <!-- Cards de diagnóstico inyectadas dinámicamente -->
+                </div>
+            </div>
             </form>
         </div>
     </div>
@@ -3242,9 +3261,11 @@ $curatedGoogleFonts = [
                     <button type="button" class="create-preview-device-btn px-3 py-1.5 rounded text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer" data-device="mobile">Mobile</button>
                 </div>
                 
-                <!-- Contenedor del Preview Visual -->
+                <!-- Contenedor del Preview Visual con Sandbox y Aislamiento CSS -->
                 <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-16">
-                    <div id="livePreviewContainer" class="w-full h-[50vh] md:h-[55vh] max-h-[500px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
+                    <div id="livePreviewContainer" class="w-full h-[50vh] md:h-[55vh] max-h-[500px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative isolate" style="max-width: 100%; contain: content; isolation: isolate;">
+                        <!-- Tag de Estilos Scoped para Código CSS Custom sin Contaminación Externa -->
+                        <style id="createScopedLivePreviewStyle"></style>
                         <!-- Skeleton Header de la tienda -->
                         <div class="w-full border-b border-slate-100 p-4 flex items-center justify-between bg-white sticky top-0 z-30">
                             <div class="w-24 h-6 bg-slate-200 rounded"></div>
@@ -3714,12 +3735,37 @@ $curatedGoogleFonts = [
                             }
                         }
 
+                        // Aislamiento Scoped CSS en el Sandbox Preview (Blindaje contra colisión con RevOps)
+                        const cssArea = document.getElementById('createCustomCss');
+                        const scopedStyleEl = document.getElementById('createScopedLivePreviewStyle');
+                        if (scopedStyleEl) {
+                            const rawCss = (cssArea && cssArea.value) ? cssArea.value.trim() : '';
+                            if (rawCss) {
+                                const scopedCss = rawCss.replace(/(^|,\s*)([^{}]+)({)/g, function(match, prefix, selectors, suffix) {
+                                    const scopedSelectors = selectors.split(',').map(s => {
+                                        const trimmed = s.trim();
+                                        if (!trimmed || trimmed.startsWith('@') || trimmed.startsWith(':root')) return trimmed;
+                                        return '#livePreviewContainer ' + trimmed;
+                                    }).join(', ');
+                                    return prefix + scopedSelectors + ' ' + suffix;
+                                });
+                                scopedStyleEl.textContent = scopedCss;
+                            } else {
+                                scopedStyleEl.textContent = '';
+                            }
+                        }
+
                         if (isCustom) {
                             if (previewHeroArea) previewHeroArea.style.display = 'none';
                             if (previewCarouselArea) previewCarouselArea.style.display = 'none';
                             if (previewPopUpArea) previewPopUpArea.style.display = 'none';
                             if (previewButtonsArea) previewButtonsArea.style.display = 'flex';
                         }
+                    }
+
+                    const editCustomCssInp = document.getElementById('editCustomCss');
+                    if (editCustomCssInp) {
+                        editCustomCssInp.addEventListener('input', () => { window.updatePreviewEdit && window.updatePreviewEdit(); });
                     }
 
                     // Handlers para la imagen y video de fondo
@@ -4817,9 +4863,11 @@ $curatedGoogleFonts = [
                     <button type="button" class="edit-preview-device-btn px-3 py-1.5 rounded text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer" data-device="mobile">Mobile</button>
                 </div>
                 
-                <!-- Contenedor del Preview Visual -->
+                <!-- Contenedor del Preview Visual con Sandbox y Aislamiento CSS -->
                 <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-16">
-                    <div id="editLivePreviewContainer" class="w-full h-[50vh] md:h-[55vh] max-h-[500px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
+                    <div id="editLivePreviewContainer" class="w-full h-[50vh] md:h-[55vh] max-h-[500px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative isolate" style="max-width: 100%; contain: content; isolation: isolate;">
+                        <!-- Tag de Estilos Scoped para Código CSS Custom sin Contaminación Externa -->
+                        <style id="editScopedLivePreviewStyle"></style>
                         <!-- Skeleton Header de la tienda -->
                         <div class="w-full border-b border-slate-100 p-4 flex items-center justify-between bg-white sticky top-0 z-30">
                             <div class="w-24 h-6 bg-slate-200 rounded"></div>
@@ -5278,12 +5326,37 @@ $curatedGoogleFonts = [
                             }
                         }
 
+                        // Aislamiento Scoped CSS en el Sandbox Preview (Blindaje contra colisión con RevOps)
+                        const cssArea = document.getElementById('editCustomCss');
+                        const scopedStyleEl = document.getElementById('editScopedLivePreviewStyle');
+                        if (scopedStyleEl) {
+                            const rawCss = (cssArea && cssArea.value) ? cssArea.value.trim() : '';
+                            if (rawCss) {
+                                const scopedCss = rawCss.replace(/(^|,\s*)([^{}]+)({)/g, function(match, prefix, selectors, suffix) {
+                                    const scopedSelectors = selectors.split(',').map(s => {
+                                        const trimmed = s.trim();
+                                        if (!trimmed || trimmed.startsWith('@') || trimmed.startsWith(':root')) return trimmed;
+                                        return '#editLivePreviewContainer ' + trimmed;
+                                    }).join(', ');
+                                    return prefix + scopedSelectors + ' ' + suffix;
+                                });
+                                scopedStyleEl.textContent = scopedCss;
+                            } else {
+                                scopedStyleEl.textContent = '';
+                            }
+                        }
+
                         if (isCustom) {
                             if (previewHeroArea) previewHeroArea.style.display = 'none';
                             if (previewCarouselArea) previewCarouselArea.style.display = 'none';
                             if (previewPopUpArea) previewPopUpArea.style.display = 'none';
                             if (previewButtonsArea) previewButtonsArea.style.display = 'flex';
                         }
+                    }
+
+                    const editCustomCssInp = document.getElementById('editCustomCss');
+                    if (editCustomCssInp) {
+                        editCustomCssInp.addEventListener('input', () => { window.updatePreviewEdit && window.updatePreviewEdit(); });
                     }
 
                     // Handlers para la imagen y video de fondo
@@ -6280,10 +6353,11 @@ $curatedGoogleFonts = [
 
     // Mapeo retrocompatible para enlaces a subsecciones dentro del acordeón unificado
     const subSectionMap = {
-        'banners': { tab: 'content_rules', accordionId: 'accordionSecBanners' },
+        'banners': { tab: 'sections', accordionId: null },
         'shipping': { tab: 'content_rules', accordionId: 'accordionSecShipping' },
         'editorial': { tab: 'content_rules', accordionId: 'accordionSecEditorial' },
-        'footer': { tab: 'content_rules', accordionId: 'accordionSecFooter' }
+        'footer': { tab: 'content_rules', accordionId: 'accordionSecFooter' },
+        'blog': { tab: 'content_rules', accordionId: 'accordionSecBlog' }
     };
 
     // Funciones operativas de Acordeón
@@ -6307,7 +6381,7 @@ $curatedGoogleFonts = [
     };
 
     window.toggleAllStoreAccordions = function(expand) {
-        const sections = ['accordionSecBanners', 'accordionSecShipping', 'accordionSecEditorial', 'accordionSecFooter'];
+        const sections = ['accordionSecShipping', 'accordionSecEditorial', 'accordionSecFooter', 'accordionSecBlog'];
         sections.forEach(secId => {
             const section = document.getElementById(secId);
             const body = document.getElementById(secId + 'Body');
@@ -9766,8 +9840,103 @@ window.selectCmsMedia = function(url) {
     if (targetCmsMediaInput) {
         targetCmsMediaInput.value = url;
         targetCmsMediaInput.dispatchEvent(new Event('input', { bubbles: true }));
+        targetCmsMediaInput.dispatchEvent(new Event('change', { bubbles: true }));
+        if (targetCmsMediaInput.id === 'createHeroBgUrl') {
+            window.previewHeroBgUrl && window.previewHeroBgUrl(url, 'createHeroBgPreview');
+        } else if (targetCmsMediaInput.id === 'editHeroBgUrl') {
+            window.previewHeroBgUrl && window.previewHeroBgUrl(url, 'editHeroBgPreview');
+            window.updatePreviewEdit && window.updatePreviewEdit();
+        } else if (targetCmsMediaInput.id === 'createPopupImageUrl') {
+            window.renderPopUpLivePreview && window.renderPopUpLivePreview('create');
+        } else if (targetCmsMediaInput.id === 'editPopupImageUrl') {
+            window.renderPopUpLivePreview && window.renderPopUpLivePreview('edit');
+        } else if (targetCmsMediaInput.id === 'qna_hero_image_url') {
+            const qnaImg = document.getElementById('qna_hero_preview_img');
+            if (qnaImg) qnaImg.src = url;
+        }
     }
     window.closeCmsMediaModal();
+};
+
+window.testTrackingConnection = function(btn) {
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<svg class="w-4 h-4 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Probando...</span>`;
+    }
+
+    const form = document.querySelector('#storeTrackingPanel form');
+    const formData = new FormData(form);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                      || document.querySelector('input[name="_token"]')?.value;
+
+    fetch('{{ route("portal.store.tracking.test") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        }
+
+        const resultsContainer = document.getElementById('trackingTestResults');
+        const grid = document.getElementById('trackingTestGrid');
+        const tsEl = document.getElementById('trackingTestTimestamp');
+        if (!resultsContainer || !grid) return;
+
+        grid.innerHTML = '';
+        if (tsEl && data.timestamp) {
+            tsEl.textContent = new Date(data.timestamp).toLocaleTimeString();
+        }
+
+        const diag = data.diagnostics || {};
+        Object.keys(diag).forEach(k => {
+            const item = diag[k];
+            let badgeBg = 'bg-slate-100 text-slate-700 border-slate-200';
+            let iconSvg = '';
+            if (item.status === 'success') {
+                badgeBg = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+                iconSvg = `<svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+            } else if (item.status === 'warning') {
+                badgeBg = 'bg-amber-50 text-amber-800 border-amber-200';
+                iconSvg = `<svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`;
+            } else if (item.status === 'error') {
+                badgeBg = 'bg-rose-50 text-rose-800 border-rose-200';
+                iconSvg = `<svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
+            } else {
+                iconSvg = `<svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+            }
+
+            grid.insertAdjacentHTML('beforeend', `
+                <div class="p-3 rounded-lg border ${badgeBg} flex flex-col gap-1.5">
+                    <div class="flex items-center justify-between font-bold">
+                        <div class="flex items-center gap-1.5">
+                            ${iconSvg}
+                            <span>${item.name || k.toUpperCase()}</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-white/70">${item.status}</span>
+                    </div>
+                    <p class="text-[11px] leading-relaxed opacity-90">${item.message}</p>
+                </div>
+            `);
+        });
+
+        resultsContainer.classList.remove('hidden');
+    })
+    .catch(err => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        }
+        console.error(err);
+        alert('Error de conexión al ejecutar el ping de telemetría.');
+    });
 };
 
 window.uploadCmsMedia = function(input) {

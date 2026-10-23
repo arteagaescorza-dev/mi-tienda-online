@@ -121,6 +121,7 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::put('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'updateBlogPost'])->name('portal.store.blog.update');
 	Route::delete('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'destroyBlogPost'])->name('portal.store.blog.destroy');
 	Route::post('/admin/tienda-cms/tracking', [PortalStoreController::class, 'updateTracking'])->name('portal.store.tracking.update');
+	Route::post('/admin/tienda-cms/tracking/test', [PortalStoreController::class, 'testTracking'])->name('portal.store.tracking.test');
 	Route::post('/admin/tienda-cms/filtros', [PortalStoreController::class, 'updateFilters'])->name('portal.store.filters.update');
 	Route::get('/admin/tienda-cms/media', [PortalStoreController::class, 'apiGetMedia'])->name('portal.store.media.get');
 	Route::post('/admin/tienda-cms/media', [PortalStoreController::class, 'apiUploadMedia'])->name('portal.store.media.upload');

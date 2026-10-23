@@ -1525,8 +1525,8 @@
           </div>
 
           {{-- 4. CONTENIDO INFERIOR INTEGRADO AL BOTÓN (ALTO CONTRASTE GARANTIZADO) --}}
-          <div class="explore-card-content">
-            <h3 class="explore-card-title">
+          <div class="explore-card-content" style="color: {{ $textColor }};">
+            <h3 class="explore-card-title" style="color: {{ $textColor }};">
               {{ $ep->title }}
             </h3>
             @if(!empty($ep->seo_description))
