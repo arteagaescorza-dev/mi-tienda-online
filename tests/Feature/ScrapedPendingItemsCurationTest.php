@@ -246,6 +246,9 @@ class ScrapedPendingItemsCurationTest extends TestCase
                 && $item['physicalStock'] === 0
                 && $item['committedStock'] === 0
                 && $item['type'] === 'dropship'
+                && $item['supplierType'] === 'dropship'
+                && $item['isScraped'] === true
+                && $item['is_scraped'] === true
                 && $item['supplierStock'] === 50
                 && $item['status'] === 'Sincronizado';
         });
@@ -267,6 +270,60 @@ class ScrapedPendingItemsCurationTest extends TestCase
             $this->assertEquals(0, $variant['stock_available']);
             $this->assertEquals('Bajo Pedido', $variant['stock_badge']);
         }
+    }
+
+    /**
+     * Politica Oficial: Los productos scrapeados y dropshipping no participan del ROP (Reorder Point).
+     * No generan alertas de reabastecimiento en Hub 4 ni participan en filtros de bajo ROP.
+     */
+    public function test_scraped_and_dropship_products_strictly_do_not_participate_in_rop()
+    {
+        $supplier = Supplier::create([
+            'name' => 'Torzo ROP Dropship Supplier',
+            'type' => 'dropship_scrape',
+            'contact_name' => 'Torzo Contact',
+            'email' => 'rop_dropship@torzo.test',
+        ]);
+
+        $product = Product::create([
+            'sku' => 'PRV-ROP-TEST-001',
+            'title' => 'Prenda Scrapeada No ROP',
+            'slug' => 'prenda-scrapeada-no-rop',
+            'brand' => 'Torzo',
+            'type' => 'dropship',
+            'price' => 350.00,
+            'cost' => 150.00,
+            'visible' => true,
+            'is_archived' => false,
+            'meta' => [
+                'is_scraped' => true,
+                'provider' => 'Torzo',
+                'category' => 'Underwear',
+                'supplier_stock' => 50,
+                'sizes' => ['ch' => 5, 'm' => 10],
+            ],
+        ]);
+
+        $syncService = app(\App\Services\Catalog\ProductCatalogSyncService::class);
+        $syncService->syncProduct($product, $product->meta);
+
+        $portalResponse = $this->actingAs($this->adminUser)->get('/admin/inventario-catalogo');
+        $portalResponse->assertStatus(200);
+        $portalResponse->assertViewHas('portalProducts', function ($products) use ($product) {
+            $item = collect($products)->firstWhere('id', $product->id);
+            if (!$item) return false;
+
+            return $item['isScraped'] === true
+                && $item['is_scraped'] === true
+                && $item['supplierType'] === 'dropship'
+                && $item['type'] === 'dropship'
+                && $item['localStock'] === 0;
+        });
+
+        // Aseguramos que la vista contenga la logica reactiva que excluye items scrapeados de ROP
+        $content = $portalResponse->getContent();
+        $this->assertStringContainsString('isDropshipOrScraped(item)', $content);
+        $this->assertStringContainsString('On-Demand', $content);
     }
 
     /**

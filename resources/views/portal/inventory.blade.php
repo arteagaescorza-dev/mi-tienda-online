@@ -1002,23 +1002,36 @@
                                                 <span class="badge-stock-locked stock-lock-pulse text-rose-600 font-semibold bg-rose-50 px-1 rounded border border-rose-200" :title="'En Carrito de Compra (TTL 5m): ' + getLockedStock(item)"><svg class="w-2.5 h-2.5 inline-block -mt-0.5 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span x-text="getLockedStock(item) + ' carrito'"></span></span>
                                             </template>
                                         </div>
-                                        <!-- DOH & Alerta ROP -->
+                                        <!-- DOH & Alerta ROP (Exclusivo Stock Físico Local / Excluye Scraped y Dropship) -->
                                         <div class="mt-1 flex items-center gap-1">
-                                            <span 
-                                                :class="getDOHBadgeClass(getDOH(item))"
-                                                class="text-[9px] font-bold px-1.5 py-0.2 rounded border"
-                                                :title="'Días de Inventario Restante (DOH): ' + getDOH(item) + ' días'"
-                                                x-text="getDOH(item) + 'd DOH'"
-                                            ></span>
-                                            <template x-if="isUnderROP(item)">
-                                                <button 
-                                                    type="button" 
-                                                    @click.stop="generateROPOrder(item)"
-                                                    class="text-[9px] font-extrabold bg-rose-600 hover:bg-rose-700 text-white px-1.5 py-0.2 rounded shadow-2xs cursor-pointer animate-pulse"
-                                                    :title="'Bajo Punto de Reorden (ROP=' + getROP(item) + '). Clic para generar orden de reabastecimiento.'"
+                                            <template x-if="isDropshipOrScraped(item)">
+                                                <span 
+                                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded border bg-sky-50 text-sky-700 border-sky-200 inline-flex items-center gap-1"
+                                                    title="Producto bajo demanda / dropshipping: No participa en Punto de Reorden (ROP) ni métricas DOH de almacén local"
                                                 >
-                                                    <svg class="w-3 h-3 inline-block -mt-0.5 mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>ROP
-                                                </button>
+                                                    <svg class="w-2.5 h-2.5 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                                    On-Demand
+                                                </span>
+                                            </template>
+                                            <template x-if="!isDropshipOrScraped(item)">
+                                                <div class="flex items-center gap-1">
+                                                    <span 
+                                                        :class="getDOHBadgeClass(getDOH(item))"
+                                                        class="text-[9px] font-bold px-1.5 py-0.2 rounded border"
+                                                        :title="'Días de Inventario Restante (DOH): ' + getDOH(item) + ' días'"
+                                                        x-text="getDOH(item) + 'd DOH'"
+                                                    ></span>
+                                                    <template x-if="isUnderROP(item)">
+                                                        <button 
+                                                            type="button" 
+                                                            @click.stop="generateROPOrder(item)"
+                                                            class="text-[9px] font-extrabold bg-rose-600 hover:bg-rose-700 text-white px-1.5 py-0.2 rounded shadow-2xs cursor-pointer animate-pulse"
+                                                            :title="'Bajo Punto de Reorden (ROP=' + getROP(item) + '). Clic para generar orden de reabastecimiento.'"
+                                                        >
+                                                            <svg class="w-3 h-3 inline-block -mt-0.5 mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>ROP
+                                                        </button>
+                                                    </template>
+                                                </div>
                                             </template>
                                         </div>
                                     </div>
@@ -11764,7 +11777,7 @@
 
                                 <div class="flex items-center justify-between pt-2">
                                     <div class="text-xs text-slate-500">
-                                        Al guardar, se recalcula inmediatamente el umbral de alerta en las tablas operativas de bodega y en el Kardex.
+                                        Al guardar, se recalcula inmediatamente el umbral de alerta en las prendas físicas de bodega y en el Kardex. Los productos scrapeados y bajo demanda (dropshipping) quedan expresamente excluidos de ROP y DOH.
                                     </div>
                                     <button 
                                         type="button" 

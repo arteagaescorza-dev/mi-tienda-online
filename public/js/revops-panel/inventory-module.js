@@ -4065,12 +4065,25 @@ function hybridInventoryModule() {
         // =========================================================================
 
         // [P4.1] Motor Predictivo ROP / DOH
+        isDropshipOrScraped(product) {
+            if (!product) return false;
+            return product.type === 'dropship' ||
+                product.isScraped === true ||
+                product.is_scraped === true ||
+                product.supplierType === 'dropship' ||
+                (product.provider && String(product.provider).toLowerCase().includes('torzo')) ||
+                (product.brand && String(product.brand).toLowerCase().includes('torzo')) ||
+                (product.originUrl && String(product.originUrl).includes('torzo')) ||
+                (product.sku && String(product.sku).startsWith('PRV-'));
+        },
+
         getDailySales(product) {
             const monthly = product.monthlySales || 30;
             return Math.round((monthly / 30) * 10) / 10;
         },
 
         getDOH(product) {
+            if (this.isDropshipOrScraped(product)) return null;
             const avail = this.getAvailableStock(product);
             const vmd = (product.monthlySales || 30) / 30;
             if (vmd <= 0) return 999;
@@ -4078,6 +4091,7 @@ function hybridInventoryModule() {
         },
 
         getROP(product) {
+            if (this.isDropshipOrScraped(product)) return 0;
             const vmd = (product.monthlySales || 30) / 30;
             const leadTime = product.leadTimeDays || 4;
             const safety = product.safetyStock || 10;
@@ -4085,16 +4099,22 @@ function hybridInventoryModule() {
         },
 
         isUnderROP(product) {
+            if (this.isDropshipOrScraped(product)) return false;
             return this.getAvailableStock(product) <= this.getROP(product);
         },
 
         getDOHBadgeClass(doh) {
+            if (doh === null || doh === undefined) return 'bg-slate-50 text-slate-500 border-slate-200';
             if (doh <= 7) return 'bg-rose-50 text-rose-700 border-rose-200';
             if (doh <= 15) return 'bg-amber-50 text-amber-700 border-amber-200';
             return 'bg-emerald-50 text-emerald-700 border-emerald-200';
         },
 
         generateROPOrder(product) {
+            if (this.isDropshipOrScraped(product)) {
+                this.showToast('El producto ' + product.sku + ' es bajo demanda (dropshipping) y no participa en órdenes ROP de inventario local.', 'warning');
+                return;
+            }
             if (this.isProductInPurchaseList(product.sku)) {
                 this.showToast('El producto ' + product.sku + ' ya se encuentra en la lista de compras planificadas.', 'info');
                 return;
@@ -4139,6 +4159,10 @@ function hybridInventoryModule() {
         },
 
         openCreatePOForProduct(product) {
+            if (this.isDropshipOrScraped(product)) {
+                this.showToast('El producto ' + product.sku + ' es bajo demanda (dropshipping) y no admite orden de reabastecimiento ROP local.', 'warning');
+                return;
+            }
             this.generateROPOrder(product);
             this.activeTab = 'purchases';
             this.showToast('Redirigiendo a Órdenes de Compra para ' + product.sku, 'info');
@@ -4582,6 +4606,12 @@ function hybridInventoryModule() {
         init() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverInventoryProducts) && window.serverInventoryProducts.length > 0) {
                 this.products = window.serverInventoryProducts;
+                this.products.forEach(p => {
+                    if (this.isDropshipOrScraped(p)) {
+                        p.ropUnits = 0;
+                        p.isUnderRop = false;
+                    }
+                });
             }
             if (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers)) {
                 this.providers = window.serverSuppliers;
@@ -8851,6 +8881,11 @@ function hybridInventoryModule() {
 
             let underCount = 0;
             (this.products || []).forEach(p => {
+                if (this.isDropshipOrScraped(p)) {
+                    p.ropUnits = 0;
+                    p.isUnderRop = false;
+                    return;
+                }
                 const lt = (p.supplierType === 'dropship') ? ltDropship : ltLocal;
                 const vel = p.dailyVelocity || defSales;
                 p.ropUnits = Math.ceil((vel * lt) + ssDays);
