@@ -42,7 +42,7 @@ class AuthModalController extends Controller
         }
 
         $user = $request->user();
-        if ($user && in_array($user->role, ['portal', 'admin'], true)) {
+        if ($user && in_array($user->role, ['portal', 'admin', 'superadmin'], true)) {
             return redirect()->intended(route('portal.dashboard'));
         }
 

@@ -87,8 +87,8 @@ class PortalDashboardController extends Controller
         $doubtfulAddresses = Order::query()->whereIn('status', ['pending', 'processing'])
             ->where(function ($q) {
                 $q->whereNull('shipping_address')
-                  ->orWhere('shipping_address', 'like', '%s/n%')
-                  ->orWhere('shipping_address', 'like', '%sin numero%');
+                  ->orWhereRaw('LOWER(CAST(shipping_address AS TEXT)) LIKE ?', ['%s/n%'])
+                  ->orWhereRaw('LOWER(CAST(shipping_address AS TEXT)) LIKE ?', ['%sin numero%']);
             })->count();
 
         $kpis = [
