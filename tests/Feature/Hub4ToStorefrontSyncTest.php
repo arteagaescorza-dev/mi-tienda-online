@@ -438,7 +438,7 @@ class Hub4ToStorefrontSyncTest extends TestCase
         $resFabric->assertOk();
 
         // 2. Actualizar marca en configuración
-        $resBrand = $this->actingAs($this->adminUser)->putJson("/api/v1/inventory/settings/brands/{$brand->id}", [
+        $resBrand = $this->actingAs($this->adminUser)->putJson("/api/v1/inventory/brands/{$brand->id}", [
             'name' => 'Torzo Black Label',
             'supplier_id' => $supplier->id,
             'is_active' => true,

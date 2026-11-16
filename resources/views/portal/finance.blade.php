@@ -1375,7 +1375,7 @@ function openClaimModal() {
 
     const firstReconId = checked[0].getAttribute('data-recon-id');
     const form = document.getElementById('shippingClaimForm');
-    form.action = `/portal/finance/shipping-audit/${firstReconId}/claim`;
+    form.action = `/admin/finanzas/auditoria-envios/${firstReconId}/reclamar`;
 
     const container = document.getElementById('hiddenClaimItemsContainer');
     container.innerHTML = '';

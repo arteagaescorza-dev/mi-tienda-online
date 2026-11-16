@@ -136,11 +136,20 @@ class PortalAuthorizationTest extends TestCase
     {
         $user = User::factory()->create(['role' => 'portal']);
 
-        foreach (['chatbot', 'atribucion', 'emailing', 'cupones', 'conciliacion', 'logistica', 'garantias'] as $module) {
+        $expectedRedirects = [
+            'chatbot' => route('portal.marketing'),
+            'atribucion' => route('portal.marketing'),
+            'emailing' => route('portal.marketing'),
+            'cupones' => route('portal.marketing'),
+            'conciliacion' => route('portal.finance'),
+            'logistica' => route('portal.logistics'),
+            'garantias' => route('portal.logistics'),
+        ];
+
+        foreach ($expectedRedirects as $module => $targetUrl) {
             $this->actingAs($user)
                 ->get('/admin/modulos/' . $module)
-                ->assertOk()
-                ->assertSee('Modulo preparado para su implementacion');
+                ->assertRedirect($targetUrl);
         }
     }
 

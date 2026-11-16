@@ -46,5 +46,10 @@ class AuditBlockTwoTest extends TestCase
         $search = $mcp->callTool('storefront_search_products', ['query' => 'Playera'], null);
         $this->assertFalse($search['isError']);
         $this->assertSame('Algodon Peinado', $search['structuredContent']['items'][0]['fabric']);
+
+        $admin = User::factory()->create(['role' => 'admin']);
+        $finance = $mcp->callTool('finance_get_margin_summary', ['days' => 30], $admin);
+        $this->assertFalse($finance['isError']);
+        $this->assertArrayHasKey('net_margin', $finance['structuredContent']);
     }
 }

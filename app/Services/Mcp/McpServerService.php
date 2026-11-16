@@ -330,7 +330,7 @@ class McpServerService
 
         $ordersCount = Order::where('created_at', '>=', $since)->count();
         $grossSales = (float) Order::where('created_at', '>=', $since)->sum('total');
-        $netMargin = (float) OrderFinancialMargin::where('created_at', '>=', $since)->sum('net_margin');
+        $netMargin = (float) OrderFinancialMargin::where('created_at', '>=', $since)->sum('net_profit');
 
         return [
             'window_days' => $days,

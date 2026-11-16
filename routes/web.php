@@ -73,7 +73,6 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 		Route::post('/admin/finanzas/cuentas/{vendorBill}/pagar', [\App\Http\Controllers\PortalFinanceController::class, 'payVendorBill'])->name('portal.finance.vendor_bills.pay');
 		Route::post('/admin/finanzas/auditoria-envios/cargar', [\App\Http\Controllers\PortalFinanceController::class, 'uploadShippingInvoiceReport'])->name('portal.finance.shipping_audit.upload');
 		Route::post('/admin/finanzas/auditoria-envios/{reconciliation}/reclamar', [\App\Http\Controllers\PortalFinanceController::class, 'fileShippingClaim'])->name('portal.finance.shipping_audit.claim');
-		Route::post('/portal/finance/shipping-audit/{reconciliation}/claim', [\App\Http\Controllers\PortalFinanceController::class, 'fileShippingClaim']);
 		Route::post('/admin/finanzas/cotejo-3-vias/verificar', [\App\Http\Controllers\PortalFinanceController::class, 'verifyThreeWayMatching'])->name('portal.finance.three_way_matching.verify');
 		Route::post('/admin/finanzas/cotejo-3-vias/{id}/nota-debito', [\App\Http\Controllers\PortalFinanceController::class, 'issueDebitNoteWeb'])->name('portal.finance.three_way_matching.debit_note');
 		Route::post('/admin/finanzas/cotejo-3-vias/{id}/autorizar-spei', [\App\Http\Controllers\PortalFinanceController::class, 'authorizeSpeiPayoutWeb'])->name('portal.finance.three_way_matching.authorize_spei');

@@ -145,17 +145,6 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
             Route::match(['post', 'patch'], '/store-sections/{id}/restore', [InventorySettingsApiController::class, 'restoreStoreSection']);
             Route::delete('/store-sections/{id}', [InventorySettingsApiController::class, 'destroyStoreSection']);
 
-            // GESTIÓN INTEGRAL DE MARCAS COMERCIALES (TASK-BRD-01)
-            Route::get('/brands', [BrandApiController::class, 'index']);
-            Route::post('/brands', [BrandApiController::class, 'store']);
-            Route::get('/brands/{id}', [BrandApiController::class, 'show']);
-            Route::put('/brands/{id}', [BrandApiController::class, 'update']);
-            Route::patch('/brands/{id}/toggle-active', [BrandApiController::class, 'toggleActive']);
-            Route::post('/brands/{id}/archive', [BrandApiController::class, 'archive']);
-            Route::post('/brands/{id}/restore', [BrandApiController::class, 'restore']);
-            Route::delete('/brands/{id}', [BrandApiController::class, 'destroy']);
-            Route::post('/brands/{id}/assign-supplier', [BrandApiController::class, 'assignSupplier']);
-
             // TABULADORES DE PRECIOS MOQ POR PROVEEDOR (REGLA COMPRAS & INVENTARIO)
             Route::get('/moq-sheets', [InventorySettingsApiController::class, 'getMoqSheets']);
             Route::post('/moq-sheets', [InventorySettingsApiController::class, 'storeMoqSheet']);
