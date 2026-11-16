@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
 
 });
 
+use App\Http\Controllers\PortalDashboardController;
+use App\Http\Controllers\PortalInventoryController;
 use App\Http\Controllers\PortalLogisticsController;
 use App\Http\Controllers\PortalMarketingController;
 use App\Http\Controllers\PortalStoreController;
@@ -44,16 +46,16 @@ use App\Http\Controllers\PortalAlliesController;
 
 Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::get('/admin', fn () => redirect()->route('portal.dashboard'));
-	Route::get('/admin/dashboard', [StorefrontController::class, 'portalDashboard'])->name('portal.dashboard');
+	Route::get('/admin/dashboard', [PortalDashboardController::class, 'portalDashboard'])->name('portal.dashboard');
 	Route::get('/admin/tienda-cms', [PortalStoreController::class, 'index'])->name('portal.store');
 	Route::get('/admin/marketing', [PortalMarketingController::class, 'index'])->name('portal.marketing');
-	Route::get('/admin/scoring', [StorefrontController::class, 'portalScoring'])->name('portal.scoring');
-	Route::get('/admin/inventario-catalogo', [StorefrontController::class, 'portalInventory'])->name('portal.inventory');
+	Route::get('/admin/scoring', [PortalDashboardController::class, 'portalScoring'])->name('portal.scoring');
+	Route::get('/admin/inventario-catalogo', [PortalInventoryController::class, 'portalInventory'])->name('portal.inventory');
 	Route::get('/admin/logistica', [PortalLogisticsController::class, 'index'])->name('portal.logistics');
 	Route::get('/admin/convenios', [PortalAlliesController::class, 'index'])->name('portal.allies');
 	Route::get('/admin/gobernanza', [\App\Http\Controllers\PortalGovernanceController::class, 'index'])->name('portal.governance');
 	Route::post('/admin/gobernanza/entorno', [\App\Http\Controllers\PortalGovernanceController::class, 'updateEnvironment'])->name('portal.governance.environment.update');
-	Route::get('/admin/modulos/{module}', [StorefrontController::class, 'portalModule'])->name('portal.module');
+	Route::get('/admin/modulos/{module}', [PortalDashboardController::class, 'portalModule'])->name('portal.module');
 	Route::get('/admin/proveedores/colores', [SupplierColorMappingController::class, 'index'])->name('portal.suppliers.colors');
 	Route::post('/admin/inventario/{inventory}/movimientos', [InventoryMovementController::class, 'store'])->name('portal.inventory.movements.store');
 	Route::post('/admin/proveedores/{supplier}/sincronizar', [SupplierSyncController::class, 'store'])->name('portal.suppliers.sync');
