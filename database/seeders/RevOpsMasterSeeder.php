@@ -38,7 +38,7 @@ class RevOpsMasterSeeder extends Seeder
             ['name' => 'Spandex / Elastano 4-Way', 'slug' => 'spandex-elastano', 'description' => 'Compresión afirmativa y ajuste dinámico.'],
         ];
         foreach ($fabrics as $fab) {
-            ApparelFabric::updateOrCreate(['slug' => $fab['slug']], $fab);
+            ApparelFabric::updateOrCreate(['name' => $fab['name']], $fab);
         }
 
         // 3. Apparel Colors
