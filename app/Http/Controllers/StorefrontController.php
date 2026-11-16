@@ -507,8 +507,10 @@ class StorefrontController extends Controller
             ->where('visible', true)
             ->where(function ($query) use ($slug) {
                 $query->where('slug', $slug)
-                    ->orWhere('id', $slug)
                     ->orWhere('sku', $slug);
+                if (ctype_digit($slug)) {
+                    $query->orWhere('id', (int) $slug);
+                }
             })
             ->first();
 

@@ -997,7 +997,6 @@
           }
         }
         $cmsFiltersList = $cmsFiltersList->sortBy('sort_order');
-      @endphp
         if (!isset($catalogColors)) {
           $dbColors = \Illuminate\Support\Facades\DB::table('apparel_colors')->where('is_active', true)->get();
           $catalogColors = $dbColors->map(function ($c) {
