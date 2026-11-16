@@ -175,7 +175,7 @@ class VariantDimensionService
 
     public function ensureDefaultCategories(): void
     {
-        if (Category::withTrashed()->count() > 0) {
+        if (Category::withTrashed()->count() > 0 || \App\Models\CmsOfficialDocument::where('code', 'INVENTORY_CATEGORIES_BOOTSTRAPPED')->exists()) {
             return;
         }
 
@@ -236,6 +236,11 @@ class VariantDimensionService
                     Category::create($childData);
                 }
             }
+
+            \App\Models\CmsOfficialDocument::firstOrCreate(
+                ['code' => 'INVENTORY_CATEGORIES_BOOTSTRAPPED'],
+                ['title' => 'Bootstrap Categorías Hub 4', 'payload' => ['initialized' => true], 'is_active' => false]
+            );
         });
     }
 
@@ -558,6 +563,11 @@ class VariantDimensionService
         if ($category->children()->count() > 0) {
             $category->children()->update(['parent_id' => null]);
         }
+
+        \App\Models\CmsOfficialDocument::firstOrCreate(
+            ['code' => 'INVENTORY_CATEGORIES_BOOTSTRAPPED'],
+            ['title' => 'Bootstrap Categorías Hub 4', 'payload' => ['initialized' => true], 'is_active' => false]
+        );
 
         return (bool) $category->forceDelete();
     }
