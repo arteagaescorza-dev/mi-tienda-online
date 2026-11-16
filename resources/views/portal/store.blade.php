@@ -7169,9 +7169,99 @@ $curatedGoogleFonts = [
     };
 
 
-    window.previewHeroBgImage = function(fileInput, previewContainerId) {
+    window.CMS_MAX_VERCEL_UPLOAD_BYTES = 4 * 1024 * 1024; // 4 MB (margen seguro bajo límite 4.5 MB de Vercel)
+
+    window.convertImageFileToWebp = function(file, maxBytes = window.CMS_MAX_VERCEL_UPLOAD_BYTES) {
+        return new Promise((resolve, reject) => {
+            if (!file || !file.type || !file.type.startsWith('image/')) {
+                resolve(file);
+                return;
+            }
+            if (file.type === 'image/webp' && file.size <= maxBytes) {
+                resolve(file);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('No se pudo leer la imagen.'));
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onerror = () => reject(new Error('Formato de imagen no soportado para conversión a WebP.'));
+                img.onload = function() {
+                    const maxDim = 1920;
+                    let w = img.naturalWidth || img.width;
+                    let h = img.naturalHeight || img.height;
+                    if (w > maxDim || h > maxDim) {
+                        const ratio = Math.min(maxDim / w, maxDim / h);
+                        w = Math.round(w * ratio);
+                        h = Math.round(h * ratio);
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    const tryEncode = (quality) => {
+                        canvas.toBlob((blob) => {
+                            if (!blob) {
+                                reject(new Error('No se pudo convertir la imagen a WebP.'));
+                                return;
+                            }
+                            if (blob.size > maxBytes && quality > 0.55) {
+                                tryEncode(quality - 0.15);
+                                return;
+                            }
+                            const baseName = (file.name || 'imagen').replace(/\.[^/.]+$/, '');
+                            const webpFile = new File([blob], baseName + '.webp', { type: 'image/webp', lastModified: Date.now() });
+                            resolve(webpFile);
+                        }, 'image/webp', quality);
+                    };
+                    tryEncode(0.86);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    window.normalizeCmsImageInputToWebp = async function(fileInput) {
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) return null;
+        const original = fileInput.files[0];
+        try {
+            const converted = await window.convertImageFileToWebp(original);
+            if (converted.size > window.CMS_MAX_VERCEL_UPLOAD_BYTES) {
+                fileInput.value = '';
+                alert('La imagen sigue pesando más de 4 MB incluso convertida a WebP (' + (converted.size / 1024 / 1024).toFixed(2) + ' MB). Sube el archivo a Supabase Storage y pega la URL.');
+                return null;
+            }
+            if (converted !== original && typeof DataTransfer !== 'undefined') {
+                const dt = new DataTransfer();
+                dt.items.add(converted);
+                fileInput.files = dt.files;
+            }
+            return converted;
+        } catch (err) {
+            if (original.size > window.CMS_MAX_VERCEL_UPLOAD_BYTES) {
+                fileInput.value = '';
+                alert('El archivo supera 4 MB y no pudo optimizarse a WebP. Usa una imagen más ligera o pega la URL.');
+                return null;
+            }
+            return original;
+        }
+    };
+
+    window.previewHeroBgImage = async function(fileInput, previewContainerId) {
         if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
-        const file = fileInput.files[0];
+        const file = await window.normalizeCmsImageInputToWebp(fileInput);
+        if (!file) {
+            const container = document.getElementById(previewContainerId);
+            if (container) {
+                container.classList.add('hidden');
+                container.style.display = 'none';
+            }
+            return;
+        }
         const container = document.getElementById(previewContainerId);
         if (!container) return;
 
@@ -7186,6 +7276,39 @@ $curatedGoogleFonts = [
         };
         reader.readAsDataURL(file);
     };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        ['createSectionForm', 'editSectionForm'].forEach(formId => {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            form.querySelectorAll('input[type="file"][accept*="image"]').forEach(inp => {
+                if (inp.name === 'background_image_file') return;
+                inp.addEventListener('change', () => window.normalizeCmsImageInputToWebp(inp));
+            });
+
+            form.querySelectorAll('input[type="file"][accept*="video"]').forEach(inp => {
+                inp.addEventListener('change', () => {
+                    const f = inp.files && inp.files[0];
+                    if (f && f.size > window.CMS_MAX_VERCEL_UPLOAD_BYTES) {
+                        inp.value = '';
+                        alert('El video pesa ' + (f.size / 1024 / 1024).toFixed(2) + ' MB y supera el límite de 4 MB de Vercel. Súbelo a Supabase Storage y pega la URL pública del video.');
+                    }
+                });
+            });
+
+            form.addEventListener('submit', function(e) {
+                let totalBytes = 0;
+                form.querySelectorAll('input[type="file"]').forEach(inp => {
+                    if (inp.files && inp.files[0]) totalBytes += inp.files[0].size;
+                });
+                if (totalBytes > window.CMS_MAX_VERCEL_UPLOAD_BYTES) {
+                    e.preventDefault();
+                    alert('El peso total de los archivos adjuntos (' + (totalBytes / 1024 / 1024).toFixed(2) + ' MB) supera el límite de 4 MB permitido por Vercel. Reduce el archivo o pega una URL externa.');
+                }
+            });
+        });
+    });
 
     window.previewHeroBgUrl = function(url, previewContainerId) {
         const container = document.getElementById(previewContainerId);
