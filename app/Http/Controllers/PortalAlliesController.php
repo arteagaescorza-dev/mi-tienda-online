@@ -523,14 +523,11 @@ class PortalAlliesController extends Controller
 
         $posterUrl = null;
         if ($request->hasFile('banner_image')) {
-            $file = $request->file('banner_image');
-            $fileName = time() . '_' . uniqid() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $file->getClientOriginalName());
-            $destPath = public_path('uploads/allies_posters');
-            if (!file_exists($destPath)) {
-                @mkdir($destPath, 0755, true);
-            }
-            $file->move($destPath, $fileName);
-            $posterUrl = '/uploads/allies_posters/' . $fileName;
+            $storedPoster = app(\App\Services\Storage\MediaStorageService::class)->storeUploadedFile(
+                $request->file('banner_image'),
+                'uploads/allies_posters'
+            );
+            $posterUrl = $storedPoster['url'];
         }
 
         $slug = Str::slug($validated['title']) . '-' . rand(100, 999);

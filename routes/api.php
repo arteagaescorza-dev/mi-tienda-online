@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\RevOps\LogisticsApiController;
 use App\Http\Controllers\Api\RevOps\AlliesApiController;
 use App\Http\Controllers\Api\RevOps\DashboardApiController;
 use App\Http\Controllers\Api\StorefrontApiController;
+use App\Http\Controllers\Api\McpController;
+use App\Http\Controllers\Api\InternalCronController;
 use App\Http\Controllers\PortalVendorController;
 
 // =========================================================================
@@ -322,3 +324,9 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         Route::post('/push/test', [StorefrontApiController::class, 'pushTest']);
     });
 });
+
+// =========================================================================
+// MCP SERVER (STREAMABLE HTTP) & INTERNAL CRON TRIGGERS (CLOUD / VERCEL)
+// =========================================================================
+Route::post('/v1/mcp', [McpController::class, 'handle']);
+Route::post('/internal/cron/run', [InternalCronController::class, 'run']);

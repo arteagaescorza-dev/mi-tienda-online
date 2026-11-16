@@ -589,16 +589,13 @@ class PortalStoreController extends Controller
             $config->kicker = $request->input('kicker');
         }
 
+        $mediaStorage = app(\App\Services\Storage\MediaStorageService::class);
+
         // Carga y Gestión de Activos Gráficos (Logos & Favicon)
         if ($request->hasFile('logo_file')) {
             $file = $request->file('logo_file');
             $filename = 'logo_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $destPath = public_path('uploads/branding');
-            if (!file_exists($destPath)) {
-                @mkdir($destPath, 0755, true);
-            }
-            $file->move($destPath, $filename);
-            $config->logo_url = '/uploads/branding/' . $filename;
+            $config->logo_url = $mediaStorage->storeUploadedFile($file, 'uploads/branding', $filename)['url'];
         } elseif ($request->filled('logo_url') || $request->filled('logoUrl')) {
             $config->logo_url = $request->input('logo_url') ?? $request->input('logoUrl');
         }
@@ -606,12 +603,7 @@ class PortalStoreController extends Controller
         if ($request->hasFile('logo_mobile_file')) {
             $file = $request->file('logo_mobile_file');
             $filename = 'logo_mob_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $destPath = public_path('uploads/branding');
-            if (!file_exists($destPath)) {
-                @mkdir($destPath, 0755, true);
-            }
-            $file->move($destPath, $filename);
-            $config->logo_mobile_url = '/uploads/branding/' . $filename;
+            $config->logo_mobile_url = $mediaStorage->storeUploadedFile($file, 'uploads/branding', $filename)['url'];
         } elseif ($request->filled('logo_mobile_url') || $request->filled('logoMobileUrl')) {
             $config->logo_mobile_url = $request->input('logo_mobile_url') ?? $request->input('logoMobileUrl');
         }
@@ -619,12 +611,7 @@ class PortalStoreController extends Controller
         if ($request->hasFile('favicon_file')) {
             $file = $request->file('favicon_file');
             $filename = 'fav_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $destPath = public_path('uploads/branding');
-            if (!file_exists($destPath)) {
-                @mkdir($destPath, 0755, true);
-            }
-            $file->move($destPath, $filename);
-            $config->favicon_url = '/uploads/branding/' . $filename;
+            $config->favicon_url = $mediaStorage->storeUploadedFile($file, 'uploads/branding', $filename)['url'];
         } elseif ($request->filled('favicon_url') || $request->filled('faviconUrl')) {
             $config->favicon_url = $request->input('favicon_url') ?? $request->input('faviconUrl');
         }
@@ -736,17 +723,13 @@ class PortalStoreController extends Controller
 
         $settings = $request->input('settings', []);
 
-        $sectionsUploadDir = public_path('uploads/sections');
-        if (!file_exists($sectionsUploadDir)) {
-            @mkdir($sectionsUploadDir, 0755, true);
-        }
+        $mediaStorage = app(\App\Services\Storage\MediaStorageService::class);
 
         // Manejo de imagen de fondo subida
         if ($request->hasFile('background_image_file')) {
             $file = $request->file('background_image_file');
             $filename = 'hero_bg_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($sectionsUploadDir, $filename);
-            $settings['background_image'] = '/uploads/sections/' . $filename;
+            $settings['background_image'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
         } elseif ($request->filled('background_image_url')) {
             $settings['background_image'] = $request->input('background_image_url');
         }
@@ -755,21 +738,18 @@ class PortalStoreController extends Controller
         if ($request->hasFile('background_video_file')) {
             $file = $request->file('background_video_file');
             $filename = 'hero_vid_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($sectionsUploadDir, $filename);
-            $settings['background_video'] = '/uploads/sections/' . $filename;
+            $settings['background_video'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
         }
 
         // Manejo de imagen de popup
         if ($request->hasFile('popup_image_file')) {
             $file = $request->file('popup_image_file');
             $filename = 'popup_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($sectionsUploadDir, $filename);
-            $settings['popup_image'] = '/uploads/sections/' . $filename;
+            $settings['popup_image'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
         } elseif ($request->hasFile('settings.popup_image')) {
             $file = $request->file('settings.popup_image');
             $filename = 'popup_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($sectionsUploadDir, $filename);
-            $settings['popup_image'] = '/uploads/sections/' . $filename;
+            $settings['popup_image'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
         } elseif ($request->filled('popup_image_url')) {
             $settings['popup_image'] = $request->input('popup_image_url');
         }
@@ -779,8 +759,7 @@ class PortalStoreController extends Controller
             foreach ($request->file('carousel_slide_files') as $index => $file) {
                 if ($file) {
                     $filename = 'carousel_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $file->move($sectionsUploadDir, $filename);
-                    $settings['carousel_slides'][$index]['image_url'] = '/uploads/sections/' . $filename;
+                    $settings['carousel_slides'][$index]['image_url'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
                 }
             }
         }
@@ -844,17 +823,13 @@ class PortalStoreController extends Controller
         $newSettings = $request->input('settings', []);
         $mergedSettings = array_merge($currentSettings, $newSettings);
 
-        $sectionsUploadDir = public_path('uploads/sections');
-        if (!file_exists($sectionsUploadDir)) {
-            @mkdir($sectionsUploadDir, 0755, true);
-        }
+        $mediaStorage = app(\App\Services\Storage\MediaStorageService::class);
 
         // Manejo de imagen de fondo subida
         if ($request->hasFile('background_image_file')) {
             $file = $request->file('background_image_file');
             $filename = 'hero_bg_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($sectionsUploadDir, $filename);
-            $mergedSettings['background_image'] = '/uploads/sections/' . $filename;
+            $mergedSettings['background_image'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
         } elseif ($request->filled('background_image_url')) {
             $mergedSettings['background_image'] = $request->input('background_image_url');
         }
@@ -863,21 +838,18 @@ class PortalStoreController extends Controller
         if ($request->hasFile('background_video_file')) {
             $file = $request->file('background_video_file');
             $filename = 'hero_vid_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($sectionsUploadDir, $filename);
-            $mergedSettings['background_video'] = '/uploads/sections/' . $filename;
+            $mergedSettings['background_video'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
         }
 
         // Manejo de imagen de popup
         if ($request->hasFile('popup_image_file')) {
             $file = $request->file('popup_image_file');
             $filename = 'popup_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($sectionsUploadDir, $filename);
-            $mergedSettings['popup_image'] = '/uploads/sections/' . $filename;
+            $mergedSettings['popup_image'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
         } elseif ($request->hasFile('settings.popup_image')) {
             $file = $request->file('settings.popup_image');
             $filename = 'popup_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($sectionsUploadDir, $filename);
-            $mergedSettings['popup_image'] = '/uploads/sections/' . $filename;
+            $mergedSettings['popup_image'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
         } elseif ($request->filled('popup_image_url')) {
             $mergedSettings['popup_image'] = $request->input('popup_image_url');
         }
@@ -892,8 +864,7 @@ class PortalStoreController extends Controller
             foreach ($request->file('carousel_slide_files') as $index => $file) {
                 if ($file) {
                     $filename = 'carousel_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $file->move($sectionsUploadDir, $filename);
-                    $mergedSettings['carousel_slides'][$index]['image_url'] = '/uploads/sections/' . $filename;
+                    $mergedSettings['carousel_slides'][$index]['image_url'] = $mediaStorage->storeUploadedFile($file, 'uploads/sections', $filename)['url'];
                 }
             }
         }
@@ -1054,11 +1025,12 @@ class PortalStoreController extends Controller
 
         $validated = $request->validated();
 
+        $mediaStorage = app(\App\Services\Storage\MediaStorageService::class);
+
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $filename = 'page_explore_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/pages'), $filename);
-            $validated['image_url'] = '/uploads/pages/' . $filename;
+            $validated['image_url'] = $mediaStorage->storeUploadedFile($file, 'uploads/pages', $filename)['url'];
         }
 
         // Galería de imágenes para carrusel automático
@@ -1070,7 +1042,7 @@ class PortalStoreController extends Controller
             $lines = preg_split('/[\r\n,]+/', $request->input('gallery_images_urls'));
             foreach ($lines as $line) {
                 $line = trim($line);
-                if (!empty($line) && (filter_var($line, FILTER_VALIDATE_URL) || str_starts_with($line, '/uploads/'))) {
+                if (!empty($line) && (filter_var($line, FILTER_VALIDATE_URL) || str_starts_with($line, '/uploads/') || str_starts_with($line, '/storage/'))) {
                     $gallery[] = $line;
                 }
             }
@@ -1079,8 +1051,7 @@ class PortalStoreController extends Controller
             foreach ($request->file('gallery_files') as $gFile) {
                 if ($gFile && $gFile->isValid()) {
                     $gName = 'page_gallery_' . time() . '_' . uniqid() . '.' . $gFile->getClientOriginalExtension();
-                    $gFile->move(public_path('uploads/pages'), $gName);
-                    $gallery[] = '/uploads/pages/' . $gName;
+                    $gallery[] = $mediaStorage->storeUploadedFile($gFile, 'uploads/pages', $gName)['url'];
                 }
             }
         }
@@ -1122,11 +1093,12 @@ class PortalStoreController extends Controller
 
         $validated = $request->validated();
 
+        $mediaStorage = app(\App\Services\Storage\MediaStorageService::class);
+
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $filename = 'page_explore_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/pages'), $filename);
-            $validated['image_url'] = '/uploads/pages/' . $filename;
+            $validated['image_url'] = $mediaStorage->storeUploadedFile($file, 'uploads/pages', $filename)['url'];
         }
 
         // Galería de imágenes para carrusel automático
@@ -1138,7 +1110,7 @@ class PortalStoreController extends Controller
             $lines = preg_split('/[\r\n,]+/', $request->input('gallery_images_urls'));
             foreach ($lines as $line) {
                 $line = trim($line);
-                if (!empty($line) && (filter_var($line, FILTER_VALIDATE_URL) || str_starts_with($line, '/uploads/'))) {
+                if (!empty($line) && (filter_var($line, FILTER_VALIDATE_URL) || str_starts_with($line, '/uploads/') || str_starts_with($line, '/storage/'))) {
                     $gallery[] = $line;
                 }
             }
@@ -1147,8 +1119,7 @@ class PortalStoreController extends Controller
             foreach ($request->file('gallery_files') as $gFile) {
                 if ($gFile && $gFile->isValid()) {
                     $gName = 'page_gallery_' . time() . '_' . uniqid() . '.' . $gFile->getClientOriginalExtension();
-                    $gFile->move(public_path('uploads/pages'), $gName);
-                    $gallery[] = '/uploads/pages/' . $gName;
+                    $gallery[] = $mediaStorage->storeUploadedFile($gFile, 'uploads/pages', $gName)['url'];
                 }
             }
         }
@@ -1403,21 +1374,17 @@ class PortalStoreController extends Controller
             $imageUrl = null;
         } elseif ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
-            $uploadDir = public_path('uploads/pages');
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
             $filename = 'qna_hero_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($uploadDir, $filename);
-            $imageUrl = '/uploads/pages/' . $filename;
+            $stored = app(\App\Services\Storage\MediaStorageService::class)->storeUploadedFile($file, 'uploads/pages', $filename);
+            $imageUrl = $stored['url'];
 
             // Registrar automáticamente en la biblioteca multimedia (Hub 2 Gestor de Medios)
             try {
                 \App\Models\CmsMedia::create([
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $imageUrl,
-                    'mime_type' => $file->getClientMimeType() ?: 'image/jpeg',
-                    'size' => @filesize(public_path('uploads/pages/' . $filename)) ?: 0,
+                    'mime_type' => $stored['mime_type'],
+                    'size' => $stored['size'],
                 ]);
             } catch (\Throwable $e) {
                 // Silencioso para no interrumpir el guardado
@@ -1801,23 +1768,13 @@ class PortalStoreController extends Controller
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $fileName = $file->getClientOriginalName();
-            $mimeType = $file->getMimeType();
-            $size = $file->getSize();
-
-            $safeName = preg_replace('/[^A-Za-z0-9._-]/', '_', $fileName);
-            $uniqueName = time() . '_' . uniqid() . '_' . $safeName;
-            $destPath = public_path('uploads/cms_media');
-            if (!file_exists($destPath)) {
-                @mkdir($destPath, 0755, true);
-            }
-            $file->move($destPath, $uniqueName);
+            $stored = app(\App\Services\Storage\MediaStorageService::class)->storeUploadedFile($file, 'uploads/cms_media');
 
             $media = \App\Models\CmsMedia::create([
-                'file_name' => $fileName,
-                'file_path' => '/uploads/cms_media/' . $uniqueName,
-                'mime_type' => $mimeType,
-                'size' => $size,
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $stored['url'],
+                'mime_type' => $stored['mime_type'],
+                'size' => $stored['size'],
             ]);
 
             return response()->json(['success' => true, 'media' => $media]);
@@ -1834,10 +1791,7 @@ class PortalStoreController extends Controller
         Gate::authorize('manage-cms');
         $media = \App\Models\CmsMedia::findOrFail($id);
         
-        $filePath = public_path(ltrim($media->file_path, '/'));
-        if (file_exists($filePath)) {
-            @unlink($filePath);
-        }
+        app(\App\Services\Storage\MediaStorageService::class)->deleteByUrl($media->file_path);
         
         $media->delete();
         

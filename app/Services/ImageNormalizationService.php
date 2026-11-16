@@ -123,27 +123,17 @@ class ImageNormalizationService
         $filename = "{$cleanSlug}-" . date('Ymd-His') . '-' . Str::random(6) . '.webp';
         $storagePath = trim($directory, '/') . '/' . $filename;
 
-        // Guardar en Storage (disco público por defecto)
-        Storage::disk($disk)->put($storagePath, $webpBytes);
+        // Guardar mediante MediaStorageService (Supabase S3 en cloud o disco public en local)
+        $mediaStorage = app(\App\Services\Storage\MediaStorageService::class);
+        $stored = $mediaStorage->storeRawBytes($webpBytes, $storagePath, $disk);
 
-        // Asegurar que también esté disponible en public/storage/products directamente si no está linkeado
-        $publicDiskRoot = Storage::disk($disk)->path('');
-        $targetDiskFile = $publicDiskRoot . $storagePath;
-        $publicWebPath = public_path('storage/' . $storagePath);
-        if (!file_exists(dirname($publicWebPath))) {
-            @mkdir(dirname($publicWebPath), 0755, true);
-        }
-        if (file_exists($targetDiskFile) && !file_exists($publicWebPath)) {
-            @copy($targetDiskFile, $publicWebPath);
-        }
-
-        $relativeUrl = '/storage/' . $storagePath;
-        $url = $relativeUrl;
-        $fullUrl = url($relativeUrl);
+        $url = $stored['url'];
+        $relativeUrl = str_starts_with($url, 'http') ? $url : $url;
+        $fullUrl = str_starts_with($url, 'http') ? $url : url($url);
 
         return [
             'filename' => $filename,
-            'path' => $storagePath,
+            'path' => $stored['path'],
             'url' => $url,
             'relative_url' => $relativeUrl,
             'full_url' => $fullUrl,

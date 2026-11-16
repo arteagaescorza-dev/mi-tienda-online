@@ -822,10 +822,19 @@ Responde siempre en español, con un tono ejecutivo, analítico, conciso y altam
                 ->values()
                 ->toArray();
 
-            $aiReply = $gemini->chat($recentHistory, $systemInstruction);
+            $mcp = app(\App\Services\Mcp\McpServerService::class);
+            $actor = auth()->user();
+            $declarations = $mcp->getGeminiFunctionDeclarations($actor);
+
+            $aiReply = $gemini->chatWithTools(
+                $recentHistory,
+                $systemInstruction,
+                $declarations,
+                fn (string $toolName, array $args) => $mcp->callTool($toolName, $args, $actor)['structuredContent'] ?? []
+            );
             if (!empty($aiReply)) {
                 $reply = $aiReply;
-                $aiProvider = 'gemini-flash';
+                $aiProvider = 'gemini-flash-mcp';
             }
         }
 

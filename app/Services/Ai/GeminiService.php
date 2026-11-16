@@ -223,6 +223,126 @@ class GeminiService
     }
 
     /**
+     * Conversación multi-turno con Google Gemini habilitando Function Calling conectado a Tools MCP.
+     *
+     * @param array $messages
+     * @param string|null $systemInstruction
+     * @param array $functionDeclarations Declaraciones generadas por McpServerService::getGeminiFunctionDeclarations()
+     * @param callable $toolExecutor fn(string $name, array $args): array
+     */
+    public function chatWithTools(
+        array $messages,
+        ?string $systemInstruction,
+        array $functionDeclarations,
+        callable $toolExecutor
+    ): ?string {
+        if (!$this->isConfigured() || empty($functionDeclarations)) {
+            return $this->chat($messages, $systemInstruction);
+        }
+
+        $contents = [];
+        foreach ($messages as $msg) {
+            $role = ($msg['sender'] ?? 'user') === 'user' ? 'user' : 'model';
+            $text = trim((string) ($msg['message'] ?? ($msg['text'] ?? '')));
+            if ($text === '') {
+                continue;
+            }
+            $contents[] = [
+                'role' => $role,
+                'parts' => [['text' => $text]],
+            ];
+        }
+
+        if (empty($contents)) {
+            return null;
+        }
+
+        $modelsToTry = array_unique(array_filter([$this->model, $this->fallbackModel]));
+
+        foreach ($modelsToTry as $targetModel) {
+            $url = "{$this->baseUrl}/models/{$targetModel}:generateContent";
+            $workingContents = $contents;
+
+            for ($step = 0; $step < 3; $step++) {
+                $payload = [
+                    'contents' => $workingContents,
+                    'tools' => [
+                        ['functionDeclarations' => $functionDeclarations],
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.5,
+                        'maxOutputTokens' => 1500,
+                    ],
+                ];
+
+                if ($systemInstruction) {
+                    $payload['system_instruction'] = [
+                        'parts' => [['text' => $systemInstruction]],
+                    ];
+                }
+
+                try {
+                    $response = Http::withHeaders([
+                        'Content-Type' => 'application/json',
+                        'X-goog-api-key' => $this->apiKey,
+                    ])
+                        ->retry(1, 400, throw: false)
+                        ->timeout($this->timeout)
+                        ->post($url, $payload);
+
+                    if (!$response->successful()) {
+                        break;
+                    }
+
+                    $parts = $response->json('candidates.0.content.parts', []);
+                    $functionCall = null;
+                    $textReply = null;
+
+                    foreach ($parts as $part) {
+                        if (isset($part['functionCall'])) {
+                            $functionCall = $part['functionCall'];
+                            break;
+                        }
+                        if (isset($part['text'])) {
+                            $textReply = trim((string) $part['text']);
+                        }
+                    }
+
+                    if ($functionCall !== null) {
+                        $fnName = (string) ($functionCall['name'] ?? '');
+                        $fnArgs = is_array($functionCall['args'] ?? null) ? $functionCall['args'] : [];
+                        $toolResult = $toolExecutor($fnName, $fnArgs);
+
+                        $workingContents[] = [
+                            'role' => 'model',
+                            'parts' => [['functionCall' => $functionCall]],
+                        ];
+                        $workingContents[] = [
+                            'role' => 'user',
+                            'parts' => [[
+                                'functionResponse' => [
+                                    'name' => $fnName,
+                                    'response' => ['result' => $toolResult],
+                                ],
+                            ]],
+                        ];
+                        continue;
+                    }
+
+                    if ($textReply !== null && $textReply !== '') {
+                        return $textReply;
+                    }
+                } catch (\Throwable $e) {
+                    Log::error("[GeminiService] Error en chatWithTools ({$targetModel}): " . $e->getMessage());
+                    break;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Prueba de conectividad activa contra Google Gemini API.
      */
     public function testConnection(): array

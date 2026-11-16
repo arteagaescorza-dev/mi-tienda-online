@@ -1,0 +1,54 @@
+name: RevOps Scheduled Tasks (Vercel + Supabase)
+
+on:
+  schedule:
+    # Limpieza de candados de stock expirados cada 5 minutos
+    - cron: '*/5 * * * *'
+    # Telemetría de APIs cada hora
+    - cron: '0 * * * *'
+    # Scraping mayorista, evaluación ROP y dunning MRR diarios (UTC)
+    - cron: '0 8 * * *'
+    - cron: '0 12 * * *'
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Comando Artisan a ejecutar'
+        required: true
+        default: 'stock:cleanup-expired-locks'
+        type: choice
+        options:
+          - stock:cleanup-expired-locks
+          - telemetry:check-apis
+          - supplier:scrape
+          - supplier:prune-runs
+          - inventory:evaluate-rop
+          - finance:process-dunning
+
+jobs:
+  trigger-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determinar comando según schedule o manual
+        id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "cmd=${{ github.event.inputs.command }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "*/5 * * * *" ]; then
+            echo "cmd=stock:cleanup-expired-locks" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 * * * *" ]; then
+            echo "cmd=telemetry:check-apis" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 8 * * *" ]; then
+            echo "cmd=supplier:scrape" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 12 * * *" ]; then
+            echo "cmd=inventory:evaluate-rop" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 15 * * *" ]; then
+            echo "cmd=finance:process-dunning" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Invocar endpoint interno protegido en Vercel
+        run: |
+          curl --fail-with-body -sS -X POST "${{ secrets.APP_URL }}/api/internal/cron/run" \
+            -H "Content-Type: application/json" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -d "{\"command\": \"${{ steps.pick.outputs.cmd }}\"}"
