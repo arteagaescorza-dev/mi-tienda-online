@@ -75,39 +75,41 @@ class TorzoProviderSeeder extends Seeder
                 $mainImage = 'https://torzo.kexe.mx/' . ltrim($mainImage, '/.');
             }
 
-            $product = Product::updateOrCreate(
-                ['sku' => $sp->supplier_sku],
-                [
-                    'title' => $title,
-                    'slug' => $slug,
-                    'description' => $snapshot['description'] ?? "Prenda de diseño {$title} importada del catálogo oficial de {$brand}.",
-                    'brand' => $brand,
-                    'visible' => true,
-                    'type' => 'dropship',
-                    'price' => $price,
-                    'cost' => $cost,
-                    'meta' => [
-                        'images' => $images,
-                        'image' => $mainImage,
-                        'category' => $category,
-                        'garment_type' => $category,
+            if (! $sp->product_id) {
+                \App\Models\ScrapedPendingItem::firstOrCreate(
+                    [
                         'supplier_id' => $supplier->id,
+                        'external_sku' => $sp->supplier_sku,
                     ],
-                ]
-            );
+                    [
+                        'supplier_product_id' => $sp->id,
+                        'external_title' => $title,
+                        'suggested_category' => $category,
+                        'external_price' => $price,
+                        'scraped_cost' => $cost,
+                        'external_image_url' => $mainImage,
+                        'images' => $images,
+                        'raw_snapshot' => $snapshot,
+                        'scraped_description' => $snapshot['description'] ?? "Prenda de diseño {$title} importada del catálogo oficial de {$brand}.",
+                        'curation_status' => 'pending',
+                    ]
+                );
+                continue;
+            }
 
-            $sp->product_id = $product->id;
-            $sp->save();
+            $product = Product::find($sp->product_id);
+            if (! $product) {
+                continue;
+            }
 
             $variations = $snapshot['variations'] ?? [];
             if (empty($variations)) {
-                $variations = [['size' => 'U', 'stock' => 15, 'color' => 'Unico']];
+                $variations = [['size' => 'U', 'stock' => 0, 'color' => 'Unico']];
             }
 
             foreach ($variations as $idx => $var) {
                 $size = is_array($var) ? ($var['size'] ?? $var['title'] ?? 'U') : 'U';
                 $color = is_array($var) ? ($var['color'] ?? 'Unico') : 'Unico';
-                $varStock = is_array($var) ? (isset($var['stock']) && $var['stock'] > 0 ? (int) $var['stock'] : 15) : 15;
                 $cleanSize = preg_replace('/[^a-zA-Z0-9]/', '', (string)$size);
                 $varSku = $sp->supplier_sku . '-' . strtoupper($cleanSize ?: ('V' . ($idx + 1)));
 
@@ -118,14 +120,14 @@ class TorzoProviderSeeder extends Seeder
                         'attributes' => ['size' => (string)$size, 'color' => (string)$color],
                         'price' => $product->price,
                         'cost' => $product->cost,
-                        'visible' => true,
+                        'visible' => (bool) $product->visible,
                     ]
                 );
 
                 Inventory::updateOrCreate(
                     ['variant_id' => $variant->id, 'location' => 'warehouse-1'],
                     [
-                        'quantity' => $varStock,
+                        'quantity' => 0,
                         'reserved' => 0,
                         'type' => 'dropship',
                     ]
