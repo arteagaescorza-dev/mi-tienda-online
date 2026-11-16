@@ -490,7 +490,7 @@ function hybridInventoryModule() {
 
         // Configuración y Telemetría de Inteligencia Artificial (Google Gemini - Regla 4)
         aiSettings: {
-            apiKey: 'AQ.Ab8RN6I9h-ZuGkxn1FL7qhChcE98DauzJrAm2RYugDmyZBO4PA',
+            apiKey: '',
             showApiKey: false,
             projectId: 'projects/506510812817',
             model: 'gemini-flash-lite-latest',

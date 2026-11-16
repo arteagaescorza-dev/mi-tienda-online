@@ -13164,7 +13164,7 @@
                                                 <input 
                                                     :type="aiSettings.showApiKey ? 'text' : 'password'" 
                                                     x-model="aiSettings.apiKey" 
-                                                    placeholder="AQ.Ab8RN6I9h-ZuGkxn1FL7qhChcE98DauzJrAm2RYugDmyZBO4PA" 
+                                                    placeholder="Configurada vía GEMINI_API_KEY en .env" 
                                                     class="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 pr-24"
                                                 >
                                                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 gap-1">
