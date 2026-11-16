@@ -135,7 +135,7 @@ class StorefrontController extends Controller
                 ? $annDoc['items']
                 : [
                     ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-                    ['id' => 2, 'text' => 'TRANSFERENCIAS SPEI BBVA', 'active' => true],
+                    ['id' => 2, 'text' => 'TARJETAS BANCARIAS & OXXO PAY SIN FRICCIÓN', 'active' => true],
                     ['id' => 3, 'text' => 'EMPAQUE 100% DISCRETO', 'active' => true],
                     ['id' => 4, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
                     ['id' => 5, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],

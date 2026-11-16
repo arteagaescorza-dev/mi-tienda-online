@@ -320,10 +320,12 @@ class PortalFinanceController extends Controller
 
     public function reconcilePayoutBatch(PayoutBatch $payoutBatch)
     {
-        $payoutBatch->update([
-            'status' => 'reconciled',
-            'deposit_date' => now(),
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($payoutBatch) {
+            $payoutBatch->update([
+                'status' => 'reconciled',
+                'deposit_date' => now(),
+            ]);
+        });
 
         return redirect()->route('portal.finance', ['tab' => 'reconciliation'])
             ->with('success', "Lote {$payoutBatch->payout_id_external} conciliado exitosamente.");
@@ -331,20 +333,22 @@ class PortalFinanceController extends Controller
 
     public function retrySubscriptionDunning(CustomerSubscription $subscription)
     {
-        $subscription->dunningLogs()->create([
-            'attempt_number' => $subscription->dunningLogs()->count() + 1,
-            'decline_code' => 'card_retry_manual',
-            'action_taken' => 'automated_charge_retry',
-            'was_recovered' => true,
-            'amount_recovered' => $subscription->monthly_amount,
-            'scheduled_retry_at' => now(),
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($subscription) {
+            $subscription->dunningLogs()->create([
+                'attempt_number' => $subscription->dunningLogs()->count() + 1,
+                'decline_code' => 'card_retry_manual',
+                'action_taken' => 'automated_charge_retry',
+                'was_recovered' => true,
+                'amount_recovered' => $subscription->monthly_amount,
+                'scheduled_retry_at' => now(),
+            ]);
 
-        $subscription->update([
-            'status' => 'active',
-            'failed_attempts_count' => 0,
-            'next_billing_at' => now()->addMonth(),
-        ]);
+            $subscription->update([
+                'status' => 'active',
+                'failed_attempts_count' => 0,
+                'next_billing_at' => now()->addMonth(),
+            ]);
+        });
 
         return redirect()->route('portal.finance', ['tab' => 'subscriptions'])
             ->with('success', "Cobro reintentado y membresía {$subscription->subscription_folio} rescatada.");
@@ -369,17 +373,19 @@ class PortalFinanceController extends Controller
         }
 
         $ref = 'SPEI-BBVA-' . rand(10000000, 99999999);
-        $vendorBill->update([
-            'status' => 'paid',
-            'paid_at' => now(),
-            'payment_reference' => $ref,
-        ]);
-
-        if ($vendorBill->threeWayMatching) {
-            $vendorBill->threeWayMatching->update([
-                'match_status' => 'approved_for_payment',
+        \Illuminate\Support\Facades\DB::transaction(function () use ($vendorBill, $ref) {
+            $vendorBill->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+                'payment_reference' => $ref,
             ]);
-        }
+
+            if ($vendorBill->threeWayMatching) {
+                $vendorBill->threeWayMatching->update([
+                    'match_status' => 'approved_for_payment',
+                ]);
+            }
+        });
 
         return redirect()->route('portal.finance', ['tab' => 'expenses'])
             ->with('success', "Cuenta por pagar {$vendorBill->bill_number} liquidada exitosamente vía SPEI ({$ref}).");

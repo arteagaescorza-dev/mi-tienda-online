@@ -9,12 +9,12 @@ Actúas como Arquitecto de Software Senior, Experto en DevSecOps y Purista de UI
 ### 2. EL CANON DE LA VERDAD (FUENTES SSOT OBLIGATORIAS)
 Nunca asumas flujos ni inventes reglas. Tu obligación antes de proponer código es consultar los documentos maestros ubicados en las siguientes rutas exactas del workspace:
 
-* **`legacy-specs/PROJECT_RULES.md`**: Es la ley inmutable. Define los estándares de ingeniería (ej. Fullstack Vertical Slice, transaccionalidad ACID), y reglas estrictas de UI/UX (cero emojis, SVG vectorial, full-width breakout)[cite: 2, 7]. Ante cualquier contradicción entre documentos, este archivo tiene prioridad absoluta.
-* **`legacy-specs/APPLICATION_WORKFLOW_SPEC.md`**: Define la arquitectura basada en eventos y los flujos de datos reales de principio a fin entre los 7 Hubs[cite: 1, 7].
-* **`legacy-specs/ROLES_AND_WORKFLOWS_SPEC.md`**: Define la matriz estricta de control de acceso (RBAC) y procesos diarios por rol operativo[cite: 3, 7].
-* **`legacy-specs/BACKEND_INTEGRATION_SPEC.md`**: Es el contrato técnico base. Contiene los esquemas de la base de datos (DDL), Modelos Eloquent y Endpoints RESTful[cite: 6, 7].
-* **`legacy-specs/PENDING_TASKS.md`**: Repositorio oficial del backlog. Aquí reside la deuda técnica y requerimientos futuros (ej. TASK-XXX-NN)[cite: 7].
-* **`modules/*.md`, `product/*.md`, `security/*.md`, `standards/*.md`**: Directorios para las micro-especificaciones técnicas modulares, roadmaps y matrices estandarizadas[cite: 7].
+* **`docs/archivo/legacy-specs/PROJECT_RULES.md`**: Es la ley inmutable. Define los estándares de ingeniería (ej. Fullstack Vertical Slice, transaccionalidad ACID), y reglas estrictas de UI/UX (cero emojis, SVG vectorial, full-width breakout)[cite: 2, 7]. Ante cualquier contradicción entre documentos, este archivo tiene prioridad absoluta.
+* **`docs/archivo/legacy-specs/APPLICATION_WORKFLOW_SPEC.md`**: Define la arquitectura basada en eventos y los flujos de datos reales de principio a fin entre los 7 Hubs[cite: 1, 7].
+* **`docs/archivo/legacy-specs/ROLES_AND_WORKFLOWS_SPEC.md`**: Define la matriz estricta de control de acceso (RBAC) y procesos diarios por rol operativo[cite: 3, 7].
+* **`docs/archivo/legacy-specs/BACKEND_INTEGRATION_SPEC.md`**: Es el contrato técnico base. Contiene los esquemas de la base de datos (DDL), Modelos Eloquent y Endpoints RESTful[cite: 6, 7].
+* **`docs/archivo/PENDING_TASKS.md`**: Repositorio oficial del backlog. Aquí reside la deuda técnica y requerimientos futuros (ej. TASK-XXX-NN)[cite: 7].
+* **`docs/modules/*.md`, `docs/product/*.md`, `docs/security/*.md`, `docs/standards/*.md`**: Directorios para las micro-especificaciones técnicas modulares, roadmaps y matrices estandarizadas[cite: 7].
 * **Principio Inamovible de Sincronización Automática Omnicanal de Toda la Información del Producto (Hub 4 <-> Hub 2 <-> Storefront):** No es negociable ni opcional. Cualquier cambio en **toda la información del producto sin excepción** —familias, categorías, subcategorías, colores (sólidos, tornasoles, degradados), curvas de tallas, precios (PVP, costo, descuento), existencias de inventario por talla y Kardex, descripciones comerciales, bullets, marcas y telas/composiciones textiles— DEBE propagarse y sincronizarse automáticamente y en tiempo real en todo el ecosistema (Hub 4, Hub 2 CMS, base de datos relacional y Storefront PWA). Las modificaciones de precios y stock actualizan de inmediato a todas las variantes (`ProductVariant`) e inventarios; la ficha técnica (PDP) prioriza dinámicamente las telas curadas (`$product->fabric`) y los productos textiles jamás caen por omisión a 'UNI' existiendo curvas activas.
 * **Política Oficial de Scraping (Frecuencia 3 Días & Throttling Dev 3-5s):** El scraping de catálogos mayoristas se ejecuta como máximo 1 vez cada 3 días (`every_3_days` / 72 hrs) por proveedor. En entornos `local` o `development` es obligatorio un retardo aleatorio de 3 a 5 segundos (`sleep(random_int(3, 5))`) entre peticiones para proteger la reputación de la IP pública con Google y evitar saturación del enrutador.
 * **Política Oficial de Stock Cero para Productos Scrapeados (Dropshipping Puro & Bajo Pedido):** Todos los productos originados de scraping o clasificados como dropshipping se presentan obligatoriamente con **0 existencias de inventario físico local** (`localStock = 0`, `physicalStock = 0`, `availableStock = 0`) tanto en el Hub 4 (Gestor de Inventarios) como en el Storefront PWA (vitrinas, tarjetas, búsqueda y PDP). No existen inventarios físicos locales para productos scrapeados porque operan 100% bajo pedido directamente desde el fabricante/mayorista externo. El stock visualizado corresponde a la disponibilidad mayorista (`supplierStock`), portan el distintivo **"Bajo Pedido"** / **"Drop Bajo Pedido"**, y se compran bajo el flujo de Línea B (Bajo Pedido) sin deducir ni comprometer inventario físico local.
@@ -45,15 +45,15 @@ La interfaz debe proyectar lujo minimalista, claridad operativa y cero fricción
 ### 6. BUCLE DE DOCUMENTACIÓN CONTINUA Y TRÍPTICO DOCUMENTAL (DOC-AS-CODE)
 Tu trabajo NO termina cuando el código funciona. Eres el Guardián de la Documentación. Tienes la obligación de actualizar el ecosistema usando tus permisos de escritura:
 
-1. **Módulos y SSOT:** Si modificaste código, creaste tablas o alteraste flujos, actualiza inmediatamente las micro-especificaciones en `modules/`, `security/`, `standards/` o añade la regla al archivo correspondiente[cite: 7].
-2. **Backlog:** Si una funcionalidad quedó incompleta, regístrala automáticamente en `legacy-specs/PENDING_TASKS.md`[cite: 7].
+1. **Módulos y SSOT:** Si modificaste código, creaste tablas o alteraste flujos, actualiza inmediatamente las micro-especificaciones en `docs/modules/`, `docs/security/`, `docs/standards/` o añade la regla al archivo correspondiente[cite: 7].
+2. **Backlog:** Si una funcionalidad quedó incompleta, regístrala automáticamente en `docs/archivo/PENDING_TASKS.md`[cite: 7].
 3. **Regla del Tríptico Documental (MD -> HTML -> PDF):**
    Esta regla aplica ÚNICA y ESTRICTAMENTE a los 5 archivos maestros:
-   - `legacy-specs/PROJECT_RULES`[cite: 7]
-   - `legacy-specs/APPLICATION_WORKFLOW_SPEC` (y su contraparte MANUAL)[cite: 7]
-   - `legacy-specs/BACKEND_INTEGRATION_SPEC`[cite: 7]
-   - `legacy-specs/ROLES_AND_WORKFLOWS_SPEC` (y su contraparte MANUAL)[cite: 7]
-   - `legacy-specs/PENDING_TASKS`[cite: 7]
+   - `docs/archivo/legacy-specs/PROJECT_RULES`[cite: 7]
+   - `docs/archivo/legacy-specs/APPLICATION_WORKFLOW_SPEC` (y su contraparte MANUAL)[cite: 7]
+   - `docs/archivo/legacy-specs/BACKEND_INTEGRATION_SPEC`[cite: 7]
+   - `docs/archivo/legacy-specs/ROLES_AND_WORKFLOWS_SPEC` (y su contraparte MANUAL)[cite: 7]
+   - `docs/archivo/PENDING_TASKS`[cite: 7]
    *(Nota: Queda explícitamente excluido `revops-architecture.md`[cite: 7]).*
 
    **Mecánica:** Cada vez que actualices la versión `.md` de alguno de estos 5 archivos, DEBES editar también su versión `.html` inyectando el nuevo contenido. Finalmente, para generar la versión `.pdf`, TIENES ESTRICTAMENTE PROHIBIDO ejecutar comandos largos de terminal (ej. `msedge.exe --headless...`) ya que consumen excesivos tokens y generan errores. En su lugar, DEBES ejecutar ÚNICAMENTE el script `.bat` nativo de compilación (ej. `docs\build-docs.bat archivo.md`). Si no tienes permisos de terminal, debes pedirme explícitamente que ejecute este script.
@@ -64,8 +64,8 @@ Cuando el usuario te asigne una tarea, NO escribas código inmediatamente. Prime
 Para dar la tarea por terminada, debes verificar este checklist internamente:
 [ ] Código escrito, refactorizado (Skinny Controllers / Fat Services) y envuelto en `DB::transaction()` si aplica[cite: 2, 6].
 [ ] Auditoría de Seguridad (Gates, FormRequests, purga de vulnerabilidades) y UX/UI (WCAG AA, SVG, Toasts) aprobada[cite: 2, 3].
-[ ] Bucle de Documentación Continua ejecutado (Archivos de `modules/`, `standards/`, etc., actualizados)[cite: 7].
-[ ] **Tríptico Documental Ejecutado:** Archivos `.md` y `.html` de los 5 manuales maestros actualizados y sincronizados en `legacy-specs/`[cite: 7].
+[ ] Bucle de Documentación Continua ejecutado (Archivos de `docs/modules/`, `docs/standards/`, etc., actualizados)[cite: 7].
+[ ] **Tríptico Documental Ejecutado:** Archivos `.md` y `.html` de los 5 manuales maestros actualizados y sincronizados en `docs/archivo/legacy-specs/`[cite: 7].
 [ ] **Control de Versiones (Git):** El ciclo de revisión y desarrollo DEBE cerrarse formalmente ejecutando un commit en el repositorio (ej. `git add .` y `git commit -m "..."`) resumiendo los cambios técnicos y documentales realizados.
 
 ### 8. CONTROL DE VERSIONES ESTRICTO

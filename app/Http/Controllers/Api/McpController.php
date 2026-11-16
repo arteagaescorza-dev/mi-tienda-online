@@ -16,7 +16,7 @@ class McpController extends Controller
         $actor = $request->user();
 
         if (!$actor) {
-            $expectedToken = (string) env('MCP_BEARER_TOKEN', '');
+            $expectedToken = (string) (config('services.mcp.bearer_token') ?? env('MCP_BEARER_TOKEN', ''));
             $providedToken = (string) $request->bearerToken();
 
             if ($expectedToken === '' || !hash_equals($expectedToken, $providedToken)) {
@@ -30,7 +30,7 @@ class McpController extends Controller
                 ], 401);
             }
 
-            $actorId = env('MCP_ACTOR_USER_ID');
+            $actorId = config('services.mcp.actor_user_id') ?? env('MCP_ACTOR_USER_ID');
             $actor = $actorId ? User::find($actorId) : User::whereIn('role', ['superadmin', 'admin', 'portal'])->first();
         }
 

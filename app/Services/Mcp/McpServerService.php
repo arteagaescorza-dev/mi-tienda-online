@@ -276,7 +276,7 @@ class McpServerService
                     'title' => $product->title,
                     'brand' => $product->brand,
                     'price' => (float) $product->price,
-                    'fabric' => $product->fabric?->name ?? null,
+                    'fabric' => $product->fabricRelation?->name ?? (is_string($product->fabric) ? $product->fabric : null),
                     'fulfillment_mode' => $isScraped ? 'on_demand' : 'physical_stock',
                     'local_stock' => $localStock,
                     'badge' => $isScraped ? 'Bajo Pedido' : ($localStock > 0 ? 'Disponible' : 'Agotado'),
@@ -380,7 +380,7 @@ class McpServerService
     private function authorizePortal(?User $actor, string $ability): void
     {
         if ($actor === null) {
-            return;
+            throw new \RuntimeException("Acceso denegado: se requiere un actor autenticado con permiso '{$ability}'.");
         }
 
         if (!Gate::forUser($actor)->allows($ability)) {

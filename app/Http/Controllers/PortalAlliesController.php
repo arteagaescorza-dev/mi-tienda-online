@@ -285,9 +285,10 @@ class PortalAlliesController extends Controller
 
         if ($token) {
             $selectedAllyModel = Ally::where('portal_token', $token)->first();
+            abort_unless($selectedAllyModel !== null, 404, 'Token de aliado inválido o no encontrado.');
         }
 
-        if (!$selectedAllyModel && $allies->isNotEmpty()) {
+        if (!$token && !$selectedAllyModel && $allies->isNotEmpty()) {
             $selectedAllyModel = $allies->first();
         }
 
@@ -299,6 +300,12 @@ class PortalAlliesController extends Controller
                     $indexData['selectedAlly'] = $a;
                     break;
                 }
+            }
+
+            // Aislamiento estricto por token: cuando se accede vía extranet tokenizada sin permiso B2B,
+            // no exponer la lista completa de otros aliados comerciales.
+            if ($token && !Gate::allows('manage-b2b')) {
+                $indexData['alliesList'] = isset($indexData['selectedAlly']) ? [$indexData['selectedAlly']] : [];
             }
         }
 

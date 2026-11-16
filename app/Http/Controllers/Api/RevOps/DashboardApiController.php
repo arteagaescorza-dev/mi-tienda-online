@@ -149,6 +149,8 @@ class DashboardApiController extends Controller
      */
     public function getShiftLogs(): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $this->ensureDefaultOperationalTasksExist();
 
         $logs = ShiftLog::query()
@@ -903,6 +905,8 @@ Responde siempre en español, con un tono ejecutivo, analítico, conciso y altam
      */
     public function getCopilotStatus(GeminiService $gemini): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $test = $gemini->testConnection();
 
         return response()->json([

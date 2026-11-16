@@ -57,8 +57,7 @@ class EnforceFinancialPrivacy
     public function handle(Request $request, Closure $next, ?string $mode = null): Response
     {
         $user = $request->user();
-        $activeRole = $request->header('X-User-Role')
-            ?: (session('active_role') ?: ($user ? $user->role : null));
+        $activeRole = session('active_role') ?: ($user ? $user->role : null);
 
         $isRestricted = $activeRole && in_array($activeRole, $this->restrictedRoles, true);
 

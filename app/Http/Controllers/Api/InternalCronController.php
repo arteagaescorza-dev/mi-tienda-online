@@ -11,7 +11,7 @@ class InternalCronController extends Controller
 {
     public function run(InternalCronRunRequest $request): JsonResponse
     {
-        $expectedSecret = (string) env('CRON_SECRET', '');
+        $expectedSecret = (string) (config('services.cron.secret') ?? env('CRON_SECRET', ''));
         $providedSecret = (string) $request->header('X-Cron-Secret', '');
 
         if ($expectedSecret === '' || !hash_equals($expectedSecret, $providedSecret)) {

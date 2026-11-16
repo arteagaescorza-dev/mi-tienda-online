@@ -15,7 +15,7 @@ class McpServeCommand extends Command
     public function handle(McpServerService $mcp): int
     {
         $userId = $this->option('user-id') ?: config('services.mcp.actor_user_id');
-        $actor = $userId ? User::find($userId) : null;
+        $actor = $userId ? User::find($userId) : User::whereIn('role', ['superadmin', 'admin', 'portal'])->first();
 
         while (($line = fgets(STDIN)) !== false) {
             $trimmed = trim($line);

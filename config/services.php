@@ -45,4 +45,13 @@ return [
         'timeout' => (int) env('GEMINI_TIMEOUT', 25),
     ],
 
+    'mcp' => [
+        'bearer_token' => env('MCP_BEARER_TOKEN'),
+        'actor_user_id' => env('MCP_ACTOR_USER_ID'),
+    ],
+
+    'cron' => [
+        'secret' => env('CRON_SECRET'),
+    ],
+
 ];

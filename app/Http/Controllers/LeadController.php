@@ -16,6 +16,8 @@ class LeadController extends Controller
 {
     public function index()
     {
+        Gate::authorize('manage-marketing');
+
         $this->ensureDemoLeads();
 
         $leads = Lead::latest()->paginate(25);
@@ -24,6 +26,8 @@ class LeadController extends Controller
 
     public function create()
     {
+        Gate::authorize('manage-marketing');
+
         return view('leads.create');
     }
 
@@ -42,6 +46,8 @@ class LeadController extends Controller
 
     public function show(Lead $lead)
     {
+        Gate::authorize('manage-marketing');
+
         $statuses = Lead::statusOptions();
         return view('leads.show', compact('lead', 'statuses'));
     }
@@ -60,6 +66,8 @@ class LeadController extends Controller
 
     public function board()
     {
+        Gate::authorize('manage-marketing');
+
         $statuses = Lead::statusOptions();
         $grouped = Lead::orderBy('created_at', 'desc')
             ->get()
@@ -70,6 +78,8 @@ class LeadController extends Controller
 
     public function importForm()
     {
+        Gate::authorize('manage-marketing');
+
         return view('leads.import');
     }
 

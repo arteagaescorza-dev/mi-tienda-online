@@ -336,7 +336,7 @@ class PortalStoreController extends Controller
             'support_email' => 'hola@mitienda.online',
             'shipping_badge_text' => 'Paqueteria nacional express ($149 / Gratis +$999)',
             'packaging_badge_text' => 'Entrega personal discreta y segura en empaque 100% neutro',
-            'payments_badge_text' => 'Pagos 100% seguros con Tarjeta, SPEI y OXXO Pay',
+            'payments_badge_text' => 'Pagos 100% seguros con Tarjeta Bancaria y OXXO Pay',
             'copyright_text' => '(C) 2026 MULTIVERSO STORE. Todos los derechos reservados.',
             'show_revops_link' => true,
             'show_zero_emojis_badge' => true,

@@ -326,7 +326,7 @@ class OrderProcessingService
                 'references' => $shippingData['references'] ?? ($data['delivery_references'] ?? null),
             ];
 
-            $paymentMethod = $data['payment_method'] ?? 'spei_bbva';
+            $paymentMethod = $data['payment_method'] ?? 'credit_debit_card';
             $isCard = ($paymentMethod === 'credit_debit_card');
 
             // Registrar atribucion de Aliado B2B si aplica

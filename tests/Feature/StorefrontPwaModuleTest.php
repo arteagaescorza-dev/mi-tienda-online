@@ -215,8 +215,9 @@ class StorefrontPwaModuleTest extends TestCase
                 'shipping_cost' => 149.00,
             ],
             'payment' => [
-                'method' => 'spei_bbva',
+                'method' => 'credit_debit_card',
             ],
+            'payment_method' => 'credit_debit_card',
         ];
 
         $response = $this->withHeader('X-Cart-Session-Id', $cartSessionId)
@@ -226,8 +227,8 @@ class StorefrontPwaModuleTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'order' => [
-                    'status' => 'pending',
-                    'payment_method' => 'spei_bbva',
+                    'status' => 'processing',
+                    'payment_method' => 'credit_debit_card',
                 ],
             ]);
 

@@ -182,13 +182,14 @@ Route::post('/logout', [AuthModalController::class, 'logout'])->name('logout');
 Route::post('/auth/google/login', [AuthModalController::class, 'googleLogin'])->name('auth.modal.google.login');
 Route::post('/auth/google/register', [AuthModalController::class, 'googleRegister'])->name('auth.modal.google.register');
 
-// CRM Leads (móvil-first simple UI)
-// CSV import routes
-Route::get('leads/import', [App\Http\Controllers\LeadController::class, 'importForm'])->name('leads.import.form');
-Route::post('leads/import', [App\Http\Controllers\LeadController::class, 'importProcess'])->name('leads.import.process');
+// CRM Leads (protegido por auth + role:portal)
+Route::middleware(['auth', 'role:portal'])->group(function () {
+	Route::get('leads/import', [App\Http\Controllers\LeadController::class, 'importForm'])->name('leads.import.form');
+	Route::post('leads/import', [App\Http\Controllers\LeadController::class, 'importProcess'])->name('leads.import.process');
 
-Route::get('leads/board', [App\Http\Controllers\LeadController::class, 'board'])->name('leads.board');
-Route::patch('leads/{lead}/status', [App\Http\Controllers\LeadController::class, 'update'])->name('leads.update');
+	Route::get('leads/board', [App\Http\Controllers\LeadController::class, 'board'])->name('leads.board');
+	Route::patch('leads/{lead}/status', [App\Http\Controllers\LeadController::class, 'update'])->name('leads.status.update');
 
-Route::resource('leads', App\Http\Controllers\LeadController::class);
+	Route::resource('leads', App\Http\Controllers\LeadController::class);
+});
 

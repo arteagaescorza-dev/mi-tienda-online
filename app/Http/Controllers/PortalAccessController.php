@@ -19,16 +19,17 @@ class PortalAccessController extends Controller
      */
     public function switchRole(\Illuminate\Http\Request $request, \App\Services\Governance\AuditTrailService $auditService)
     {
+        $user = $request->user();
+        abort_unless($user && in_array($user->role, ['superadmin', 'admin', 'portal'], true), 403, 'No autorizado para conmutar roles operativos.');
+
         $validated = $request->validate([
             'role' => ['required', 'string', 'in:superadmin,admin,finance,warehouse,purchases,logistics,sales,support,operator,all_roles,portal,vendor,ally'],
         ]);
 
-        $previousRole = session('active_role') ?: (auth()->user()?->role ?? 'guest');
+        $previousRole = session('active_role') ?: $user->role;
         session(['active_role' => $validated['role']]);
 
-        if (auth()->check()) {
-            $auditService->logRoleSwitch(auth()->user(), $previousRole, $validated['role']);
-        }
+        $auditService->logRoleSwitch($user, $previousRole, $validated['role']);
 
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([

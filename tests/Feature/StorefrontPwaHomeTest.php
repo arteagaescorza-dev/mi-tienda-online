@@ -32,7 +32,7 @@ class StorefrontPwaHomeTest extends TestCase
 
         // Minimalist Marquee & Brand Pillars
         $response->assertSee('ENVÍOS EXPRESS A TODO MÉXICO', false);
-        $response->assertSee('TRANSFERENCIAS SPEI BBVA', false);
+        $response->assertSee('TARJETAS BANCARIAS &amp; OXXO PAY SIN FRICCIÓN', false);
         $response->assertSee('EMPAQUE 100% DISCRETO', false);
 
         // 5-Button Bottom Dock & Desktop Nav (Regla 4.13)
