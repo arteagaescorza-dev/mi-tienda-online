@@ -906,15 +906,14 @@ body.store-body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: calc(62px + env(safe-area-inset-bottom, 0px));
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--border-subtle);
   z-index: 990;
   align-items: center;
   justify-content: space-around;
-  padding: 0 8px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding: 4px 8px env(safe-area-inset-bottom, 0px);
   box-shadow: var(--shadow-dock);
 }
 
@@ -959,16 +958,18 @@ body.store-body {
 
 .dock-cart-badge {
   position: absolute;
-  top: 8px;
-  right: calc(50% - 18px);
+  top: 4px;
+  right: calc(50% - 20px);
   background: #050505;
   color: #ffffff;
   font-size: 0.6rem;
   font-weight: 800;
+  line-height: 1.2;
   padding: 1px 5px;
   border-radius: var(--radius-pill);
   min-width: 16px;
   text-align: center;
+  pointer-events: none;
 }
 
 /* ============================================================================
@@ -1040,8 +1041,14 @@ body.store-body {
   bottom: 0 !important;
   width: min(380px, 88vw) !important;
   max-width: 380px !important;
-  height: 100vh !important;
-  max-height: 100vh !important;
+  height: 100vh;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  overflow-x: hidden !important;
   border-radius: 0 16px 16px 0 !important;
   transform: translateX(-100%) !important;
   transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -1107,7 +1114,9 @@ body.store-body {
 .sheet-content-scroll {
   padding: 18px 20px;
   overflow-y: auto;
-  flex-grow: 1;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* Switcher Multiverso Tipo ZARA dentro del Drawer */
@@ -1213,7 +1222,8 @@ html.dark .category-filter-pill.active {
 }
 
 .sheet-footer-actions {
-  padding: 14px 20px;
+  flex-shrink: 0;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
@@ -5483,8 +5493,8 @@ html.dark .discount-filter-btn.active {
 
 @media (max-width: 420px) {
   .navbar-mobile {
-    padding: 0 10px !important;
-    height: 52px !important;
+    padding: 0 14px !important;
+    height: 58px !important;
     overflow: hidden;
   }
   .navbar-mobile .pwa-btn-text,
