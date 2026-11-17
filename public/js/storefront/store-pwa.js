@@ -4605,14 +4605,18 @@
     const emailInput = document.getElementById('accProfileEmail');
     const phoneInput = document.getElementById('accProfilePhone');
     if (nameInput) nameInput.value = session?.name || '';
-    if (emailInput) emailInput.value = session?.email || '';
+    if (emailInput) {
+      emailInput.value = session?.email || '';
+      emailInput.readOnly = !!(session && session.email);
+    }
     if (phoneInput) phoneInput.value = session?.phone || '';
 
-    // 2. Vinculación Google
+    // 2. Vinculación Google (oculta si no hay OAuth vinculado)
     const googleCard = document.getElementById('accGoogleLinkCard');
     if (googleCard) {
       const isGoogleLinked = (session && (session.provider === 'google' || session.google_linked));
       if (isGoogleLinked) {
+        googleCard.style.display = 'block';
         googleCard.innerHTML = `
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -4631,23 +4635,8 @@
           </div>
         `;
       } else {
-        googleCard.innerHTML = `
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div>
-              <strong style="font-size: 0.75rem; color: var(--text-primary); display: block;">Vincular Cuenta de Google</strong>
-              <span style="font-size: 0.68rem; color: var(--text-muted);">Sincroniza tus accesos de forma instantánea.</span>
-            </div>
-            <button type="button" class="btn-account-action" data-action="link-google-account" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 0.7rem;">
-              <svg viewBox="0 0 24 24" width="14" height="14" class="google-icon">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-              </svg>
-              <span>Vincular</span>
-            </button>
-          </div>
-        `;
+        googleCard.style.display = 'none';
+        googleCard.innerHTML = '';
       }
     }
 
@@ -4690,35 +4679,14 @@
     const listEl = document.getElementById('accountAddressList');
     if (!listEl) return;
 
-    let addresses = session?.addresses || [];
-    if (addresses.length === 0 && session?.shipping && session.shipping.street) {
-      addresses = [{
-        id: 'addr_' + Date.now(),
-        type: 'casa',
-        street: session.shipping.street,
-        postalCode: session.shipping.postalCode || '06600',
-        colony: session.shipping.colony || 'Juárez',
-        city: session.shipping.city || 'Cuauhtémoc',
-        state: session.shipping.state || 'Ciudad de México',
-        references: session.shipping.references || '',
-        isDefault: true
-      }];
-      if (session) {
-        session.addresses = addresses;
-        try { localStorage.setItem('multiverse_customer_session', JSON.stringify(session)); } catch(e){}
-      }
-    } else if (addresses.length === 0) {
-      addresses = [{
-        id: 'addr_default_1',
-        type: 'casa',
-        street: 'Calle Génova 42, Depto 301',
-        postalCode: '06600',
-        colony: 'Juárez',
-        city: 'Cuauhtémoc',
-        state: 'Ciudad de México',
-        references: 'Portón café, interfono 301',
-        isDefault: true
-      }];
+    let addresses = Array.isArray(session?.addresses) ? session.addresses : [];
+    if (addresses.length === 0) {
+      listEl.innerHTML = `
+        <div style="padding: 12px; text-align: center; font-size: 0.74rem; color: var(--text-muted); background: var(--bg-secondary); border: 1px dashed var(--border-medium); border-radius: 8px;">
+          Aún no tienes direcciones guardadas. Agrega tu dirección de Casa o Trabajo.
+        </div>
+      `;
+      return;
     }
 
     listEl.innerHTML = addresses.map(addr => {
@@ -4741,7 +4709,7 @@
             <div style="display: flex; gap: 6px;">
               <button type="button" class="btn-account-action" data-action="edit-acc-address" data-id="${addr.id}" style="padding: 2px 8px; font-size: 0.68rem;">Editar</button>
               ${!addr.isDefault ? `<button type="button" class="btn-account-secondary" data-action="set-default-address" data-id="${addr.id}" style="padding: 2px 6px; font-size: 0.68rem;">Hacer Principal</button>` : ''}
-              ${addresses.length > 1 ? `<button type="button" data-action="delete-acc-address" data-id="${addr.id}" style="background: none; border: none; color: #ef4444; font-size: 0.68rem; cursor: pointer; padding: 2px 4px;">Eliminar</button>` : ''}
+              <button type="button" data-action="delete-acc-address" data-id="${addr.id}" style="background: none; border: none; color: #ef4444; font-size: 0.68rem; cursor: pointer; padding: 2px 4px;">Eliminar</button>
             </div>
           </div>
           <div style="font-size: 0.74rem; color: var(--text-secondary); line-height: 1.4;">
@@ -4792,7 +4760,28 @@
     if (trabajoBtn) trabajoBtn.classList.toggle('active', type === 'trabajo');
   }
 
-  function saveCustomerAddress() {
+  function syncAddressesToSession(addresses) {
+    const list = Array.isArray(addresses) ? addresses : [];
+    const session = getActiveCustomerSession() || {};
+    session.addresses = list;
+    const defaultAddr = list.find(a => a.isDefault) || list[0];
+    if (defaultAddr) {
+      session.shipping = {
+        street: defaultAddr.street,
+        postalCode: defaultAddr.postalCode,
+        colony: defaultAddr.colony,
+        city: defaultAddr.city,
+        state: defaultAddr.state,
+        references: defaultAddr.references
+      };
+      if (typeof checkoutState !== 'undefined') checkoutState.shipping = { ...session.shipping };
+    }
+    if (window.__INITIAL_AUTH_USER__) window.__INITIAL_AUTH_USER__.addresses = list;
+    try { localStorage.setItem('multiverse_customer_session', JSON.stringify(session)); } catch (e) {}
+    return session;
+  }
+
+  async function saveCustomerAddress() {
     const editId = document.getElementById('accAddressEditId')?.value || '';
     const street = (document.getElementById('accShippingStreet')?.value || '').trim();
     const postalCode = (document.getElementById('accShippingZip')?.value || '').replace(/\D/g, '');
@@ -4807,89 +4796,98 @@
       return;
     }
 
-    let session = {};
+    const active = getActiveCustomerSession();
+    if (!active || !active.email) {
+      showToastNotification('Inicia sesión para guardar direcciones en tu cuenta.');
+      return;
+    }
+
+    const endpoint = editId ? `/auth/account/addresses/${encodeURIComponent(editId)}` : '/auth/account/addresses';
+    const method = editId ? 'PUT' : 'POST';
     try {
-      session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}');
-    } catch (e) {}
-
-    let addresses = session.addresses || [];
-
-    if (editId) {
-      const idx = addresses.findIndex(a => a.id === editId);
-      if (idx !== -1) {
-        addresses[idx] = { ...addresses[idx], street, postalCode, colony, city, state, references, type };
+      const res = await fetch(endpoint, {
+        method,
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
+        },
+        body: JSON.stringify({
+          label_type: type,
+          street,
+          postal_code: postalCode,
+          colony,
+          city,
+          state,
+          references
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToastNotification(data.message || 'No se pudo guardar la dirección.');
+        return;
       }
-    } else {
-      const newAddr = {
-        id: 'addr_' + Date.now(),
-        type,
-        street,
-        postalCode,
-        colony,
-        city,
-        state,
-        references,
-        isDefault: addresses.length === 0
-      };
-      addresses.push(newAddr);
+      const updatedSession = syncAddressesToSession(data.addresses || []);
+      const form = document.getElementById('accountAddressEditForm');
+      if (form) form.style.display = 'none';
+      renderAddressList(updatedSession);
+      showToastNotification(data.message || 'Dirección guardada exitosamente.');
+    } catch (e) {
+      showToastNotification('Error de conexión al guardar la dirección.');
     }
-
-    session.addresses = addresses;
-    const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
-    if (defaultAddr) {
-      session.shipping = {
-        street: defaultAddr.street,
-        postalCode: defaultAddr.postalCode,
-        colony: defaultAddr.colony,
-        city: defaultAddr.city,
-        state: defaultAddr.state,
-        references: defaultAddr.references
-      };
-      checkoutState.shipping = { ...session.shipping };
-    }
-
-    try {
-      localStorage.setItem('multiverse_customer_session', JSON.stringify(session));
-    } catch (e) {}
-
-    const form = document.getElementById('accountAddressEditForm');
-    if (form) form.style.display = 'none';
-    renderAddressList(session);
-    showToastNotification('Dirección guardada exitosamente.');
   }
 
-  function setDefaultAddress(addrId) {
-    let session = {};
+  async function setDefaultAddress(addrId) {
+    const active = getActiveCustomerSession();
+    if (!active || !active.email) return;
+
     try {
-      session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}');
-    } catch (e) {}
-
-    let addresses = session.addresses || [];
-    addresses.forEach(a => { a.isDefault = (a.id === addrId); });
-    session.addresses = addresses;
-
-    const def = addresses.find(a => a.id === addrId);
-    if (def) {
-      session.shipping = { street: def.street, postalCode: def.postalCode, colony: def.colony, city: def.city, state: def.state, references: def.references };
-      checkoutState.shipping = { ...session.shipping };
+      const res = await fetch(`/auth/account/addresses/${encodeURIComponent(addrId)}/default`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
+        }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToastNotification(data.message || 'No se pudo actualizar la dirección.');
+        return;
+      }
+      const updatedSession = syncAddressesToSession(data.addresses || []);
+      renderAddressList(updatedSession);
+      showToastNotification(data.message || 'Dirección predeterminada actualizada.');
+    } catch (e) {
+      showToastNotification('Error de conexión.');
     }
-
-    try { localStorage.setItem('multiverse_customer_session', JSON.stringify(session)); } catch(e){}
-    renderAddressList(session);
-    showToastNotification('Dirección predeterminada actualizada.');
   }
 
-  function deleteAddress(addrId) {
-    let session = {};
-    try { session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
-    let addresses = (session.addresses || []).filter(a => a.id !== addrId);
-    if (addresses.length > 0 && !addresses.some(a => a.isDefault)) {
-      addresses[0].isDefault = true;
+  async function deleteAddress(addrId) {
+    const active = getActiveCustomerSession();
+    if (!active || !active.email) return;
+
+    try {
+      const res = await fetch(`/auth/account/addresses/${encodeURIComponent(addrId)}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
+        }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToastNotification(data.message || 'No se pudo eliminar la dirección.');
+        return;
+      }
+      const updatedSession = syncAddressesToSession(data.addresses || []);
+      renderAddressList(updatedSession);
+      showToastNotification(data.message || 'Dirección eliminada.');
+    } catch (e) {
+      showToastNotification('Error de conexión.');
     }
-    session.addresses = addresses;
-    try { localStorage.setItem('multiverse_customer_session', JSON.stringify(session)); } catch(e){}
-    renderAddressList(session);
-    showToastNotification('Dirección eliminada.');
   }
 
   let REAL_CUSTOMER_DISCOUNTS = [];
@@ -4922,81 +4920,50 @@
     const referralContainer = document.getElementById('accReferralCardContainer');
     if (!listEl) return;
 
-    let session = {};
-    try { session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
-    const walletBalance = (typeof session.walletBalance === 'number') ? session.walletBalance : 280;
+    let session = getActiveCustomerSession() || {};
+    const walletBalance = (typeof session.walletBalance === 'number') ? session.walletBalance : 0;
 
-    // 1. Render Wallet Cashback Card (Item 8)
+    // 1. Ocultar Wallet si saldo es 0 (sin saldo simulado)
     if (walletContainer) {
-      walletContainer.innerHTML = `
-        <div class="wallet-cashback-card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <div class="wallet-icon-box">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M16 12h.01"/><path d="M2 10h20"/></svg>
+      if (walletBalance > 0) {
+        walletContainer.style.display = 'block';
+        walletContainer.innerHTML = `
+          <div class="wallet-cashback-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="wallet-icon-box">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M16 12h.01"/><path d="M2 10h20"/></svg>
+                </div>
+                <div>
+                  <div class="account-subheading" style="margin: 0;">Multiverse Wallet</div>
+                  <span class="account-subheading-desc" style="margin: 0;">Monedero Digital y Cashback</span>
+                </div>
               </div>
+            </div>
+            <div class="wallet-balance-row">
               <div>
-                <div class="account-subheading" style="margin: 0;">Multiverse Wallet</div>
-                <span class="account-subheading-desc" style="margin: 0;">Monedero Digital y Cashback</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Saldo Acumulado Disponible</span>
+                <strong class="wallet-balance-amount font-mono">MXN $${walletBalance.toFixed(2)}</strong>
               </div>
+              <button type="button" class="btn-wallet-redeem" data-action="redeem-wallet-to-cart">
+                Canjear en Carrito
+              </button>
             </div>
-            <span class="wallet-tier-pill">Tier Plata (5%)</span>
           </div>
-          <div class="wallet-balance-row">
-            <div>
-              <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Saldo Acumulado Disponible</span>
-              <strong class="wallet-balance-amount font-mono">MXN $${walletBalance.toFixed(2)}</strong>
-            </div>
-            <button type="button" class="btn-wallet-redeem" data-action="redeem-wallet-to-cart">
-              Canjear en Carrito
-            </button>
-          </div>
-          <div style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 8px; line-height: 1.35;">
-            Recibes 5% de reembolso directo en cada compra entregada. Puedes descontar tu saldo en el checkout.
-          </div>
-        </div>
-      `;
+        `;
+      } else {
+        walletContainer.style.display = 'none';
+        walletContainer.innerHTML = '';
+      }
     }
 
-    // 2. Render Referral Program Card (Item 7)
+    // 2. Ocultar Referidos hardcoded hasta conectar programa real en BD
     if (referralContainer) {
-      referralContainer.innerHTML = `
-        <div class="referral-program-card">
-          <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-            <div class="referral-icon-box">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </div>
-            <div style="flex: 1;">
-              <strong style="font-size: 0.85rem; color: var(--text-primary); display: block;">Invita a un Amigo: Regala $150 MXN</strong>
-              <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 3px 0 0; line-height: 1.35;">
-                Comparte tu enlace exclusivo. Tu amigo recibe $150 MXN en su primera compra y tu recibes $150 MXN en tu Monedero tras su primer pedido.
-              </p>
-            </div>
-          </div>
-          <div class="referral-actions-row">
-            <div class="referral-link-display">
-              <span class="font-mono">TORZO-REF-7492</span>
-            </div>
-            <div style="display: flex; gap: 6px;">
-              <button type="button" class="btn-referral-copy" data-action="copy-referral-link" title="Copiar Enlace">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                <span>Copiar</span>
-              </button>
-              <button type="button" class="btn-referral-wa" data-action="share-referral-whatsapp" title="Compartir en WhatsApp">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 6.46 17.5 2 12.04 2M12.05 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.69 12.05 3.69C16.6 3.69 20.28 7.37 20.28 11.92C20.28 16.46 16.6 20.15 12.05 20.15Z"/></svg>
-                <span>WhatsApp</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
+      referralContainer.style.display = 'none';
+      referralContainer.innerHTML = '';
     }
 
-    let allDiscounts = [...PARTNER_DISCOUNTS];
-    if (REAL_CUSTOMER_DISCOUNTS && REAL_CUSTOMER_DISCOUNTS.length > 0) {
-      const existingCodes = new Set(REAL_CUSTOMER_DISCOUNTS.map(d => d.code));
-      allDiscounts = [...REAL_CUSTOMER_DISCOUNTS, ...PARTNER_DISCOUNTS.filter(d => !existingCodes.has(d.code))];
-    }
+    let allDiscounts = Array.isArray(REAL_CUSTOMER_DISCOUNTS) ? [...REAL_CUSTOMER_DISCOUNTS] : [];
 
     let totalSaved = 0;
     let activeCount = 0;
@@ -5916,6 +5883,37 @@
       changePwdForm.reset();
       if (data.user) applyAuthenticatedUserSession(data.user);
       showToastNotification(data.message || 'Contraseña actualizada.');
+      return;
+    }
+
+    const deleteAccForm = e.target.closest('#buyerDeleteAccountForm');
+    if (deleteAccForm) {
+      e.preventDefault();
+      const errEl = document.getElementById('buyerDeleteAccountError');
+      if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+      const payload = Object.fromEntries(new FormData(deleteAccForm).entries());
+      const res = await fetch('/auth/account', {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (errEl) { errEl.textContent = extractAuthError(data, 'No se pudo eliminar la cuenta.'); errEl.style.display = 'block'; }
+        return;
+      }
+      window.__INITIAL_AUTH_USER__ = null;
+      localStorage.removeItem('multiverse_customer_session');
+      localStorage.removeItem('multiverse_customer_orders');
+      localStorage.removeItem('multiverse_store_wishlist');
+      closeAllDrawers();
+      showToastNotification(data.message || 'Tu cuenta y datos han sido eliminados.');
+      setTimeout(() => { window.location.reload(); }, 700);
     }
   });
 
@@ -6668,14 +6666,45 @@
     const saveProfileBtn = e.target.closest('[data-action="save-profile-info"]');
     if (saveProfileBtn) {
       e.preventDefault();
-      let sess = {};
-      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
-      sess.name = (document.getElementById('accProfileName')?.value || '').trim();
-      sess.email = (document.getElementById('accProfileEmail')?.value || '').trim();
-      sess.phone = (document.getElementById('accProfilePhone')?.value || '').trim();
-      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
-      renderAccountSheetContent();
-      showToastNotification('Información personal guardada con éxito.');
+      const active = getActiveCustomerSession();
+      if (!active || !active.email) {
+        showToastNotification('Inicia sesión primero para guardar tus datos personales.');
+        return;
+      }
+      const name = (document.getElementById('accProfileName')?.value || '').trim();
+      const phone = (document.getElementById('accProfilePhone')?.value || '').trim();
+      if (!name) {
+        showToastNotification('Ingresa tu nombre completo.');
+        return;
+      }
+      saveProfileBtn.disabled = true;
+      fetch('/auth/account/personal-info', {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
+        },
+        body: JSON.stringify({
+          name,
+          phone,
+          discrete_packaging: active.discretePackaging !== false
+        })
+      }).then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showToastNotification(data.message || 'No se pudieron guardar tus datos.');
+          return;
+        }
+        const merged = { ...active, ...(data.user || { name, phone }) };
+        applyAuthenticatedUserSession(merged);
+        showToastNotification(data.message || 'Información personal guardada.');
+      }).catch(() => {
+        showToastNotification('Error de conexión al guardar.');
+      }).finally(() => {
+        saveProfileBtn.disabled = false;
+      });
       return;
     }
 
@@ -6799,13 +6828,32 @@
 
     const toggleDiscreteBtn = e.target.closest('[data-action="toggle-discrete-packaging"]');
     if (toggleDiscreteBtn) {
-      let sess = {};
-      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
-      sess.discretePackaging = toggleDiscreteBtn.checked;
-      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
-      renderAccountPersonalAndAddresses(sess);
-      renderAccountSheetContent();
-      showToastNotification(sess.discretePackaging ? 'Empaque discreto activado (100% anonimo).' : 'Empaque comercial estandar asignado.');
+      const active = getActiveCustomerSession();
+      const nextDiscrete = !!toggleDiscreteBtn.checked;
+      if (active && active.email) {
+        fetch('/auth/account/personal-info', {
+          method: 'PUT',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
+          },
+          body: JSON.stringify({
+            name: active.name || 'Comprador',
+            phone: active.phone || '',
+            discrete_packaging: nextDiscrete
+          })
+        }).then(async (res) => {
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            const merged = { ...active, discretePackaging: nextDiscrete, discrete_packaging: nextDiscrete };
+            applyAuthenticatedUserSession(merged);
+            renderAccountPersonalAndAddresses(merged);
+          }
+        }).catch(() => {});
+      }
+      showToastNotification(nextDiscrete ? 'Empaque discreto activado (100% anonimo).' : 'Empaque comercial estandar asignado.');
       return;
     }
 
@@ -6859,16 +6907,34 @@
     const deleteAccountBtn = e.target.closest('[data-action="delete-customer-account"]');
     if (deleteAccountBtn) {
       e.preventDefault();
-      if (confirm('¿Estás seguro de que deseas eliminar tu cuenta y datos personales? Esta acción es irreversible conforme a los lineamientos de privacidad ARCO.')) {
-        localStorage.removeItem('multiverse_customer_session');
-        localStorage.removeItem('multiverse_customer_orders');
-        localStorage.removeItem('multiverse_store_wishlist');
-        storeState.wishlist = [];
-        updateWishlistBadges();
-        closeAllDrawers();
-        showToastNotification('Tu cuenta y datos han sido eliminados.');
-        setTimeout(() => { window.location.reload(); }, 600);
+      const active = getActiveCustomerSession();
+      const panel = document.getElementById('accDeleteAccountPanel');
+      if (!active || !active.email) {
+        showToastNotification('Inicia sesión para gestionar la eliminación de tu cuenta.');
+        return;
       }
+      if (panel) {
+        panel.innerHTML = `
+          <form id="buyerDeleteAccountForm" style="display:flex; flex-direction:column; gap:8px; background:var(--bg-primary); border:1px solid rgba(239,68,68,0.35); border-radius:8px; padding:10px;">
+            <div style="font-size:0.72rem; color:#ef4444; font-weight:700;">Confirmar eliminación ARCO (irreversible)</div>
+            ${renderPasswordFieldHtml('current_password', 'Tu contraseña actual', { compact: true })}
+            ${active.two_factor_enabled ? `<input type="text" name="code" required autocomplete="one-time-code" placeholder="Código 2FA de 6 dígitos o respaldo" style="width:100%; padding:8px 10px; border:1px solid var(--border-subtle); border-radius:6px; font-size:0.78rem; background:var(--bg-primary); color:var(--text-primary);">` : ''}
+            <div id="buyerDeleteAccountError" style="display:none; color:#e11d48; font-size:0.72rem; font-weight:600;"></div>
+            <div style="display:flex; gap:6px;">
+              <button type="submit" style="flex:1; padding:7px; border:none; border-radius:6px; background:#ef4444; color:#fff; font-size:0.74rem; font-weight:700; cursor:pointer;">Eliminar Definitivamente</button>
+              <button type="button" class="btn-account-secondary" data-action="cancel-delete-account" style="padding:7px 10px; font-size:0.74rem;">Cancelar</button>
+            </div>
+          </form>
+        `;
+      }
+      return;
+    }
+
+    const cancelDeleteAccBtn = e.target.closest('[data-action="cancel-delete-account"]');
+    if (cancelDeleteAccBtn) {
+      e.preventDefault();
+      const panel = document.getElementById('accDeleteAccountPanel');
+      if (panel) panel.innerHTML = '';
       return;
     }
 

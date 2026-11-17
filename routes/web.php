@@ -195,6 +195,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/auth/2fa/disable', [AuthModalController::class, 'disableTwoFactor'])->name('auth.2fa.disable');
     Route::post('/auth/2fa/recovery-codes', [AuthModalController::class, 'regenerateRecoveryCodes'])->name('auth.2fa.recovery');
     Route::post('/auth/password/change', [AuthModalController::class, 'changePassword'])->name('auth.password.change');
+
+    Route::put('/auth/account/personal-info', [\App\Http\Controllers\BuyerAccountController::class, 'updatePersonalInfo'])->name('auth.account.personal');
+    Route::get('/auth/account/addresses', [\App\Http\Controllers\BuyerAccountController::class, 'addresses'])->name('auth.account.addresses.index');
+    Route::post('/auth/account/addresses', [\App\Http\Controllers\BuyerAccountController::class, 'storeAddress'])->name('auth.account.addresses.store');
+    Route::put('/auth/account/addresses/{id}', [\App\Http\Controllers\BuyerAccountController::class, 'updateAddress'])->name('auth.account.addresses.update');
+    Route::post('/auth/account/addresses/{id}/default', [\App\Http\Controllers\BuyerAccountController::class, 'setDefaultAddress'])->name('auth.account.addresses.default');
+    Route::delete('/auth/account/addresses/{id}', [\App\Http\Controllers\BuyerAccountController::class, 'deleteAddress'])->name('auth.account.addresses.destroy');
+    Route::delete('/auth/account', [\App\Http\Controllers\BuyerAccountController::class, 'deleteAccount'])->name('auth.account.delete');
 });
 
 // CRM Leads (protegido por auth + role:portal)

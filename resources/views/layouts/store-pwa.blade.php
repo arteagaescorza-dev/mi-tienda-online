@@ -1955,6 +1955,7 @@
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               <span>Eliminar Mi Cuenta y Datos Personales</span>
             </button>
+            <div id="accDeleteAccountPanel" style="margin-top: 10px;"></div>
           </div>
         </div>
       </div>
@@ -2631,6 +2632,20 @@
     window.__AUTO_OPEN_PRODUCT_ID__ = @json($autoOpenProductId ?? null);
     @php
       $authUser = auth()->user();
+      $initialAddresses = [];
+      if ($authUser && \Illuminate\Support\Facades\Schema::hasTable('customer_addresses')) {
+        $initialAddresses = $authUser->addresses()->orderByDesc('is_default')->orderByDesc('id')->get()->map(fn ($a) => [
+          'id' => $a->id,
+          'type' => $a->label_type,
+          'street' => $a->street,
+          'postalCode' => $a->postal_code,
+          'colony' => $a->colony,
+          'city' => $a->city,
+          'state' => $a->state,
+          'references' => $a->references ?? '',
+          'isDefault' => (bool) $a->is_default,
+        ])->values()->all();
+      }
       $initialAuthPayload = $authUser ? [
         'id' => $authUser->id,
         'name' => $authUser->name,
@@ -2639,6 +2654,9 @@
         'role' => $authUser->role,
         'email_verified' => $authUser->hasVerifiedEmail(),
         'two_factor_enabled' => $authUser->hasTwoFactorEnabled(),
+        'discrete_packaging' => (bool) ($authUser->discrete_packaging ?? true),
+        'discretePackaging' => (bool) ($authUser->discrete_packaging ?? true),
+        'addresses' => $initialAddresses,
         'walletBalance' => 0,
       ] : null;
     @endphp

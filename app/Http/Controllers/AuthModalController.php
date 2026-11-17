@@ -689,6 +689,27 @@ class AuthModalController extends Controller
     {
         $type = $this->resolveUserType($user);
 
+        $addresses = [];
+        if (Schema::hasTable('customer_addresses')) {
+            $addresses = $user->addresses()
+                ->orderByDesc('is_default')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn ($a) => [
+                    'id' => $a->id,
+                    'type' => $a->label_type,
+                    'street' => $a->street,
+                    'postalCode' => $a->postal_code,
+                    'colony' => $a->colony,
+                    'city' => $a->city,
+                    'state' => $a->state,
+                    'references' => $a->references ?? '',
+                    'isDefault' => (bool) $a->is_default,
+                ])
+                ->values()
+                ->all();
+        }
+
         return [
             'id' => $user->id,
             'name' => $user->name,
@@ -697,6 +718,9 @@ class AuthModalController extends Controller
             'role' => $user->role,
             'email_verified' => $user->hasVerifiedEmail(),
             'two_factor_enabled' => $user->hasTwoFactorEnabled(),
+            'discrete_packaging' => (bool) ($user->discrete_packaging ?? true),
+            'discretePackaging' => (bool) ($user->discrete_packaging ?? true),
+            'addresses' => $addresses,
             'avatar' => 'https://i.pravatar.cc/80?u=' . urlencode($user->email),
             'roleLabel' => $type === 'portal' ? 'Usuario portal' : 'Cliente de la tienda',
             'type' => $type,
