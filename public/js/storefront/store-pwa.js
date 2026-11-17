@@ -4220,15 +4220,12 @@
     // 3. Renderizar Contenido según Pestaña Activa
     if (accountState.activeTab === 'orders') {
       renderAccountOrders(orders);
-      renderAccountWishlistIntegrated();
+    } else if (accountState.activeTab === 'benefits') {
+      renderAccountSubscription();
+      renderAccountDiscounts();
     } else if (accountState.activeTab === 'account') {
       renderAccountPersonalAndAddresses(session);
       renderAccountAnatomy(session);
-    } else if (accountState.activeTab === 'discounts') {
-      renderAccountDiscounts();
-    } else if (accountState.activeTab === 'subscription') {
-      renderAccountSubscription();
-    } else if (accountState.activeTab === 'settings') {
       renderAccountSettingsView(session);
     }
   }
@@ -5266,8 +5263,12 @@
 
     panel.innerHTML = `
       <div class="subscription-panel-content">
+        <div class="sub-header" style="margin-bottom: 10px;">
+          <h4 class="sub-title">Club MARTE — Caja Mensual</h4>
+          <p class="sub-desc">Recibe prendas curadas cada mes con envío prioritario. Pausa o reanuda cuando quieras.</p>
+        </div>
         <div id="accountSubStatusBox" style="margin-bottom: 12px;">
-          <div style="font-size: 0.78rem; color: var(--text-secondary);">Cargando estado de suscripcion...</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);">Cargando planes del Club...</div>
         </div>
       </div>
     `;
@@ -5284,7 +5285,7 @@
             <div class="sub-plan-card">
               <div class="sub-plan-header">
                 <div>
-                  <span class="sub-badge-mrr">MEMBRESIA MRR</span>
+                  <span class="sub-badge-mrr">MEMBRESÍA ACTIVA</span>
                   <h4 class="sub-plan-title">${sub.tier_name}</h4>
                   <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Folio: ${sub.folio}</div>
                 </div>

@@ -1593,8 +1593,8 @@
         <div id="accountTabSubscription" style="margin-bottom: 16px;">
           <div class="subscription-panel-content">
             <div class="sub-header">
-              <h4 class="sub-title">Club de Reposición Recurrente (MRR)</h4>
-              <p class="sub-desc">Recibe prendas esenciales mensualmente con envío prioritario.</p>
+              <h4 class="sub-title">Club MARTE — Caja Mensual</h4>
+              <p class="sub-desc">Recibe prendas curadas cada mes con envío prioritario. Pausa o reanuda cuando quieras.</p>
             </div>
             <div id="accountSubscriptionCard" class="subscription-card"></div>
           </div>
