@@ -5104,13 +5104,8 @@
     }
 
     // 2. Estado de 2FA real (TOTP)
-    const waBtn = document.getElementById('btnToggle2FAWhatsApp');
     const appBtn = document.getElementById('btnToggle2FAApp');
     const isTwoFactorEnabled = !!(session && session.two_factor_enabled);
-    if (waBtn) {
-      waBtn.textContent = session?.twoFaWhatsApp ? 'Desactivar' : 'Activar';
-      waBtn.classList.toggle('active', !!session?.twoFaWhatsApp);
-    }
     if (appBtn) {
       appBtn.textContent = isTwoFactorEnabled ? 'Desactivar' : 'Configurar';
       appBtn.classList.toggle('active', isTwoFactorEnabled);
@@ -6811,18 +6806,6 @@
       renderAccountPersonalAndAddresses(sess);
       renderAccountSheetContent();
       showToastNotification(sess.discretePackaging ? 'Empaque discreto activado (100% anonimo).' : 'Empaque comercial estandar asignado.');
-      return;
-    }
-
-    const toggle2FAWABtn = e.target.closest('[data-action="toggle-2fa-whatsapp"]');
-    if (toggle2FAWABtn) {
-      e.preventDefault();
-      let sess = {};
-      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
-      sess.twoFaWhatsApp = !sess.twoFaWhatsApp;
-      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
-      renderAccountSheetContent();
-      showToastNotification(sess.twoFaWhatsApp ? '2FA por WhatsApp activado exitosamente.' : '2FA por WhatsApp desactivado.');
       return;
     }
 

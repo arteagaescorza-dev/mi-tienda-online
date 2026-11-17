@@ -1912,22 +1912,6 @@
             </div>
             <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Protege tus compras y datos de cuenta mediante códigos temporales de un solo uso.</p>
 
-            <!-- 2FA WhatsApp -->
-            <div class="twofa-option-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; margin-bottom: 8px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(34, 197, 94, 0.12); color: #16a34a; display: flex; align-items: center; justify-content: center;">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
-                </div>
-                <div>
-                  <div class="twofa-title" style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary);">Verificación por WhatsApp</div>
-                  <div class="twofa-desc" style="font-size: 0.68rem; color: var(--text-muted);">Códigos de seguridad vía WhatsApp al celular registrado.</div>
-                </div>
-              </div>
-              <button type="button" class="btn-account-secondary" id="btnToggle2FAWhatsApp" data-action="toggle-2fa-whatsapp" style="font-size: 0.7rem; padding: 4px 10px;">
-                Activar
-              </button>
-            </div>
-
             <!-- 2FA Authenticator App -->
             <div class="twofa-option-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px;">
               <div style="display: flex; align-items: center; gap: 10px;">
