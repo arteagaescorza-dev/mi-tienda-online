@@ -3904,6 +3904,51 @@
     }
   }
 
+  const AUTH_EYE_OPEN_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const AUTH_EYE_CLOSED_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+  function renderPasswordFieldHtml(name, placeholder, opts = {}) {
+    const minlength = opts.minlength ? `minlength="${opts.minlength}"` : '';
+    const padding = opts.compact ? '8px 36px 8px 10px' : '9px 38px 9px 12px';
+    const fontSize = opts.compact ? '0.78rem' : '0.82rem';
+    const radius = opts.compact ? '6px' : '8px';
+    return `
+      <div style="position: relative; width: 100%;">
+        <input type="password" name="${name}" required ${minlength} placeholder="${placeholder}" style="width: 100%; box-sizing: border-box; padding: ${padding}; border: 1px solid var(--border-subtle); border-radius: ${radius}; font-size: ${fontSize}; background: var(--bg-primary); color: var(--text-primary);">
+        <button type="button" data-action="toggle-password-visibility" aria-label="Mostrar u ocultar contraseña" aria-pressed="false" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer;">
+          ${AUTH_EYE_OPEN_SVG}
+        </button>
+      </div>
+    `;
+  }
+
+  function renderPhoneWithCountryCodeHtml() {
+    const codes = [
+      ['+52', '🇲🇽 +52'],
+      ['+1', '🇺🇸 +1'],
+      ['+57', '🇨🇴 +57'],
+      ['+54', '🇦🇷 +54'],
+      ['+34', '🇪🇸 +34'],
+      ['+56', '🇨🇱 +56'],
+      ['+51', '🇵🇪 +51'],
+      ['+593', '🇪🇨 +593'],
+      ['+502', '🇬🇹 +502'],
+      ['+506', '🇨🇷 +506'],
+      ['+507', '🇵🇦 +507'],
+      ['+55', '🇧🇷 +55'],
+      ['+44', '🇬🇧 +44'],
+    ];
+    const options = codes.map(([val, label]) => `<option value="${val}">${label}</option>`).join('');
+    return `
+      <div style="display: flex; gap: 6px; width: 100%;">
+        <select name="phone_code" aria-label="Código internacional" style="width: 96px; flex-shrink: 0; padding: 9px 6px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.8rem; background: var(--bg-primary); color: var(--text-primary);">
+          ${options}
+        </select>
+        <input type="tel" name="phone" placeholder="Teléfono / WhatsApp (opcional)" style="flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+      </div>
+    `;
+  }
+
   function renderAccountSheetContent() {
     // 1. Tarjeta de Identidad / Auth
     const authCard = document.getElementById('accountAuthCard');
@@ -3986,10 +4031,10 @@
           submitText = 'Crear Cuenta';
           fieldsHtml = `
             <input type="text" name="name" required placeholder="Nombre completo" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-            <input type="tel" name="phone" placeholder="Teléfono / WhatsApp (opcional)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            ${renderPhoneWithCountryCodeHtml()}
             <input type="email" name="email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-            <input type="password" name="password" required minlength="8" placeholder="Contraseña (mín. 8 caracteres)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-            <input type="password" name="password_confirmation" required minlength="8" placeholder="Confirmar contraseña" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            ${renderPasswordFieldHtml('password', 'Contraseña (mín. 8 caracteres)', { minlength: 8 })}
+            ${renderPasswordFieldHtml('password_confirmation', 'Confirmar contraseña', { minlength: 8 })}
           `;
         } else if (mode === 'two_factor') {
           title = 'Verificación en Dos Pasos (2FA)';
@@ -4016,14 +4061,14 @@
           fieldsHtml = `
             <input type="hidden" name="token" value="${buyerResetParams.token || ''}">
             <input type="email" name="email" required value="${buyerResetParams.email || ''}" placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-            <input type="password" name="password" required minlength="8" placeholder="Nueva contraseña (mín. 8 caracteres)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-            <input type="password" name="password_confirmation" required minlength="8" placeholder="Confirmar nueva contraseña" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            ${renderPasswordFieldHtml('password', 'Nueva contraseña (mín. 8 caracteres)', { minlength: 8 })}
+            ${renderPasswordFieldHtml('password_confirmation', 'Confirmar nueva contraseña', { minlength: 8 })}
             <input type="text" name="code" placeholder="Código 2FA (solo si tu cuenta tiene 2FA activo)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
           `;
         } else {
           fieldsHtml = `
             <input type="email" name="email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-            <input type="password" name="password" required minlength="8" placeholder="Contraseña" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            ${renderPasswordFieldHtml('password', 'Contraseña', { minlength: 8 })}
             <div style="text-align: right;">
               <button type="button" data-action="set-buyer-auth-mode" data-mode="forgot" style="background: none; border: none; color: #4f46e5; font-size: 0.72rem; font-weight: 600; cursor: pointer; text-decoration: underline;">
                 ¿Olvidaste tu contraseña?
@@ -5083,7 +5128,7 @@
         twoFaPanel.innerHTML = `
           <form id="buyer2faEnableForm" style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 10px;">
             <div style="font-size: 0.74rem; font-weight: 600;">Confirma tu contraseña actual para generar tu clave 2FA</div>
-            <input type="password" name="current_password" required placeholder="Contraseña actual" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem;">
+            ${renderPasswordFieldHtml('current_password', 'Contraseña actual', { compact: true })}
             <div id="buyer2faPanelError" style="display:none; color:#e11d48; font-size:0.72rem; font-weight:600;"></div>
             <div style="display:flex; gap:6px;">
               <button type="submit" class="btn-add-cart" style="flex:1; padding: 7px; font-size: 0.74rem; justify-content:center;">Generar QR</button>
@@ -5111,7 +5156,7 @@
         twoFaPanel.innerHTML = `
           <form id="${isDisable ? 'buyer2faDisableForm' : 'buyer2faRecoveryForm'}" style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 10px;">
             <div style="font-size: 0.74rem; font-weight: 700;">${isDisable ? 'Desactivar Verificación en Dos Pasos' : 'Regenerar Códigos de Respaldo'}</div>
-            <input type="password" name="current_password" required placeholder="Contraseña actual" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem;">
+            ${renderPasswordFieldHtml('current_password', 'Contraseña actual', { compact: true })}
             <input type="text" name="code" required autocomplete="one-time-code" placeholder="Código 2FA de 6 dígitos o respaldo" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem;">
             <div id="buyer2faPanelError" style="display:none; color:#e11d48; font-size:0.72rem; font-weight:600;"></div>
             <div style="display:flex; gap:6px;">
@@ -5139,9 +5184,9 @@
       } else {
         changePwdBox.innerHTML = `
           <form id="buyerChangePasswordForm" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
-            <input type="password" name="current_password" required placeholder="Contraseña actual" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem; background: var(--bg-primary); color: var(--text-primary);">
-            <input type="password" name="password" required minlength="8" placeholder="Nueva contraseña (mín. 8 caracteres)" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem; background: var(--bg-primary); color: var(--text-primary);">
-            <input type="password" name="password_confirmation" required minlength="8" placeholder="Confirmar nueva contraseña" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem; background: var(--bg-primary); color: var(--text-primary);">
+            ${renderPasswordFieldHtml('current_password', 'Contraseña actual', { compact: true })}
+            ${renderPasswordFieldHtml('password', 'Nueva contraseña (mín. 8 caracteres)', { compact: true, minlength: 8 })}
+            ${renderPasswordFieldHtml('password_confirmation', 'Confirmar nueva contraseña', { compact: true, minlength: 8 })}
             ${isTwoFactorEnabled ? `<input type="text" name="code" required autocomplete="one-time-code" placeholder="Código 2FA de 6 dígitos o respaldo" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem; background: var(--bg-primary); color: var(--text-primary);">` : ''}
             <div id="buyerChangePasswordError" style="display:none; color:#e11d48; font-size:0.72rem; font-weight:600;"></div>
             <button type="submit" class="btn-account-secondary" style="width: 100%; padding: 8px; font-size: 0.75rem; font-weight: 700;">Actualizar Contraseña</button>
@@ -5737,6 +5782,12 @@
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Procesando...'; }
 
       const payload = Object.fromEntries(new FormData(authForm).entries());
+      if (mode === 'register') {
+        const rawPhone = (payload.phone || '').trim();
+        const phoneCode = (payload.phone_code || '').trim();
+        payload.phone = rawPhone ? `${phoneCode ? phoneCode + ' ' : ''}${rawPhone}` : '';
+        delete payload.phone_code;
+      }
       if (mode === 'two_factor') {
         payload.trust_device = !!authForm.querySelector('input[name="trust_device"]:checked');
       }
@@ -6900,6 +6951,20 @@
       e.preventDefault();
       buyerAuthMode = (buyerAuthMode === 'login') ? 'register' : 'login';
       renderAccountSheetContent();
+      return;
+    }
+
+    const togglePwdBtn = e.target.closest('[data-action="toggle-password-visibility"]');
+    if (togglePwdBtn) {
+      e.preventDefault();
+      const wrapper = togglePwdBtn.parentElement;
+      const input = wrapper ? wrapper.querySelector('input') : null;
+      if (input) {
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        togglePwdBtn.setAttribute('aria-pressed', show ? 'true' : 'false');
+        togglePwdBtn.innerHTML = show ? AUTH_EYE_CLOSED_SVG : AUTH_EYE_OPEN_SVG;
+      }
       return;
     }
 
