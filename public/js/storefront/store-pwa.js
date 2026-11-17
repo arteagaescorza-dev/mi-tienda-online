@@ -3702,7 +3702,33 @@
   // ============================================================================
   // AUTENTICACION REAL D2C (CONECTADA A public.users EN SUPABASE)
   // ============================================================================
-  let buyerAuthMode = 'login'; // 'login' | 'register'
+  let buyerAuthMode = 'login'; // 'login' | 'register' | 'two_factor' | 'forgot' | 'reset'
+  let buyerResetParams = { token: '', email: '' };
+  let buyerTwoFactorUiState = {
+    mode: null, // null | 'start' | 'confirm' | 'recovery' | 'disable'
+    secret: '',
+    otpauthUri: '',
+    recoveryCodes: null,
+  };
+
+  (function initAuthUrlParams() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const resetToken = params.get('reset_token');
+      const resetEmail = params.get('reset_email');
+      if (resetToken && resetEmail) {
+        buyerResetParams = { token: resetToken, email: resetEmail };
+        buyerAuthMode = 'reset';
+      }
+      if (params.get('verified') === '1') {
+        setTimeout(() => {
+          if (typeof showToastNotification === 'function') {
+            showToastNotification('Correo confirmado correctamente. Tu cuenta ya puede activar 2FA.');
+          }
+        }, 400);
+      }
+    } catch (e) {}
+  })();
 
   function getActiveCustomerSession() {
     if (window.__INITIAL_AUTH_USER__ && window.__INITIAL_AUTH_USER__.email) {
@@ -3937,36 +3963,98 @@
                 <span class="auth-stat-accent">5% Cashback</span>
               </div>
             </div>
+            ${!session.email_verified ? `
+              <div style="margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.72rem; color: #b45309;">
+                <span>Confirma tu correo para activar 2FA y vincular pedidos previos.</span>
+                <button type="button" data-action="resend-verification-email" style="flex-shrink: 0; background: #d97706; color: #fff; border: none; border-radius: 6px; padding: 4px 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">
+                  Reenviar correo
+                </button>
+              </div>
+            ` : ''}
           </div>
         `;
       } else {
-        const isReg = (buyerAuthMode === 'register');
+        const mode = buyerAuthMode || 'login';
+        let title = 'Acceso de Comprador';
+        let desc = 'Inicia sesión con tu correo para consultar tus pedidos y perfil.';
+        let fieldsHtml = '';
+        let submitText = 'Iniciar Sesión';
+
+        if (mode === 'register') {
+          title = 'Crear Cuenta de Comprador';
+          desc = 'Regístrate para guardar tus pedidos reales, direcciones y preferencias.';
+          submitText = 'Crear Cuenta';
+          fieldsHtml = `
+            <input type="text" name="name" required placeholder="Nombre completo" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="tel" name="phone" placeholder="Teléfono / WhatsApp (opcional)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="email" name="email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="password" name="password" required minlength="8" placeholder="Contraseña (mín. 8 caracteres)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="password" name="password_confirmation" required minlength="8" placeholder="Confirmar contraseña" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+          `;
+        } else if (mode === 'two_factor') {
+          title = 'Verificación en Dos Pasos (2FA)';
+          desc = 'Ingresa el código de 6 dígitos de tu app autenticadora o uno de tus códigos de respaldo.';
+          submitText = 'Verificar Código';
+          fieldsHtml = `
+            <input type="text" name="code" required autocomplete="one-time-code" placeholder="Código 2FA o respaldo (ej. 123456)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.9rem; letter-spacing: 0.08em; text-align: center; background: var(--bg-primary); color: var(--text-primary);">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer;">
+              <input type="checkbox" name="trust_device" value="1">
+              <span>Confiar en este dispositivo por 30 días</span>
+            </label>
+          `;
+        } else if (mode === 'forgot') {
+          title = 'Recuperar Contraseña';
+          desc = 'Ingresa tu correo y te enviaremos un enlace válido por 60 minutos.';
+          submitText = 'Enviar Enlace';
+          fieldsHtml = `
+            <input type="email" name="email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+          `;
+        } else if (mode === 'reset') {
+          title = 'Restablecer Contraseña';
+          desc = 'Elige una nueva contraseña segura (mín. 8 caracteres).';
+          submitText = 'Guardar Nueva Contraseña';
+          fieldsHtml = `
+            <input type="hidden" name="token" value="${buyerResetParams.token || ''}">
+            <input type="email" name="email" required value="${buyerResetParams.email || ''}" placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="password" name="password" required minlength="8" placeholder="Nueva contraseña (mín. 8 caracteres)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="password" name="password_confirmation" required minlength="8" placeholder="Confirmar nueva contraseña" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="text" name="code" placeholder="Código 2FA (solo si tu cuenta tiene 2FA activo)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+          `;
+        } else {
+          fieldsHtml = `
+            <input type="email" name="email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="password" name="password" required minlength="8" placeholder="Contraseña" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+            <div style="text-align: right;">
+              <button type="button" data-action="set-buyer-auth-mode" data-mode="forgot" style="background: none; border: none; color: #4f46e5; font-size: 0.72rem; font-weight: 600; cursor: pointer; text-decoration: underline;">
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+          `;
+        }
+
         authCard.innerHTML = `
           <div class="auth-guest-card">
-            <div class="account-subheading">${isReg ? 'Crear Cuenta de Comprador' : 'Acceso de Comprador'}</div>
-            <p class="account-subheading-desc" style="margin-bottom: 10px;">
-              ${isReg ? 'Regístrate para guardar tus pedidos reales, direcciones y preferencias.' : 'Inicia sesión con tu correo para consultar tus pedidos y perfil.'}
-            </p>
-            <form id="buyerAuthForm" data-mode="${buyerAuthMode}" style="display: flex; flex-direction: column; gap: 8px;">
-              ${isReg ? `
-                <input type="text" name="name" required placeholder="Nombre completo" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-                <input type="tel" name="phone" placeholder="Teléfono / WhatsApp (opcional)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-              ` : ''}
-              <input type="email" name="email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-              <input type="password" name="password" required minlength="8" placeholder="${isReg ? 'Contraseña (mín. 8 caracteres)' : 'Contraseña'}" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-              ${isReg ? `
-                <input type="password" name="password_confirmation" required minlength="8" placeholder="Confirmar contraseña" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
-              ` : ''}
+            <div class="account-subheading">${title}</div>
+            <p class="account-subheading-desc" style="margin-bottom: 10px;">${desc}</p>
+            <form id="buyerAuthForm" data-mode="${mode}" style="display: flex; flex-direction: column; gap: 8px;">
+              ${fieldsHtml}
               <div id="buyerAuthError" style="display:none; color: #e11d48; font-size: 0.75rem; font-weight: 600;"></div>
+              <div id="buyerAuthSuccess" style="display:none; color: #16a34a; font-size: 0.75rem; font-weight: 600;"></div>
               <button type="submit" id="buyerAuthSubmitBtn" class="btn-add-cart" style="width: 100%; padding: 10px; justify-content: center;">
-                ${isReg ? 'Crear Cuenta' : 'Iniciar Sesión'}
+                ${submitText}
               </button>
             </form>
             <div style="margin-top: 10px; text-align: center; font-size: 0.76rem; color: var(--text-muted);">
-              ${isReg ? '¿Ya tienes cuenta?' : '¿Aún no tienes cuenta?'}
-              <button type="button" data-action="toggle-buyer-auth-mode" style="background: none; border: none; color: #4f46e5; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">
-                ${isReg ? 'Inicia sesión' : 'Regístrate aquí'}
-              </button>
+              ${mode === 'login' ? `
+                ¿Aún no tienes cuenta?
+                <button type="button" data-action="toggle-buyer-auth-mode" style="background: none; border: none; color: #4f46e5; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">
+                  Regístrate aquí
+                </button>
+              ` : `
+                <button type="button" data-action="set-buyer-auth-mode" data-mode="login" style="background: none; border: none; color: #4f46e5; font-weight: 700; cursor: pointer; text-decoration: underline;">
+                  Volver a Iniciar Sesión
+                </button>
+              `}
             </div>
           </div>
         `;
@@ -4958,16 +5046,108 @@
       }
     }
 
-    // 2. Estado de 2FA
+    // 2. Estado de 2FA real (TOTP)
     const waBtn = document.getElementById('btnToggle2FAWhatsApp');
     const appBtn = document.getElementById('btnToggle2FAApp');
+    const isTwoFactorEnabled = !!(session && session.two_factor_enabled);
     if (waBtn) {
       waBtn.textContent = session?.twoFaWhatsApp ? 'Desactivar' : 'Activar';
       waBtn.classList.toggle('active', !!session?.twoFaWhatsApp);
     }
     if (appBtn) {
-      appBtn.textContent = session?.twoFaApp ? 'Desvincular' : 'Configurar';
-      appBtn.classList.toggle('active', !!session?.twoFaApp);
+      appBtn.textContent = isTwoFactorEnabled ? 'Desactivar' : 'Configurar';
+      appBtn.classList.toggle('active', isTwoFactorEnabled);
+    }
+
+    const twoFaPanel = document.getElementById('accTwoFactorPanel');
+    if (twoFaPanel) {
+      if (!session || !session.email) {
+        twoFaPanel.innerHTML = '';
+      } else if (!session.email_verified) {
+        twoFaPanel.innerHTML = `
+          <div style="font-size: 0.72rem; color: #b45309; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 8px 10px;">
+            Confirma tu correo electrónico antes de activar la verificación en dos pasos (2FA).
+          </div>
+        `;
+      } else if (buyerTwoFactorUiState.recoveryCodes && buyerTwoFactorUiState.recoveryCodes.length) {
+        twoFaPanel.innerHTML = `
+          <div style="background: var(--bg-primary); border: 1px solid #16a34a; border-radius: 8px; padding: 10px;">
+            <div style="font-size: 0.76rem; font-weight: 700; color: #16a34a; margin-bottom: 6px;">Códigos de respaldo (guárdalos en un lugar seguro)</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-family: monospace; font-size: 0.74rem; margin-bottom: 8px;">
+              ${buyerTwoFactorUiState.recoveryCodes.map(c => `<div style="padding: 4px 6px; background: var(--bg-secondary); border-radius: 4px; text-align: center;">${c}</div>`).join('')}
+            </div>
+            <button type="button" class="btn-account-secondary" data-action="2fa-close-panel" style="width: 100%; padding: 6px; font-size: 0.72rem;">Listo, ya los guardé</button>
+          </div>
+        `;
+      } else if (buyerTwoFactorUiState.mode === 'start') {
+        twoFaPanel.innerHTML = `
+          <form id="buyer2faEnableForm" style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 10px;">
+            <div style="font-size: 0.74rem; font-weight: 600;">Confirma tu contraseña actual para generar tu clave 2FA</div>
+            <input type="password" name="current_password" required placeholder="Contraseña actual" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem;">
+            <div id="buyer2faPanelError" style="display:none; color:#e11d48; font-size:0.72rem; font-weight:600;"></div>
+            <div style="display:flex; gap:6px;">
+              <button type="submit" class="btn-add-cart" style="flex:1; padding: 7px; font-size: 0.74rem; justify-content:center;">Generar QR</button>
+              <button type="button" class="btn-account-secondary" data-action="2fa-close-panel" style="padding: 7px 10px; font-size: 0.74rem;">Cancelar</button>
+            </div>
+          </form>
+        `;
+      } else if (buyerTwoFactorUiState.mode === 'confirm' && buyerTwoFactorUiState.secret) {
+        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(buyerTwoFactorUiState.otpauthUri);
+        twoFaPanel.innerHTML = `
+          <form id="buyer2faConfirmForm" style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 10px;">
+            <div style="font-size: 0.74rem; font-weight: 700;">1. Escanea el QR en Google Authenticator o Authy</div>
+            <div style="text-align: center;">
+              <img src="${qrUrl}" alt="QR 2FA" width="140" height="140" style="border-radius: 8px; border: 1px solid var(--border-subtle); background: #fff; padding: 4px;">
+            </div>
+            <div style="font-size: 0.68rem; color: var(--text-muted); word-break: break-all;">Clave manual: <strong style="font-family: monospace; color: var(--text-primary);">${buyerTwoFactorUiState.secret}</strong></div>
+            <div style="font-size: 0.74rem; font-weight: 700;">2. Ingresa el código de 6 dígitos para confirmar</div>
+            <input type="text" name="code" required autocomplete="one-time-code" placeholder="000000" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.86rem; text-align: center; letter-spacing: 0.12em;">
+            <div id="buyer2faPanelError" style="display:none; color:#e11d48; font-size:0.72rem; font-weight:600;"></div>
+            <button type="submit" class="btn-add-cart" style="width:100%; padding: 8px; font-size: 0.75rem; justify-content:center;">Activar 2FA</button>
+          </form>
+        `;
+      } else if (buyerTwoFactorUiState.mode === 'disable' || buyerTwoFactorUiState.mode === 'recovery') {
+        const isDisable = buyerTwoFactorUiState.mode === 'disable';
+        twoFaPanel.innerHTML = `
+          <form id="${isDisable ? 'buyer2faDisableForm' : 'buyer2faRecoveryForm'}" style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 10px;">
+            <div style="font-size: 0.74rem; font-weight: 700;">${isDisable ? 'Desactivar Verificación en Dos Pasos' : 'Regenerar Códigos de Respaldo'}</div>
+            <input type="password" name="current_password" required placeholder="Contraseña actual" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem;">
+            <input type="text" name="code" required autocomplete="one-time-code" placeholder="Código 2FA de 6 dígitos o respaldo" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem;">
+            <div id="buyer2faPanelError" style="display:none; color:#e11d48; font-size:0.72rem; font-weight:600;"></div>
+            <div style="display:flex; gap:6px;">
+              <button type="submit" class="btn-add-cart" style="flex:1; padding: 7px; font-size: 0.74rem; justify-content:center;">${isDisable ? 'Confirmar Desactivación' : 'Generar Nuevos Códigos'}</button>
+              <button type="button" class="btn-account-secondary" data-action="2fa-close-panel" style="padding: 7px 10px; font-size: 0.74rem;">Cancelar</button>
+            </div>
+          </form>
+        `;
+      } else if (isTwoFactorEnabled) {
+        twoFaPanel.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px; background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.3); border-radius: 8px;">
+            <span style="font-size: 0.72rem; color: #15803d; font-weight: 600;">2FA TOTP Activo</span>
+            <button type="button" class="btn-account-secondary" data-action="2fa-open-recovery" style="font-size: 0.68rem; padding: 4px 8px;">Regenerar códigos</button>
+          </div>
+        `;
+      } else {
+        twoFaPanel.innerHTML = '';
+      }
+    }
+
+    const changePwdBox = document.getElementById('accChangePasswordContainer');
+    if (changePwdBox) {
+      if (!session || !session.email) {
+        changePwdBox.innerHTML = '<div style="font-size: 0.72rem; color: var(--text-muted);">Inicia sesión para cambiar tu contraseña.</div>';
+      } else {
+        changePwdBox.innerHTML = `
+          <form id="buyerChangePasswordForm" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+            <input type="password" name="current_password" required placeholder="Contraseña actual" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="password" name="password" required minlength="8" placeholder="Nueva contraseña (mín. 8 caracteres)" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem; background: var(--bg-primary); color: var(--text-primary);">
+            <input type="password" name="password_confirmation" required minlength="8" placeholder="Confirmar nueva contraseña" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem; background: var(--bg-primary); color: var(--text-primary);">
+            ${isTwoFactorEnabled ? `<input type="text" name="code" required autocomplete="one-time-code" placeholder="Código 2FA de 6 dígitos o respaldo" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.78rem; background: var(--bg-primary); color: var(--text-primary);">` : ''}
+            <div id="buyerChangePasswordError" style="display:none; color:#e11d48; font-size:0.72rem; font-weight:600;"></div>
+            <button type="submit" class="btn-account-secondary" style="width: 100%; padding: 8px; font-size: 0.75rem; font-weight: 700;">Actualizar Contraseña</button>
+          </form>
+        `;
+      }
     }
   }
 
@@ -5514,46 +5694,164 @@
     showToastNotification('Sesión cerrada correctamente.');
   }
 
+  async function postAuthJson(endpoint, payload) {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
+      },
+      body: JSON.stringify(payload || {})
+    });
+    const data = await res.json().catch(() => ({}));
+    return { res, data };
+  }
+
+  function extractAuthError(data, fallback) {
+    return data && data.errors
+      ? Object.values(data.errors).flat()[0]
+      : ((data && data.message) || fallback);
+  }
+
   document.addEventListener('submit', async function(e) {
     const authForm = e.target.closest('#buyerAuthForm');
-    if (!authForm) return;
-    e.preventDefault();
+    if (authForm) {
+      e.preventDefault();
+      const mode = authForm.dataset.mode || 'login';
+      const endpointMap = {
+        login: '/auth/login',
+        register: '/auth/register',
+        two_factor: '/auth/2fa/challenge',
+        forgot: '/auth/forgot-password',
+        reset: '/auth/reset-password'
+      };
+      const endpoint = endpointMap[mode] || '/auth/login';
+      const errEl = document.getElementById('buyerAuthError');
+      const okEl = document.getElementById('buyerAuthSuccess');
+      const submitBtn = document.getElementById('buyerAuthSubmitBtn');
+      if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+      if (okEl) { okEl.style.display = 'none'; okEl.textContent = ''; }
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Procesando...'; }
 
-    const mode = authForm.dataset.mode || 'login';
-    const endpoint = mode === 'register' ? '/auth/register' : '/auth/login';
-    const errEl = document.getElementById('buyerAuthError');
-    const submitBtn = document.getElementById('buyerAuthSubmitBtn');
-    if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Procesando...'; }
-
-    const formData = new FormData(authForm);
-    const payload = Object.fromEntries(formData.entries());
-
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
-        },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.user) {
-        const firstErr = data.errors ? Object.values(data.errors).flat()[0] : (data.message || 'Error al autenticar.');
-        if (errEl) { errEl.textContent = firstErr; errEl.style.display = 'block'; }
-      } else {
-        applyAuthenticatedUserSession(data.user);
-        showToastNotification(data.message || 'Sesión iniciada correctamente.');
+      const payload = Object.fromEntries(new FormData(authForm).entries());
+      if (mode === 'two_factor') {
+        payload.trust_device = !!authForm.querySelector('input[name="trust_device"]:checked');
       }
-    } catch (err) {
-      if (errEl) { errEl.textContent = 'Error de conexión. Intenta de nuevo.'; errEl.style.display = 'block'; }
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = mode === 'register' ? 'Crear Cuenta' : 'Iniciar Sesión';
+
+      try {
+        const { res, data } = await postAuthJson(endpoint, payload);
+        if (res.ok && data.requires_two_factor) {
+          buyerAuthMode = 'two_factor';
+          renderAccountSheetContent();
+          return;
+        }
+        if (!res.ok) {
+          if (errEl) { errEl.textContent = extractAuthError(data, 'Error al autenticar.'); errEl.style.display = 'block'; }
+          return;
+        }
+        if (mode === 'forgot' || mode === 'reset') {
+          if (okEl) { okEl.textContent = data.message || 'Operación completada.'; okEl.style.display = 'block'; }
+          showToastNotification(data.message || 'Operación completada.');
+          if (mode === 'reset') {
+            buyerResetParams = { token: '', email: '' };
+            buyerAuthMode = 'login';
+            setTimeout(() => renderAccountSheetContent(), 900);
+          }
+          return;
+        }
+        if (data.user) {
+          buyerAuthMode = 'login';
+          applyAuthenticatedUserSession(data.user);
+          showToastNotification(data.message || 'Sesión iniciada correctamente.');
+        }
+      } catch (err) {
+        if (errEl) { errEl.textContent = 'Error de conexión. Intenta de nuevo.'; errEl.style.display = 'block'; }
+      } finally {
+        if (submitBtn && document.body.contains(submitBtn)) {
+          submitBtn.disabled = false;
+        }
       }
+      return;
+    }
+
+    const enable2faForm = e.target.closest('#buyer2faEnableForm');
+    if (enable2faForm) {
+      e.preventDefault();
+      const errEl = document.getElementById('buyer2faPanelError');
+      const payload = Object.fromEntries(new FormData(enable2faForm).entries());
+      const { res, data } = await postAuthJson('/auth/2fa/enable', payload);
+      if (!res.ok) {
+        if (errEl) { errEl.textContent = extractAuthError(data, 'No se pudo iniciar 2FA.'); errEl.style.display = 'block'; }
+        return;
+      }
+      buyerTwoFactorUiState = { mode: 'confirm', secret: data.secret, otpauthUri: data.otpauth_uri, recoveryCodes: null };
+      renderAccountSettingsView(getActiveCustomerSession());
+      return;
+    }
+
+    const confirm2faForm = e.target.closest('#buyer2faConfirmForm');
+    if (confirm2faForm) {
+      e.preventDefault();
+      const errEl = document.getElementById('buyer2faPanelError');
+      const payload = Object.fromEntries(new FormData(confirm2faForm).entries());
+      const { res, data } = await postAuthJson('/auth/2fa/confirm', payload);
+      if (!res.ok) {
+        if (errEl) { errEl.textContent = extractAuthError(data, 'Código incorrecto.'); errEl.style.display = 'block'; }
+        return;
+      }
+      buyerTwoFactorUiState = { mode: null, secret: '', otpauthUri: '', recoveryCodes: data.recovery_codes || [] };
+      if (data.user) applyAuthenticatedUserSession(data.user);
+      showToastNotification(data.message || '2FA activado.');
+      return;
+    }
+
+    const disable2faForm = e.target.closest('#buyer2faDisableForm');
+    if (disable2faForm) {
+      e.preventDefault();
+      const errEl = document.getElementById('buyer2faPanelError');
+      const payload = Object.fromEntries(new FormData(disable2faForm).entries());
+      const { res, data } = await postAuthJson('/auth/2fa/disable', payload);
+      if (!res.ok) {
+        if (errEl) { errEl.textContent = extractAuthError(data, 'No se pudo desactivar 2FA.'); errEl.style.display = 'block'; }
+        return;
+      }
+      buyerTwoFactorUiState = { mode: null, secret: '', otpauthUri: '', recoveryCodes: null };
+      if (data.user) applyAuthenticatedUserSession(data.user);
+      showToastNotification(data.message || '2FA desactivado.');
+      return;
+    }
+
+    const recovery2faForm = e.target.closest('#buyer2faRecoveryForm');
+    if (recovery2faForm) {
+      e.preventDefault();
+      const errEl = document.getElementById('buyer2faPanelError');
+      const payload = Object.fromEntries(new FormData(recovery2faForm).entries());
+      const { res, data } = await postAuthJson('/auth/2fa/recovery-codes', payload);
+      if (!res.ok) {
+        if (errEl) { errEl.textContent = extractAuthError(data, 'No se pudieron regenerar los códigos.'); errEl.style.display = 'block'; }
+        return;
+      }
+      buyerTwoFactorUiState = { mode: null, secret: '', otpauthUri: '', recoveryCodes: data.recovery_codes || [] };
+      renderAccountSettingsView(getActiveCustomerSession());
+      showToastNotification(data.message || 'Códigos regenerados.');
+      return;
+    }
+
+    const changePwdForm = e.target.closest('#buyerChangePasswordForm');
+    if (changePwdForm) {
+      e.preventDefault();
+      const errEl = document.getElementById('buyerChangePasswordError');
+      if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+      const payload = Object.fromEntries(new FormData(changePwdForm).entries());
+      const { res, data } = await postAuthJson('/auth/password/change', payload);
+      if (!res.ok) {
+        if (errEl) { errEl.textContent = extractAuthError(data, 'No se pudo actualizar la contraseña.'); errEl.style.display = 'block'; }
+        return;
+      }
+      changePwdForm.reset();
+      if (data.user) applyAuthenticatedUserSession(data.user);
+      showToastNotification(data.message || 'Contraseña actualizada.');
     }
   });
 
@@ -6462,12 +6760,47 @@
     const toggle2FAAppBtn = e.target.closest('[data-action="toggle-2fa-app"]');
     if (toggle2FAAppBtn) {
       e.preventDefault();
-      let sess = {};
-      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
-      sess.twoFaApp = !sess.twoFaApp;
-      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
-      renderAccountSheetContent();
-      showToastNotification(sess.twoFaApp ? 'App Authenticator vinculada (Clave TOTP activa).' : 'App Authenticator desvinculada.');
+      const sess = getActiveCustomerSession();
+      if (!sess || !sess.email) {
+        showToastNotification('Inicia sesión primero para configurar 2FA.');
+        return;
+      }
+      if (!sess.email_verified) {
+        showToastNotification('Confirma tu correo electrónico antes de activar 2FA.');
+        return;
+      }
+      buyerTwoFactorUiState.recoveryCodes = null;
+      buyerTwoFactorUiState.mode = sess.two_factor_enabled ? 'disable' : 'start';
+      renderAccountSettingsView(sess);
+      return;
+    }
+
+    const twoFaCloseBtn = e.target.closest('[data-action="2fa-close-panel"]');
+    if (twoFaCloseBtn) {
+      e.preventDefault();
+      buyerTwoFactorUiState = { mode: null, secret: '', otpauthUri: '', recoveryCodes: null };
+      renderAccountSettingsView(getActiveCustomerSession());
+      return;
+    }
+
+    const twoFaOpenRecoveryBtn = e.target.closest('[data-action="2fa-open-recovery"]');
+    if (twoFaOpenRecoveryBtn) {
+      e.preventDefault();
+      buyerTwoFactorUiState.recoveryCodes = null;
+      buyerTwoFactorUiState.mode = 'recovery';
+      renderAccountSettingsView(getActiveCustomerSession());
+      return;
+    }
+
+    const resendVerifyBtn = e.target.closest('[data-action="resend-verification-email"]');
+    if (resendVerifyBtn) {
+      e.preventDefault();
+      resendVerifyBtn.disabled = true;
+      postAuthJson('/auth/email/resend', {}).then(({ res, data }) => {
+        showToastNotification(data.message || (res.ok ? 'Correo reenviado.' : 'No se pudo reenviar el correo.'));
+      }).finally(() => {
+        if (document.body.contains(resendVerifyBtn)) resendVerifyBtn.disabled = false;
+      });
       return;
     }
 
@@ -6560,6 +6893,14 @@
     if (toggleBuyerAuthBtn) {
       e.preventDefault();
       buyerAuthMode = (buyerAuthMode === 'login') ? 'register' : 'login';
+      renderAccountSheetContent();
+      return;
+    }
+
+    const setBuyerAuthModeBtn = e.target.closest('[data-action="set-buyer-auth-mode"]');
+    if (setBuyerAuthModeBtn) {
+      e.preventDefault();
+      buyerAuthMode = setBuyerAuthModeBtn.dataset.mode || 'login';
       renderAccountSheetContent();
       return;
     }

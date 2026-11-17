@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/*',
         ]);
 
+        $middleware->encryptCookies(except: [
+            'mto_trusted_device',
+        ]);
+
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
             'financial.privacy' => \App\Http\Middleware\EnforceFinancialPrivacy::class,

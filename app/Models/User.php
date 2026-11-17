@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'phone', 'two_factor_confirmed', 'password', 'role', 'supplier_id', 'ally_id'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -31,7 +31,15 @@ class User extends Authenticatable
             'supplier_id' => 'integer',
             'ally_id' => 'integer',
             'two_factor_confirmed' => 'boolean',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_trusted_version' => 'integer',
         ];
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return (bool) $this->two_factor_confirmed && !empty($this->two_factor_secret);
     }
 
     /**

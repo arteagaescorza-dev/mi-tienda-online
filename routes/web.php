@@ -183,6 +183,19 @@ Route::post('/auth/logout', [AuthModalController::class, 'logout'])->name('auth.
 Route::post('/logout', [AuthModalController::class, 'logout'])->name('logout');
 Route::post('/auth/google/login', [AuthModalController::class, 'googleLogin'])->name('auth.modal.google.login');
 Route::post('/auth/google/register', [AuthModalController::class, 'googleRegister'])->name('auth.modal.google.register');
+Route::get('/auth/email/verify/{id}/{hash}', [AuthModalController::class, 'verifyEmail'])->middleware('signed')->name('auth.verification.verify');
+Route::post('/auth/2fa/challenge', [AuthModalController::class, 'twoFactorChallenge'])->name('auth.2fa.challenge');
+Route::post('/auth/forgot-password', [AuthModalController::class, 'forgotPassword'])->name('auth.password.forgot');
+Route::post('/auth/reset-password', [AuthModalController::class, 'resetPassword'])->name('auth.password.reset');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/auth/email/resend', [AuthModalController::class, 'resendVerification'])->name('auth.verification.resend');
+    Route::post('/auth/2fa/enable', [AuthModalController::class, 'enableTwoFactor'])->name('auth.2fa.enable');
+    Route::post('/auth/2fa/confirm', [AuthModalController::class, 'confirmTwoFactor'])->name('auth.2fa.confirm');
+    Route::post('/auth/2fa/disable', [AuthModalController::class, 'disableTwoFactor'])->name('auth.2fa.disable');
+    Route::post('/auth/2fa/recovery-codes', [AuthModalController::class, 'regenerateRecoveryCodes'])->name('auth.2fa.recovery');
+    Route::post('/auth/password/change', [AuthModalController::class, 'changePassword'])->name('auth.password.change');
+});
 
 // CRM Leads (protegido por auth + role:portal)
 Route::middleware(['auth', 'role:portal'])->group(function () {
