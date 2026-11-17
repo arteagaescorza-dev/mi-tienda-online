@@ -3899,25 +3899,94 @@
     { code: 'MULTIVERSE50', title: '$50.00 MXN Bono de Recompensa MRR', ally: 'Programa Lealtad Multiverso', minOrder: 450, discountFixed: 50, redeemed: true, savedAmount: 320 }
   ];
 
-  function switchAccountTab(tabKey) {
-    accountState.activeTab = tabKey;
-    document.querySelectorAll('.account-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tabKey);
-    });
-    document.querySelectorAll('.account-tab-panel').forEach(panel => {
-      const match = (panel.id === `accountTab${tabKey.charAt(0).toUpperCase() + tabKey.slice(1)}`);
-      panel.classList.toggle('active', match);
-      panel.style.display = match ? 'block' : 'none';
-    });
-    renderAccountSheetContent();
-    if (tabKey === 'discounts') {
-      fetchAccountDiscounts();
+  const ACCOUNT_SUBVIEW_TITLES = {
+    personal: 'Datos personales y empaque',
+    addresses: 'Direcciones de entrega',
+    anatomy: 'Talla y perfil anatómico',
+    security: 'Seguridad y contraseña',
+    notifications: 'Notificaciones y apariencia',
+    privacy: 'Privacidad y cuenta (ARCO)'
+  };
+
+  function openAccountSubView(subviewKey) {
+    const hubMenu = document.getElementById('accountHubMenu');
+    const header = document.getElementById('accountSubViewHeader');
+    const titleEl = document.getElementById('accountSubViewTitle');
+    const panels = document.querySelectorAll('.account-subview-panel');
+
+    if (!subviewKey) {
+      if (hubMenu) hubMenu.style.display = 'flex';
+      if (header) header.style.display = 'none';
+      panels.forEach(p => { p.style.display = 'none'; });
+      return;
     }
-    if (tabKey === 'settings') {
+
+    if (hubMenu) hubMenu.style.display = 'none';
+    if (header) header.style.display = 'flex';
+    if (titleEl) titleEl.textContent = ACCOUNT_SUBVIEW_TITLES[subviewKey] || 'Cuenta';
+    panels.forEach(p => {
+      p.style.display = (p.dataset.subview === subviewKey) ? 'block' : 'none';
+    });
+
+    if (subviewKey === 'notifications') {
       if (typeof renderAccountPushPreferences === 'function') {
         renderAccountPushPreferences();
       }
       setAppTheme(getAppTheme(), false);
+    }
+  }
+
+  function updateAccountHubSummaries(session) {
+    if (!session || !session.email) return;
+    const pEl = document.getElementById('hubSubPersonal');
+    const aEl = document.getElementById('hubSubAddresses');
+    const anEl = document.getElementById('hubSubAnatomy');
+    const sEl = document.getElementById('hubSubSecurity');
+    if (pEl) {
+      const emp = session.discretePackaging !== false ? 'Empaque discreto' : 'Empaque estándar';
+      pEl.textContent = `${session.name || 'Comprador'} · ${emp}`;
+    }
+    if (aEl) {
+      const count = Array.isArray(session.addresses) ? session.addresses.length : 0;
+      aEl.textContent = count > 0 ? `${count} ${count === 1 ? 'dirección guardada' : 'direcciones guardadas'}` : 'Sin direcciones guardadas';
+    }
+    if (anEl) {
+      const waist = session.waistCm || 82;
+      anEl.textContent = `Cintura ${waist} cm`;
+    }
+    if (sEl) {
+      sEl.textContent = session.two_factor_enabled ? '2FA TOTP activo · Contraseña' : '2FA desactivado · Contraseña';
+    }
+  }
+
+  function switchAccountTab(tabKey) {
+    let targetTab = tabKey;
+    let initialSubView = null;
+    if (tabKey === 'subscription' || tabKey === 'discounts') {
+      targetTab = 'benefits';
+    } else if (tabKey === 'settings') {
+      targetTab = 'account';
+      initialSubView = 'security';
+    } else if (tabKey === 'profile') {
+      targetTab = 'account';
+      initialSubView = 'anatomy';
+    }
+
+    accountState.activeTab = targetTab;
+    document.querySelectorAll('.account-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === targetTab);
+    });
+    document.querySelectorAll('.account-tab-panel').forEach(panel => {
+      const match = (panel.id === `accountTab${targetTab.charAt(0).toUpperCase() + targetTab.slice(1)}`);
+      panel.classList.toggle('active', match);
+      panel.style.display = match ? 'block' : 'none';
+    });
+    renderAccountSheetContent();
+    if (targetTab === 'benefits') {
+      fetchAccountDiscounts();
+    }
+    if (targetTab === 'account') {
+      openAccountSubView(initialSubView);
     }
   }
 
@@ -3969,7 +4038,23 @@
   function renderAccountSheetContent() {
     // 1. Tarjeta de Identidad / Auth
     const authCard = document.getElementById('accountAuthCard');
+    const tabsNav = document.getElementById('accountTabsNav');
     const session = getActiveCustomerSession();
+    const isLoggedIn = !!(session && session.email);
+
+    if (tabsNav) {
+      tabsNav.style.display = isLoggedIn ? 'grid' : 'none';
+    }
+    if (!isLoggedIn) {
+      document.querySelectorAll('.account-tab-panel').forEach(p => { p.style.display = 'none'; });
+    } else {
+      const activeKey = accountState.activeTab || 'orders';
+      document.querySelectorAll('.account-tab-panel').forEach(p => {
+        const match = (p.id === `accountTab${activeKey.charAt(0).toUpperCase() + activeKey.slice(1)}`);
+        p.style.display = match ? 'block' : 'none';
+      });
+      updateAccountHubSummaries(session);
+    }
 
     if (authCard) {
       if (session && session.name) {
@@ -5184,13 +5269,8 @@
         <div id="accountSubStatusBox" style="margin-bottom: 12px;">
           <div style="font-size: 0.78rem; color: var(--text-secondary);">Cargando estado de suscripcion...</div>
         </div>
-        <div class="push-notifications-card" id="accountPushCenter">
-          <!-- Renderizado dinamico desde renderAccountPushPreferences() -->
-        </div>
       </div>
     `;
-
-    renderAccountPushPreferences();
 
     fetch('/api/v1/store/account/subscriptions')
       .then(res => res.json())
@@ -6570,6 +6650,20 @@
     if (accTabBtn) {
       e.preventDefault();
       switchAccountTab(accTabBtn.dataset.tab);
+      return;
+    }
+
+    const openSubViewBtn = e.target.closest('[data-action="open-account-subview"]');
+    if (openSubViewBtn) {
+      e.preventDefault();
+      openAccountSubView(openSubViewBtn.dataset.subview);
+      return;
+    }
+
+    const backHubBtn = e.target.closest('[data-action="back-account-hub"]');
+    if (backHubBtn) {
+      e.preventDefault();
+      openAccountSubView(null);
       return;
     }
 

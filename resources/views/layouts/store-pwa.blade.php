@@ -1551,8 +1551,8 @@
         <!-- Renderizado dinámico desde store-pwa.js -->
       </div>
 
-      <!-- Barra de Pestañas Táctiles del Portal (5 Pestañas Oficiales en Grid sin Scroll) -->
-      <div class="account-tabs-nav" id="accountTabsNav">
+      <!-- Barra de Pestañas Minimalista del Portal (3 Pestañas Limpias) -->
+      <div class="account-tabs-nav" id="accountTabsNav" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
         <button type="button" class="account-tab-btn active" data-action="switch-account-tab" data-tab="orders">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
@@ -1560,8 +1560,14 @@
             <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
             <line x1="12" y1="22.08" x2="12" y2="12"></line>
           </svg>
-          <span class="account-tab-text">Pedidos</span>
+          <span class="account-tab-text">Compras</span>
           <span id="accountOrdersBadge" class="account-tab-badge">0</span>
+        </button>
+        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="benefits">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+          </svg>
+          <span class="account-tab-text">Beneficios</span>
         </button>
         <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="account">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1570,62 +1576,115 @@
           </svg>
           <span class="account-tab-text">Cuenta</span>
         </button>
-        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="discounts">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-            <line x1="2" y1="10" x2="22" y2="10"></line>
-            <path d="M7 15h.01M17 15h.01"></path>
-          </svg>
-          <span class="account-tab-text">Descuentos</span>
-        </button>
-        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="subscription">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-          </svg>
-          <span class="account-tab-text">Club VIP</span>
-        </button>
-        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="settings">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <span class="account-tab-text">Ajustes</span>
-        </button>
       </div>
 
       <!-- Paneles de Contenido por Pestaña -->
 
-      <!-- Pestaña 1: Mis Pedidos & Rastreo + Wishlist -->
+      <!-- Pestaña 1: Compras & Rastreo -->
       <div id="accountTabOrders" class="account-tab-panel active">
-        <!-- Vista de Detalle de Pedido (oculta inicialmente, se abre al pulsar un pedido) -->
-        <div id="orderDetailViewContainer" style="display: none; margin-bottom: 20px;">
-          <!-- Renderizado dinámico desde store-pwa.js -->
-        </div>
-
+        <div id="orderDetailViewContainer" style="display: none; margin-bottom: 20px;"></div>
         <div id="orderListViewContainer">
-          <div id="accountOrdersList">
-            <!-- Renderizado dinámico desde store-pwa.js -->
-          </div>
+          <div id="accountOrdersList"></div>
+        </div>
+      </div>
 
-          <!-- Sección Integrada de Wishlist en Mis Pedidos -->
-          <div class="account-wishlist-integrated" style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--border-medium);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none" style="color: #e11d48;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                <h4 class="account-subheading" style="margin: 0;">Mis Deseos &amp; Favoritos</h4>
+      <!-- Pestaña 2: Beneficios (Club VIP + Cupones) -->
+      <div id="accountTabBenefits" class="account-tab-panel" style="display: none;">
+        <div id="accountTabSubscription" style="margin-bottom: 16px;">
+          <div class="subscription-panel-content">
+            <div class="sub-header">
+              <h4 class="sub-title">Club de Reposición Recurrente (MRR)</h4>
+              <p class="sub-desc">Recibe prendas esenciales mensualmente con envío prioritario.</p>
+            </div>
+            <div id="accountSubscriptionCard" class="subscription-card"></div>
+          </div>
+        </div>
+        <div id="accountTabDiscounts">
+          <div class="discounts-panel-content">
+            <div id="accWalletCardContainer" style="margin-bottom: 14px;"></div>
+            <div id="accReferralCardContainer" style="margin-bottom: 14px;"></div>
+            <div class="discounts-kpi-banner">
+              <div class="kpi-banner-item">
+                <span class="kpi-banner-label">Total Ahorrado</span>
+                <strong class="kpi-banner-value" id="kpiTotalDiscountsSaved">MXN $0.00</strong>
               </div>
-              <span id="accountWishlistCountBadge" style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted);">0 prendas</span>
+              <div class="kpi-banner-divider"></div>
+              <div class="kpi-banner-item">
+                <span class="kpi-banner-label">Cupones Disponibles</span>
+                <strong class="kpi-banner-value" id="kpiActiveDiscountsCount">0 Activos</strong>
+              </div>
             </div>
-            <div id="accountWishlistItemsList" class="account-wishlist-grid">
-              <!-- Renderizado dinámico desde store-pwa.js -->
+            <div class="discounts-header" style="margin: 14px 0 8px;">
+              <h4 class="account-subheading">Mis Cupones</h4>
             </div>
+            <div class="discounts-filter-bar" id="accDiscountsFilterBar">
+              <button type="button" class="discount-filter-btn active" data-action="set-discount-filter" data-filter="all">Todos (<span id="countDiscountsAll">0</span>)</button>
+              <button type="button" class="discount-filter-btn" data-action="set-discount-filter" data-filter="active">Disponibles (<span id="countDiscountsActive">0</span>)</button>
+              <button type="button" class="discount-filter-btn" data-action="set-discount-filter" data-filter="redeemed">Redimidos (<span id="countDiscountsRedeemed">0</span>)</button>
+            </div>
+            <div id="accountDiscountsList" class="discounts-grid-3x3"></div>
           </div>
         </div>
       </div>
 
-      <!-- Pestaña 2: Cuenta (Datos Personales, Google, Direcciones Casa/Trabajo, Perfil Anatómico) -->
+      <!-- Pestaña 3: Cuenta (Hub Minimalista + Sub-vistas limpias) -->
       <div id="accountTabAccount" class="account-tab-panel" style="display: none;">
-        <!-- Sección 1: Datos Personales & Google Link -->
+        <!-- Menú Hub Minimalista -->
+        <div id="accountHubMenu" style="display: flex; flex-direction: column; border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; background: var(--bg-primary);">
+          <button type="button" data-action="open-account-subview" data-subview="personal" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:13px 14px; background:transparent; border:none; border-bottom:1px solid var(--border-subtle); text-align:left; cursor:pointer;">
+            <div>
+              <div style="font-size:0.82rem; font-weight:700; color:var(--text-primary);">Datos personales y empaque</div>
+              <div id="hubSubPersonal" style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Nombre, teléfono y empaque discreto</div>
+            </div>
+            <span style="font-size:1rem; color:var(--text-muted);">›</span>
+          </button>
+          <button type="button" data-action="open-account-subview" data-subview="addresses" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:13px 14px; background:transparent; border:none; border-bottom:1px solid var(--border-subtle); text-align:left; cursor:pointer;">
+            <div>
+              <div style="font-size:0.82rem; font-weight:700; color:var(--text-primary);">Direcciones de entrega</div>
+              <div id="hubSubAddresses" style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Casa, trabajo y código postal</div>
+            </div>
+            <span style="font-size:1rem; color:var(--text-muted);">›</span>
+          </button>
+          <button type="button" data-action="open-account-subview" data-subview="anatomy" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:13px 14px; background:transparent; border:none; border-bottom:1px solid var(--border-subtle); text-align:left; cursor:pointer;">
+            <div>
+              <div style="font-size:0.82rem; font-weight:700; color:var(--text-primary);">Talla y perfil anatómico</div>
+              <div id="hubSubAnatomy" style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Medida de cintura y siluetas</div>
+            </div>
+            <span style="font-size:1rem; color:var(--text-muted);">›</span>
+          </button>
+          <button type="button" data-action="open-account-subview" data-subview="security" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:13px 14px; background:transparent; border:none; border-bottom:1px solid var(--border-subtle); text-align:left; cursor:pointer;">
+            <div>
+              <div style="font-size:0.82rem; font-weight:700; color:var(--text-primary);">Seguridad y contraseña</div>
+              <div id="hubSubSecurity" style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">2FA TOTP, códigos y contraseña</div>
+            </div>
+            <span style="font-size:1rem; color:var(--text-muted);">›</span>
+          </button>
+          <button type="button" data-action="open-account-subview" data-subview="notifications" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:13px 14px; background:transparent; border:none; border-bottom:1px solid var(--border-subtle); text-align:left; cursor:pointer;">
+            <div>
+              <div style="font-size:0.82rem; font-weight:700; color:var(--text-primary);">Notificaciones y apariencia</div>
+              <div id="hubSubNotifications" style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Alertas Web Push y tema visual</div>
+            </div>
+            <span style="font-size:1rem; color:var(--text-muted);">›</span>
+          </button>
+          <button type="button" data-action="open-account-subview" data-subview="privacy" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:13px 14px; background:transparent; border:none; text-align:left; cursor:pointer;">
+            <div>
+              <div style="font-size:0.82rem; font-weight:700; color:#ef4444;">Privacidad y cuenta (ARCO)</div>
+              <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Eliminación permanente de datos</div>
+            </div>
+            <span style="font-size:1rem; color:var(--text-muted);">›</span>
+          </button>
+        </div>
+
+        <!-- Cabecera de Sub-vista con botón Volver -->
+        <div id="accountSubViewHeader" style="display: none; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <button type="button" data-action="back-account-hub" style="display:inline-flex; align-items:center; gap:4px; background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:8px; padding:5px 10px; font-size:0.75rem; font-weight:700; color:var(--text-primary); cursor:pointer;">
+            ← Volver
+          </button>
+          <strong id="accountSubViewTitle" style="font-size:0.85rem; color:var(--text-primary);"></strong>
+        </div>
+
+        <!-- Sub-vista: Datos Personales -->
+        <div id="accSubPersonal" class="account-subview-panel" data-subview="personal" style="display: none;">
         <div class="account-section-card" style="margin-bottom: 18px;">
           <div class="account-section-header" style="margin-bottom: 12px;">
             <h4 class="account-subheading">Datos del Perfil</h4>
@@ -1661,8 +1720,10 @@
             <span>GUARDAR INFORMACIÓN</span>
           </button>
         </div>
+        </div>
 
-        <!-- Libreta de Direcciones (Casa / Trabajo) -->
+        <!-- Sub-vista: Libreta de Direcciones (Casa / Trabajo) -->
+        <div id="accSubAddresses" class="account-subview-panel" data-subview="addresses" style="display: none;">
         <div class="account-section-card" style="margin-bottom: 18px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div>
@@ -1740,8 +1801,10 @@
             </div>
           </div>
         </div>
+        </div>
 
-        <!-- Sección 2: Perfil Anatómico & Preferencias -->
+        <!-- Sub-vista: Perfil Anatómico & Preferencias -->
+        <div id="accSubAnatomy" class="account-subview-panel" data-subview="anatomy" style="display: none;">
         <div class="account-section-card">
           <div class="anatomy-header">
             <h4 class="anatomy-title">Perfil Anatómico y Preferencias</h4>
@@ -1796,123 +1859,16 @@
             <span>GUARDAR PERFIL ANATÓMICO</span>
           </button>
         </div>
-      </div>
-
-      <!-- Pestaña 3: Mis Descuentos (Códigos Aliados, Estado Redimido/Disponible, Dinero Ahorrado, Wallet & Referidos) -->
-      <div id="accountTabDiscounts" class="account-tab-panel" style="display: none;">
-        <div class="discounts-panel-content">
-          <!-- Monedero Wallet Cashback (Recomendación 8) -->
-          <div id="accWalletCardContainer" style="margin-bottom: 14px;">
-            <!-- Renderizado dinámico desde store-pwa.js -->
-          </div>
-
-          <!-- Programa de Referidos Invita a un Amigo (Recomendación 7) -->
-          <div id="accReferralCardContainer" style="margin-bottom: 14px;">
-            <!-- Renderizado dinámico desde store-pwa.js -->
-          </div>
-
-          <!-- KPI Banner de Dinero Ahorrado -->
-          <div class="discounts-kpi-banner">
-            <div class="kpi-banner-item">
-              <span class="kpi-banner-label">Total Ahorrado con Aliados</span>
-              <strong class="kpi-banner-value" id="kpiTotalDiscountsSaved">MXN $450.00</strong>
-            </div>
-            <div class="kpi-banner-divider"></div>
-            <div class="kpi-banner-item">
-              <span class="kpi-banner-label">Cupones Disponibles</span>
-              <strong class="kpi-banner-value" id="kpiActiveDiscountsCount">3 Activos</strong>
-            </div>
-          </div>
-
-          <div class="discounts-header" style="margin: 16px 0 10px;">
-            <h4 class="account-subheading">Códigos de Descuento &amp; Aliados</h4>
-            <p class="account-subheading-desc">Beneficios exclusivos con marcas y eventos aliados en formato 4:5.</p>
-          </div>
-
-          <!-- Filtro Conmutador de Cupones Activos y Redimidos (Requerimiento 5) -->
-          <div class="discounts-filter-bar" id="accDiscountsFilterBar">
-            <button type="button" class="discount-filter-btn active" data-action="set-discount-filter" data-filter="all">Todos (<span id="countDiscountsAll">5</span>)</button>
-            <button type="button" class="discount-filter-btn" data-action="set-discount-filter" data-filter="active">Disponibles (<span id="countDiscountsActive">3</span>)</button>
-            <button type="button" class="discount-filter-btn" data-action="set-discount-filter" data-filter="redeemed">Redimidos (<span id="countDiscountsRedeemed">2</span>)</button>
-          </div>
-
-          <!-- Grid de Cupones 3x3 en formato 4:5 -->
-          <div id="accountDiscountsList" class="discounts-grid-3x3">
-            <!-- Renderizado dinámico desde store-pwa.js -->
-          </div>
         </div>
-      </div>
 
-      <!-- Pestaña 4: Club Mensual MRR -->
-      <div id="accountTabSubscription" class="account-tab-panel" style="display: none;">
-        <div class="subscription-panel-content">
-          <div class="sub-header">
-            <h4 class="sub-title">Club de Reposición Recurrente (MRR)</h4>
-            <p class="sub-desc">Recibe prendas esenciales mensualmente con flete courier bonificado y precio preferencial.</p>
-          </div>
-
-          <div id="accountSubscriptionCard" class="subscription-card">
-            <!-- Renderizado dinámico desde store-pwa.js -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Pestaña 5: Configuración & Preferencias (Tema, Web Push, 2FA WhatsApp/Authenticator, Gestión de Cuenta) -->
-      <div id="accountTabSettings" class="account-tab-panel" style="display: none;">
-        <div class="settings-panel-content" style="padding: 4px 0;">
-          <div class="settings-header" style="margin-bottom: 16px;">
-            <h4 class="account-subheading">Configuración de la Cuenta</h4>
-            <p class="account-subheading-desc">Personaliza la apariencia visual, seguridad 2FA y canales de comunicación directa.</p>
-          </div>
-
-          <!-- Selector de Modo Oscuro / Claro / Sistema -->
-          <div class="theme-selector-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                <div>
-                  <strong class="settings-card-title">Apariencia Visual</strong>
-                  <span style="font-size: 0.68rem; color: var(--text-muted);">Soporte Dark Mode &amp; Light Mode</span>
-                </div>
-              </div>
-              <span id="currentThemeBadge" class="theme-active-badge" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 9999px; background: rgba(79, 70, 229, 0.1); color: var(--brand-accent, #4f46e5); border: 1px solid rgba(79, 70, 229, 0.2);">SISTEMA</span>
-            </div>
-
-            <div class="theme-options-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-              <button type="button" class="theme-option-btn" data-action="set-app-theme" data-theme-mode="light" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-primary); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                <span style="font-size: 0.72rem; font-weight: 700;">Claro</span>
-              </button>
-
-              <button type="button" class="theme-option-btn" data-action="set-app-theme" data-theme-mode="dark" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-primary); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                <span style="font-size: 0.72rem; font-weight: 700;">Oscuro</span>
-              </button>
-
-              <button type="button" class="theme-option-btn active" data-action="set-app-theme" data-theme-mode="system" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--brand-accent, #4f46e5); background: var(--bg-primary); color: var(--brand-accent, #4f46e5); cursor: pointer; transition: all 0.2s;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                <span style="font-size: 0.72rem; font-weight: 700;">Sistema</span>
-              </button>
-            </div>
-            <p style="font-size: 0.68rem; color: var(--text-muted); margin: 8px 0 0; text-align: center;">
-              El modo "Sistema" sincroniza automáticamente la tienda con la configuración de apariencia de tu dispositivo.
-            </p>
-          </div>
-
-          <!-- Centro de Notificaciones Web Push PWA (REGLA 2: RESIDE EN CONFIGURACIÓN) -->
-          <div class="push-notifications-card" id="accountPushCenter">
-            <!-- Renderizado dinámicamente desde store-pwa.js -->
-          </div>
-
-          <!-- Seguridad y Autenticación de Dos Factores (2FA) -->
-          <div class="security-2fa-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-top: 16px;">
+        <!-- Sub-vista: Seguridad y Contraseña -->
+        <div id="accSubSecurity" class="account-subview-panel" data-subview="security" style="display: none;">
+          <div class="security-2fa-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
               <strong class="settings-card-title">Seguridad en Dos Pasos (2FA)</strong>
             </div>
-            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Protege tus compras y datos de cuenta mediante códigos temporales de un solo uso.</p>
-
-            <!-- 2FA Authenticator App -->
+            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Protege tu cuenta con códigos temporales de un solo uso.</p>
             <div class="twofa-option-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(79, 70, 229, 0.12); color: #4f46e5; display: flex; align-items: center; justify-content: center;">
@@ -1920,7 +1876,7 @@
                 </div>
                 <div>
                   <div class="twofa-title" style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary);">Google Authenticator / Authy</div>
-                  <div class="twofa-desc" style="font-size: 0.68rem; color: var(--text-muted);">Clave temporal TOTP de 6 dígitos sin depender de señal celular.</div>
+                  <div class="twofa-desc" style="font-size: 0.68rem; color: var(--text-muted);">Clave temporal TOTP de 6 dígitos.</div>
                 </div>
               </div>
               <button type="button" class="btn-account-secondary" id="btnToggle2FAApp" data-action="toggle-2fa-app" style="font-size: 0.7rem; padding: 4px 10px;">
@@ -1930,28 +1886,54 @@
             <div id="accTwoFactorPanel" style="margin-top: 10px;"></div>
           </div>
 
-          <!-- Cambiar Contraseña -->
-          <div class="account-management-card" id="accChangePasswordCard" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-top: 16px;">
+          <div class="account-management-card" id="accChangePasswordCard" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-top: 14px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
               <strong class="settings-card-title">Cambiar Contraseña</strong>
             </div>
             <div id="accChangePasswordContainer"></div>
           </div>
+        </div>
 
-          <!-- Gestión y Privacidad de la Cuenta -->
-          <div class="account-management-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-top: 16px;">
+        <!-- Sub-vista: Notificaciones y Apariencia -->
+        <div id="accSubNotifications" class="account-subview-panel" data-subview="notifications" style="display: none;">
+          <div class="theme-selector-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <strong class="settings-card-title">Apariencia Visual</strong>
+              </div>
+              <span id="currentThemeBadge" class="theme-active-badge" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 9999px; background: rgba(79, 70, 229, 0.1); color: var(--brand-accent, #4f46e5); border: 1px solid rgba(79, 70, 229, 0.2);">SISTEMA</span>
+            </div>
+            <div class="theme-options-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <button type="button" class="theme-option-btn" data-action="set-app-theme" data-theme-mode="light" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-primary); color: var(--text-primary); cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Claro</span>
+              </button>
+              <button type="button" class="theme-option-btn" data-action="set-app-theme" data-theme-mode="dark" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-primary); color: var(--text-primary); cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Oscuro</span>
+              </button>
+              <button type="button" class="theme-option-btn active" data-action="set-app-theme" data-theme-mode="system" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--brand-accent, #4f46e5); background: var(--bg-primary); color: var(--brand-accent, #4f46e5); cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Sistema</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="push-notifications-card" id="accountPushCenter"></div>
+        </div>
+
+        <!-- Sub-vista: Privacidad y Cuenta (ARCO) -->
+        <div id="accSubPrivacy" class="account-subview-panel" data-subview="privacy" style="display: none;">
+          <div class="account-management-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: #ef4444;"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <strong class="settings-card-title">Gestión de la Cuenta &amp; Privacidad</strong>
+              <strong class="settings-card-title">Privacidad y Derechos ARCO</strong>
             </div>
-            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Controla la vinculación con servicios de terceros y tus derechos ARCO de cancelación de datos.</p>
-
-            <div id="accGoogleUnlinkRow" style="margin-bottom: 10px;">
-              <!-- Renderizado dinámicamente: botón de desvincular Google si aplica -->
-            </div>
-
-            <button type="button" class="btn-danger-account" data-action="delete-customer-account" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 12px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Elimina de forma permanente tus datos personales, direcciones y sesiones activas.</p>
+            <div id="accGoogleUnlinkRow" style="margin-bottom: 10px;"></div>
+            <button type="button" class="btn-danger-account" data-action="delete-customer-account" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 12px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               <span>Eliminar Mi Cuenta y Datos Personales</span>
             </button>
