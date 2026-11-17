@@ -115,9 +115,14 @@ class AuthModalController extends Controller
             'role' => 'customer',
         ]);
 
+        $mailSent = true;
+        $mailError = null;
+
         try {
             $user->notify(new VerifyBuyerEmailNotification());
         } catch (\Throwable $e) {
+            $mailSent = false;
+            $mailError = $e->getMessage();
             report($e);
         }
 
@@ -125,7 +130,10 @@ class AuthModalController extends Controller
         $request->session()->regenerate();
 
         return response()->json([
-            'message' => 'Cuenta creada correctamente. Te enviamos un correo para confirmar tu cuenta.',
+            'message' => $mailSent
+                ? 'Cuenta creada correctamente. Te enviamos un correo para confirmar tu cuenta.'
+                : 'Cuenta creada, pero no se pudo enviar el correo de confirmación (' . $mailError . ').',
+            'email_sent' => $mailSent,
             'user' => $this->userPayload($user),
         ], 201);
     }
@@ -192,6 +200,9 @@ class AuthModalController extends Controller
             $user->notify(new VerifyBuyerEmailNotification());
         } catch (\Throwable $e) {
             report($e);
+            return response()->json([
+                'message' => 'No se pudo enviar el correo de verificación: ' . $e->getMessage(),
+            ], 422);
         }
 
         return response()->json([
