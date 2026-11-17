@@ -3480,7 +3480,7 @@
     // 1. Consulta a API SEPOMEX de backend
     try {
       const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
-      const resp = await fetch('/api/v1/postal-code/lookup', {
+      const resp = await fetch('/api/v1/store/postal-code/lookup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

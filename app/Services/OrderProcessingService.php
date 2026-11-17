@@ -60,6 +60,32 @@ class OrderProcessingService
 
         $location = $directory[$cleanZip] ?? null;
 
+        if ($location === null && $isValid && !app()->runningUnitTests()) {
+            try {
+                $resp = \Illuminate\Support\Facades\Http::timeout(4)
+                    ->acceptJson()
+                    ->get("https://api.zippopotam.us/mx/{$cleanZip}");
+                if ($resp->ok()) {
+                    $body = $resp->json();
+                    $places = is_array($body['places'] ?? null) ? $body['places'] : [];
+                    if ($places !== []) {
+                        $state = (string) ($places[0]['state'] ?? '');
+                        $colonias = array_values(array_unique(array_filter(array_map(
+                            fn ($p) => trim((string) ($p['place name'] ?? '')),
+                            $places
+                        ))));
+                        $location = [
+                            'state' => $state !== '' ? $state : null,
+                            'city' => $state !== '' ? $state : null,
+                            'colonias' => $colonias,
+                        ];
+                    }
+                }
+            } catch (\Throwable) {
+                // Ignorar fallo externo y mantener cobertura nacional
+            }
+        }
+
         return [
             'success' => $isValid,
             'postal_code' => $cleanZip,
