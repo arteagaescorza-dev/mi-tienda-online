@@ -5697,6 +5697,7 @@
   async function postAuthJson(endpoint, payload) {
     const res = await fetch(endpoint, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -5730,6 +5731,7 @@
       const errEl = document.getElementById('buyerAuthError');
       const okEl = document.getElementById('buyerAuthSuccess');
       const submitBtn = document.getElementById('buyerAuthSubmitBtn');
+      const originalBtnText = submitBtn ? submitBtn.textContent : '';
       if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
       if (okEl) { okEl.style.display = 'none'; okEl.textContent = ''; }
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Procesando...'; }
@@ -5747,7 +5749,10 @@
           return;
         }
         if (!res.ok) {
-          if (errEl) { errEl.textContent = extractAuthError(data, 'Error al autenticar.'); errEl.style.display = 'block'; }
+          const fallbackMsg = res.status === 419
+            ? 'Tu sesión expiró. Recarga la página e intenta de nuevo.'
+            : `Error al autenticar (HTTP ${res.status}).`;
+          if (errEl) { errEl.textContent = extractAuthError(data, fallbackMsg); errEl.style.display = 'block'; }
           return;
         }
         if (mode === 'forgot' || mode === 'reset') {
@@ -5770,6 +5775,7 @@
       } finally {
         if (submitBtn && document.body.contains(submitBtn)) {
           submitBtn.disabled = false;
+          submitBtn.textContent = originalBtnText;
         }
       }
       return;
