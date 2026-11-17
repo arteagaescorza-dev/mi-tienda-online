@@ -27,6 +27,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (!app()->runningInConsole() && !app()->runningUnitTests()) {
+            $request = request();
+            $host = $request->getHost();
+            if ($host !== '' && !in_array($host, ['localhost', '127.0.0.1'], true)) {
+                \Illuminate\Support\Facades\URL::forceRootUrl($request->getSchemeAndHttpHost());
+                if ($request->isSecure() || app()->environment('production')) {
+                    \Illuminate\Support\Facades\URL::forceScheme('https');
+                }
+            }
+        }
+
         // Observadores de dominio para sincronización omnicanal inmutable Interhub 4 <-> 2 y Hub 7 <-> 3
         Product::observe(ProductObserver::class);
         ProductVariant::observe(ProductVariantObserver::class);
