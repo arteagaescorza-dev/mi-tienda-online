@@ -3440,21 +3440,26 @@
     }
   }
 
-  async function lookupPostalCode(zip) {
+  async function lookupPostalCode(zip, prefix = 'checkoutShipping') {
     const cleanZip = (zip || '').replace(/\D/g, '');
     if (cleanZip.length !== 5) {
       showToastNotification('Ingresa un código postal válido de 5 dígitos.');
       return;
     }
 
-    const stateInput = document.getElementById('checkoutShippingState');
-    const cityInput = document.getElementById('checkoutShippingCity');
-    const colInput = document.getElementById('checkoutShippingColony');
-    const datalist = document.getElementById('checkoutColoniesList');
+    const stateId = `${prefix}State`;
+    const cityId = `${prefix}City`;
+    const colId = `${prefix}Colony`;
+    const stateInput = document.getElementById(stateId);
+    const cityInput = document.getElementById(cityId);
+    const colInput = document.getElementById(colId);
+    const datalist = prefix === 'checkoutShipping' ? document.getElementById('checkoutColoniesList') : null;
 
     const knownCodes = {
       '06000': { state: 'Ciudad de México', city: 'Cuauhtémoc', colonias: ['Centro'] },
       '06600': { state: 'Ciudad de México', city: 'Cuauhtémoc', colonias: ['Juárez', 'Cuauhtémoc', 'Roma Norte'] },
+      '06700': { state: 'Ciudad de México', city: 'Cuauhtémoc', colonias: ['Roma Norte'] },
+      '06760': { state: 'Ciudad de México', city: 'Cuauhtémoc', colonias: ['Roma Sur'] },
       '01000': { state: 'Ciudad de México', city: 'Álvaro Obregón', colonias: ['San Ángel', 'Campestre'] },
       '03100': { state: 'Ciudad de México', city: 'Benito Juárez', colonias: ['Del Valle Centro', 'Insurgentes San Borja', 'Tlacoquemecatl'] },
       '11000': { state: 'Ciudad de México', city: 'Miguel Hidalgo', colonias: ['Lomas de Chapultepec', 'Polanco'] },
@@ -3506,11 +3511,11 @@
     // 3. Aplicar datos autocompletados al formulario
     if (resolvedState && stateInput) {
       stateInput.value = resolvedState;
-      setFieldValidation('checkoutShippingState', true);
+      if (prefix === 'checkoutShipping') setFieldValidation(stateId, true);
     }
     if (resolvedCity && cityInput) {
       cityInput.value = resolvedCity;
-      setFieldValidation('checkoutShippingCity', true);
+      if (prefix === 'checkoutShipping') setFieldValidation(cityId, true);
     }
 
     if (resolvedColonias.length > 0) {
@@ -3519,7 +3524,7 @@
       }
       if (colInput) {
         colInput.value = resolvedColonias[0];
-        setFieldValidation('checkoutShippingColony', true);
+        if (prefix === 'checkoutShipping') setFieldValidation(colId, true);
       }
     }
 
@@ -6948,8 +6953,8 @@
     const accCpBtn = e.target.closest('[data-action="acc-lookup-postal-code"]');
     if (accCpBtn) {
       e.preventDefault();
-      const cp = document.getElementById('accInputZip')?.value || '';
-      lookupPostalCode(cp);
+      const cp = document.getElementById('accShippingZip')?.value || '';
+      lookupPostalCode(cp, 'accShipping');
       return;
     }
 
