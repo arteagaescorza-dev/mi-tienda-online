@@ -49,6 +49,32 @@ class AuthModalController extends Controller
         return redirect()->intended('/');
     }
 
+    public function register(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'string', 'email', 'max:190', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = User::create([
+            'name' => trim($validated['name']),
+            'email' => strtolower(trim($validated['email'])),
+            'phone' => $validated['phone'] ?? null,
+            'password' => $validated['password'],
+            'role' => 'customer',
+        ]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return response()->json([
+            'message' => 'Cuenta creada correctamente.',
+            'user' => $this->userPayload($user),
+        ], 201);
+    }
+
     public function logout(Request $request): JsonResponse|RedirectResponse
     {
         Auth::logout();
@@ -109,8 +135,11 @@ class AuthModalController extends Controller
         $type = $this->resolveUserType($user);
 
         return [
+            'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'phone' => $user->phone,
+            'role' => $user->role,
             'avatar' => 'https://i.pravatar.cc/80?u=' . urlencode($user->email),
             'roleLabel' => $type === 'portal' ? 'Usuario portal' : 'Cliente de la tienda',
             'type' => $type,

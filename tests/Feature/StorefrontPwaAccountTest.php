@@ -263,4 +263,34 @@ class StorefrontPwaAccountTest extends TestCase
                 ],
             ]);
     }
+
+    public function test_customer_can_register_and_login_via_auth_modal_endpoints(): void
+    {
+        $reg = $this->postJson('/auth/register', [
+            'name' => 'Cliente Real Prueba',
+            'email' => 'cliente.real@ejemplo.com',
+            'phone' => '5511223344',
+            'password' => 'Secreta1234!',
+            'password_confirmation' => 'Secreta1234!',
+        ]);
+
+        $reg->assertStatus(201)
+            ->assertJsonPath('user.email', 'cliente.real@ejemplo.com')
+            ->assertJsonPath('user.role', 'customer');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'cliente.real@ejemplo.com',
+            'role' => 'customer',
+        ]);
+
+        $this->postJson('/auth/logout')->assertOk();
+
+        $login = $this->postJson('/auth/login', [
+            'email' => 'cliente.real@ejemplo.com',
+            'password' => 'Secreta1234!',
+        ]);
+
+        $login->assertOk()
+            ->assertJsonPath('user.email', 'cliente.real@ejemplo.com');
+    }
 }

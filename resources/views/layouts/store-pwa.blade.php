@@ -2635,6 +2635,18 @@
     window.__UNIVERSE_META__ = @json($universeMeta ?? [], JSON_UNESCAPED_UNICODE);
     window.__STORE_CSRF_TOKEN__ = "{{ csrf_token() }}";
     window.__AUTO_OPEN_PRODUCT_ID__ = @json($autoOpenProductId ?? null);
+    @php
+      $authUser = auth()->user();
+      $initialAuthPayload = $authUser ? [
+        'id' => $authUser->id,
+        'name' => $authUser->name,
+        'email' => $authUser->email,
+        'phone' => $authUser->phone,
+        'role' => $authUser->role,
+        'walletBalance' => 0,
+      ] : null;
+    @endphp
+    window.__INITIAL_AUTH_USER__ = @json($initialAuthPayload);
   </script>
   <script src="{{ asset('js/storefront/store-pwa.js') }}?v={{ file_exists(public_path('js/storefront/store-pwa.js')) ? filemtime(public_path('js/storefront/store-pwa.js')) : time() }}"></script>
   @if(!empty($autoOpenProductId))

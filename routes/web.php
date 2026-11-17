@@ -178,6 +178,7 @@ Route::get('/ingreso/cliente', [PortalAccessController::class, 'clientLogin'])->
 Route::post('/ingreso/cliente', [AuthModalController::class, 'login']);
 
 Route::post('/auth/login', [AuthModalController::class, 'login'])->name('auth.modal.login');
+Route::post('/auth/register', [AuthModalController::class, 'register'])->name('auth.modal.register');
 Route::post('/auth/logout', [AuthModalController::class, 'logout'])->name('auth.modal.logout');
 Route::post('/logout', [AuthModalController::class, 'logout'])->name('logout');
 Route::post('/auth/google/login', [AuthModalController::class, 'googleLogin'])->name('auth.modal.google.login');

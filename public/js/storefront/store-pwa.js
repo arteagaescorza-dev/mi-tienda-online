@@ -3700,62 +3700,67 @@
   }
 
   // ============================================================================
-  // AUTENTICACION CON GOOGLE OAUTH2 (D2C BUYER AUTH)
+  // AUTENTICACION REAL D2C (CONECTADA A public.users EN SUPABASE)
   // ============================================================================
-  function loginWithGoogle(source) {
-    const googleUser = {
-      name: 'Carlos Mendoza',
-      email: 'carlos.mendoza@gmail.com',
-      phone: '5512345678',
-      avatar: 'G',
-      provider: 'google',
-      shipping: {
-        postalCode: '06000',
-        state: 'Ciudad de México',
-        city: 'Cuauhtémoc',
-        colony: 'Centro',
-        street: 'Av. Juárez 14, Depto 402',
-        references: 'Edificio clásico entre Balderas y Revillagigedo'
-      },
-      registeredAt: new Date().toISOString(),
-      universe: storeState.activeUniverse
-    };
+  let buyerAuthMode = 'login'; // 'login' | 'register'
 
-    try {
-      localStorage.setItem('multiverse_customer_session', JSON.stringify(googleUser));
-    } catch (e) {}
-
-    checkoutState.customer.name = googleUser.name;
-    checkoutState.customer.phone = googleUser.phone;
-    checkoutState.customer.email = googleUser.email;
-    checkoutState.shipping = { ...googleUser.shipping };
-
-    if (source === 'checkout' || document.getElementById('checkoutCustomerName')) {
-      const nameEl = document.getElementById('checkoutCustomerName');
-      if (nameEl) nameEl.value = googleUser.name;
-      const phoneEl = document.getElementById('checkoutCustomerPhone');
-      if (phoneEl) phoneEl.value = googleUser.phone;
-      const emailEl = document.getElementById('checkoutCustomerEmail');
-      if (emailEl) emailEl.value = googleUser.email;
-      const zipEl = document.getElementById('checkoutShippingZip');
-      if (zipEl) zipEl.value = googleUser.shipping.postalCode;
-      const stateEl = document.getElementById('checkoutShippingState');
-      if (stateEl) stateEl.value = googleUser.shipping.state;
-      const cityEl = document.getElementById('checkoutShippingCity');
-      if (cityEl) cityEl.value = googleUser.shipping.city;
-      const colEl = document.getElementById('checkoutShippingColony');
-      if (colEl) colEl.value = googleUser.shipping.colony;
-      const streetEl = document.getElementById('checkoutShippingStreet');
-      if (streetEl) streetEl.value = googleUser.shipping.street;
-      const refsEl = document.getElementById('checkoutShippingRefs');
-      if (refsEl) refsEl.value = googleUser.shipping.references;
+  function getActiveCustomerSession() {
+    if (window.__INITIAL_AUTH_USER__ && window.__INITIAL_AUTH_USER__.email) {
+      return window.__INITIAL_AUTH_USER__;
     }
+    try {
+      const raw = localStorage.getItem('multiverse_customer_session');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.email === 'carlos.mendoza@gmail.com') {
+          localStorage.removeItem('multiverse_customer_session');
+          return null;
+        }
+        return parsed;
+      }
+    } catch (e) {}
+    return null;
+  }
 
+  function applyAuthenticatedUserSession(userObj) {
+    window.__INITIAL_AUTH_USER__ = userObj;
+    try {
+      localStorage.setItem('multiverse_customer_session', JSON.stringify(userObj));
+    } catch (e) {}
+    if (typeof checkoutState !== 'undefined' && checkoutState.customer) {
+      checkoutState.customer.name = userObj.name || '';
+      checkoutState.customer.phone = userObj.phone || '';
+      checkoutState.customer.email = userObj.email || '';
+    }
     renderAccountSheetContent();
     if (typeof renderPdpDynamicSections === 'function') {
       renderPdpDynamicSections();
     }
-    showToastNotification('Sesión iniciada con Google.');
+  }
+
+  (function syncInitialAuthOnBoot() {
+    if (window.__INITIAL_AUTH_USER__ && window.__INITIAL_AUTH_USER__.email) {
+      try {
+        localStorage.setItem('multiverse_customer_session', JSON.stringify(window.__INITIAL_AUTH_USER__));
+      } catch (e) {}
+    } else {
+      try {
+        const raw = localStorage.getItem('multiverse_customer_session');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.email === 'carlos.mendoza@gmail.com') {
+            localStorage.removeItem('multiverse_customer_session');
+          }
+        }
+      } catch (e) {}
+    }
+  })();
+
+  function loginWithGoogle(source) {
+    if (typeof openDrawer === 'function') {
+      openDrawer('accountSheet');
+    }
+    showToastNotification('Inicia sesión o crea tu cuenta con tu correo para guardar tu historial real.');
   }
 
   // ============================================================================
@@ -3876,17 +3881,13 @@
   function renderAccountSheetContent() {
     // 1. Tarjeta de Identidad / Auth
     const authCard = document.getElementById('accountAuthCard');
-    let session = null;
-    try {
-      const raw = localStorage.getItem('multiverse_customer_session');
-      if (raw) session = JSON.parse(raw);
-    } catch (e) {}
+    const session = getActiveCustomerSession();
 
     if (authCard) {
       if (session && session.name) {
         const initials = session.name.split(' ').filter(Boolean).map(n => n.charAt(0)).slice(0, 2).join('').toUpperCase() || 'M';
         const isGoogle = session.provider === 'google' || !!session.google_linked;
-        const walletBalance = (typeof session.walletBalance === 'number') ? session.walletBalance : 280;
+        const walletBalance = (typeof session.walletBalance === 'number') ? session.walletBalance : 0;
         authCard.innerHTML = `
           <div class="auth-logged-card">
             <div class="auth-logged-main">
@@ -3939,19 +3940,34 @@
           </div>
         `;
       } else {
+        const isReg = (buyerAuthMode === 'register');
         authCard.innerHTML = `
           <div class="auth-guest-card">
-            <div class="account-subheading">Acceso de Comprador</div>
-            <p class="account-subheading-desc" style="margin-bottom: 10px;">Inicia sesión con Google para rastrear tus pedidos, guardar tus direcciones y perfil anatómico.</p>
-            <button type="button" class="btn-google-auth" data-action="google-login" data-source="account">
-              <svg viewBox="0 0 24 24" width="18" height="18" class="google-icon">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-              </svg>
-              <span>Continuar con Google</span>
-            </button>
+            <div class="account-subheading">${isReg ? 'Crear Cuenta de Comprador' : 'Acceso de Comprador'}</div>
+            <p class="account-subheading-desc" style="margin-bottom: 10px;">
+              ${isReg ? 'Regístrate para guardar tus pedidos reales, direcciones y preferencias.' : 'Inicia sesión con tu correo para consultar tus pedidos y perfil.'}
+            </p>
+            <form id="buyerAuthForm" data-mode="${buyerAuthMode}" style="display: flex; flex-direction: column; gap: 8px;">
+              ${isReg ? `
+                <input type="text" name="name" required placeholder="Nombre completo" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+                <input type="tel" name="phone" placeholder="Teléfono / WhatsApp (opcional)" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+              ` : ''}
+              <input type="email" name="email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+              <input type="password" name="password" required minlength="8" placeholder="${isReg ? 'Contraseña (mín. 8 caracteres)' : 'Contraseña'}" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+              ${isReg ? `
+                <input type="password" name="password_confirmation" required minlength="8" placeholder="Confirmar contraseña" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);">
+              ` : ''}
+              <div id="buyerAuthError" style="display:none; color: #e11d48; font-size: 0.75rem; font-weight: 600;"></div>
+              <button type="submit" id="buyerAuthSubmitBtn" class="btn-add-cart" style="width: 100%; padding: 10px; justify-content: center;">
+                ${isReg ? 'Crear Cuenta' : 'Iniciar Sesión'}
+              </button>
+            </form>
+            <div style="margin-top: 10px; text-align: center; font-size: 0.76rem; color: var(--text-muted);">
+              ${isReg ? '¿Ya tienes cuenta?' : '¿Aún no tienes cuenta?'}
+              <button type="button" data-action="toggle-buyer-auth-mode" style="background: none; border: none; color: #4f46e5; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">
+                ${isReg ? 'Inicia sesión' : 'Regístrate aquí'}
+              </button>
+            </div>
           </div>
         `;
       }
@@ -5476,7 +5492,17 @@
     showToastNotification(`${title}: ${body}`);
   }
 
-  function logoutBuyerSession() {
+  async function logoutBuyerSession() {
+    try {
+      await fetch('/auth/logout', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || '',
+          'Accept': 'application/json'
+        }
+      });
+    } catch (e) {}
+    window.__INITIAL_AUTH_USER__ = null;
     try {
       localStorage.removeItem('multiverse_customer_session');
     } catch (e) {}
@@ -5487,6 +5513,49 @@
     }
     showToastNotification('Sesión cerrada correctamente.');
   }
+
+  document.addEventListener('submit', async function(e) {
+    const authForm = e.target.closest('#buyerAuthForm');
+    if (!authForm) return;
+    e.preventDefault();
+
+    const mode = authForm.dataset.mode || 'login';
+    const endpoint = mode === 'register' ? '/auth/register' : '/auth/login';
+    const errEl = document.getElementById('buyerAuthError');
+    const submitBtn = document.getElementById('buyerAuthSubmitBtn');
+    if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Procesando...'; }
+
+    const formData = new FormData(authForm);
+    const payload = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': window.__STORE_CSRF_TOKEN__ || ''
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.user) {
+        const firstErr = data.errors ? Object.values(data.errors).flat()[0] : (data.message || 'Error al autenticar.');
+        if (errEl) { errEl.textContent = firstErr; errEl.style.display = 'block'; }
+      } else {
+        applyAuthenticatedUserSession(data.user);
+        showToastNotification(data.message || 'Sesión iniciada correctamente.');
+      }
+    } catch (err) {
+      if (errEl) { errEl.textContent = 'Error de conexión. Intenta de nuevo.'; errEl.style.display = 'block'; }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = mode === 'register' ? 'Crear Cuenta' : 'Iniciar Sesión';
+      }
+    }
+  });
 
   // Delegación de Eventos Click
   document.addEventListener('click', function(e) {
@@ -6484,6 +6553,14 @@
     if (logoutBtn) {
       e.preventDefault();
       logoutBuyerSession();
+      return;
+    }
+
+    const toggleBuyerAuthBtn = e.target.closest('[data-action="toggle-buyer-auth-mode"]');
+    if (toggleBuyerAuthBtn) {
+      e.preventDefault();
+      buyerAuthMode = (buyerAuthMode === 'login') ? 'register' : 'login';
+      renderAccountSheetContent();
       return;
     }
 
