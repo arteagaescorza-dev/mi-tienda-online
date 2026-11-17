@@ -3716,16 +3716,28 @@
       const params = new URLSearchParams(window.location.search);
       const resetToken = params.get('reset_token');
       const resetEmail = params.get('reset_email');
+      const isVerified = params.get('verified') === '1';
+      const wantsAccountTab = params.get('tab') === 'account';
+
       if (resetToken && resetEmail) {
         buyerResetParams = { token: resetToken, email: resetEmail };
         buyerAuthMode = 'reset';
       }
-      if (params.get('verified') === '1') {
-        setTimeout(() => {
-          if (typeof showToastNotification === 'function') {
+
+      if (wantsAccountTab || (resetToken && resetEmail) || isVerified) {
+        const openAccountOnBoot = () => {
+          if (typeof openDrawer === 'function') {
+            openDrawer('accountSheet');
+          }
+          if (isVerified && typeof showToastNotification === 'function') {
             showToastNotification('Correo confirmado correctamente. Tu cuenta ya puede activar 2FA.');
           }
-        }, 400);
+        };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => setTimeout(openAccountOnBoot, 120));
+        } else {
+          setTimeout(openAccountOnBoot, 120);
+        }
       }
     } catch (e) {}
   })();
