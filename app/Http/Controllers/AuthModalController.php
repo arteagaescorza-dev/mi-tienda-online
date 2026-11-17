@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class AuthModalController extends Controller
@@ -353,11 +354,15 @@ class AuthModalController extends Controller
 
         DB::transaction(function () use ($user, $validated, $email): void {
             $user->password = $validated['password'];
-            $user->two_factor_trusted_version = ((int) ($user->two_factor_trusted_version ?? 1)) + 1;
+            if (Schema::hasColumn('users', 'two_factor_trusted_version')) {
+                $user->two_factor_trusted_version = ((int) ($user->two_factor_trusted_version ?? 1)) + 1;
+            }
             $user->save();
 
             DB::table('password_reset_tokens')->where('email', $email)->delete();
-            DB::table('sessions')->where('user_id', $user->id)->delete();
+            if (Schema::hasTable('sessions')) {
+                DB::table('sessions')->where('user_id', $user->id)->delete();
+            }
         });
 
         return response()
@@ -551,13 +556,17 @@ class AuthModalController extends Controller
 
         DB::transaction(function () use ($user, $validated, $currentSessionId): void {
             $user->password = $validated['password'];
-            $user->two_factor_trusted_version = ((int) ($user->two_factor_trusted_version ?? 1)) + 1;
+            if (Schema::hasColumn('users', 'two_factor_trusted_version')) {
+                $user->two_factor_trusted_version = ((int) ($user->two_factor_trusted_version ?? 1)) + 1;
+            }
             $user->save();
 
-            DB::table('sessions')
-                ->where('user_id', $user->id)
-                ->where('id', '!=', $currentSessionId)
-                ->delete();
+            if (Schema::hasTable('sessions')) {
+                DB::table('sessions')
+                    ->where('user_id', $user->id)
+                    ->where('id', '!=', $currentSessionId)
+                    ->delete();
+            }
         });
 
         return response()
